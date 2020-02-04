@@ -35,27 +35,13 @@ IF(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   SET_PROPERTY(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 ENDIF()
 
-# Find and use the system's Eigen3 library
-FIND_PACKAGE (Eigen3 3.0.0)
-
-IF (NOT EIGEN3_FOUND AND NOT RBDL_USE_SIMPLE_MATH)
-	MESSAGE (WARNING "Could not find Eigen3 on your system. Install it or use the slower SimpleMath library by enabling RBDL_USE_SIMPLE_MATH.")
-ENDIF (NOT EIGEN3_FOUND AND NOT RBDL_USE_SIMPLE_MATH)
-
-IF (EIGEN3_FOUND AND NOT RBDL_USE_SIMPLE_MATH)
-	INCLUDE_DIRECTORIES (${EIGEN3_INCLUDE_DIR})
-ENDIF (EIGEN3_FOUND AND NOT RBDL_USE_SIMPLE_MATH)
-
-# Options
-SET (RBDL_BUILD_STATIC_DEFAULT OFF)
-IF (MSVC)
-  SET (RBDL_BUILD_STATIC_DEFAULT ON)
-ENDIF (MSVC)
 
 OPTION (RBDL_BUILD_STATIC "Build statically linked library (otherwise dynamiclly linked)" ${RBDL_BUILD_STATIC_DEFAULT})
 OPTION (RBDL_BUILD_TESTS "Build the test executables" OFF)
 OPTION (RBDL_ENABLE_LOGGING "Enable logging (warning: major impact on performance!)" OFF)
 OPTION (RBDL_USE_SIMPLE_MATH "Use slow math instead of the fast Eigen3 library (faster compilation)" OFF)
+OPTION (RBDL_USE_CASADI_MATH "Use automatic differentiation Casadi library" OFF)
+option (RBDL_USE_EIGEN3_MATH "Use Eigen library" ON)
 OPTION (RBDL_STORE_VERSION "Enable storing of version information in the library (requires build from valid repository)" OFF)
 OPTION (RBDL_BUILD_ADDON_URDFREADER "Build the (experimental) urdf reader" OFF)
 OPTION (RBDL_BUILD_ADDON_BENCHMARK "Build the benchmarking tool" OFF)
@@ -63,6 +49,51 @@ OPTION (RBDL_BUILD_ADDON_LUAMODEL "Build the lua model reader" OFF)
 OPTION (RBDL_BUILD_PYTHON_WRAPPER "Build experimental python wrapper" OFF)
 OPTION (RBDL_BUILD_ADDON_GEOMETRY "Build the geometry library" OFF)
 OPTION (RBDL_BUILD_ADDON_MUSCLE "Build the muscle library" OFF)
+
+# Make sure only one math library is selected priorizing the following order: Casadi, Eigen, Simple
+IF (RBDL_USE_CASADI_MATH)
+    IF(RBDL_USE_SIMPLE_MATH)
+        MESSAGE (WARNING "You can not use both Casadi and Simple math. Automatically choosing RBDL_USE_CASADI_MATH.")
+        SET (RBDL_USE_SIMPLE_MATH OFF)
+    ENDIF(RBDL_USE_SIMPLE_MATH)
+
+    IF (RBDL_USE_EIGEN3_MATH)
+        MESSAGE (WARNING "You can not use both Casadi and Eigen3 math. Automatically choosing RBDL_USE_CASADI_MATH.")
+        SET (RBDL_USE_EIGEN3_MATH OFF)
+    ENDIF(RBDL_USE_EIGEN3_MATH)
+ENDIF(RBDL_USE_CASADI_MATH)
+
+IF (RBDL_USE_EIGEN3_MATH)
+    IF(RBDL_USE_SIMPLE_MATH)
+        MESSAGE (WARNING "You can not use both Eigen and Simple math. Automatically choosing RBDL_USE_EIGEN3_MATH.")
+        SET (RBDL_USE_SIMPLE_MATH OFF)
+    ENDIF(RBDL_USE_SIMPLE_MATH)
+ENDIF (RBDL_USE_EIGEN3_MATH)
+
+IF (NOT RBDL_USE_CASADI_MATH AND NOT RBDL_USE_EIGEN3_MATH AND NOT RBDL_USE_SIMPLE_MATH)
+    MESSAGE (WARNING "You have to choose exactly one library. Automatically choosing RBDL_USE_EIGEN3_MATH.")
+    SET(RBDL_USE_EIGEN3_MATH ON)
+ENDIF (NOT RBDL_USE_CASADI_MATH AND NOT RBDL_USE_EIGEN3_MATH AND NOT RBDL_USE_SIMPLE_MATH)
+
+# Loading the appropriate packages
+IF (RBDL_USE_CASADI_MATH)
+    FIND_PACKAGE (Casadi REQUIRED)
+    INCLUDE_DIRECTORIES (
+        ${Casadi_INCLUDE_DIR}
+        ${Casadi_INCLUDE_DIR}/..)
+ENDIF (RBDL_USE_CASADI_MATH)
+
+IF (RBDL_USE_EIGEN3_MATH)
+    # Find and use the system's Eigen3 library
+    FIND_PACKAGE (Eigen3 3.0.0 REQUIRED)
+    INCLUDE_DIRECTORIES (${EIGEN3_INCLUDE_DIR})
+ENDIF (RBDL_USE_EIGEN3_MATH)
+
+# Options
+SET (RBDL_BUILD_STATIC_DEFAULT OFF)
+IF (MSVC)
+  SET (RBDL_BUILD_STATIC_DEFAULT ON)
+ENDIF (MSVC)
 
 # Addons
 IF (RBDL_BUILD_ADDON_URDFREADER)
