@@ -72,10 +72,10 @@ class Quaternion : public Vector4d {
       Scalar s = sqrt (squaredNorm() * quat.squaredNorm());
 
       // division by 0.f is unhealthy!
-      assert (s != 0.);
+      assert (s != Scalar(0.));
 
       Scalar angle = acos (dot(quat) / s);
-      if (angle == 0. || isnan(angle)) {
+      if (angle == Scalar(0.) || isnan(angle)) {
         return *this;
       }
 

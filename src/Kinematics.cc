@@ -243,131 +243,131 @@ RBDL_DLLAPI Matrix3d CalcBodyWorldOrientation(
   return model.X_base[body_id].E;
 }
 
-RBDL_DLLAPI void CalcPointJacobian (
-    Model &model,
-    const VectorNd &Q,
-    unsigned int body_id,
-    const Vector3d &point_position,
-    MatrixNd &G,
-    bool update_kinematics) {
-  LOG << "-------- " << __func__ << " --------" << std::endl;
+//RBDL_DLLAPI void CalcPointJacobian (
+//    Model &model,
+//    const VectorNd &Q,
+//    unsigned int body_id,
+//    const Vector3d &point_position,
+//    MatrixNd &G,
+//    bool update_kinematics) {
+//  LOG << "-------- " << __func__ << " --------" << std::endl;
 
-  // update the Kinematics if necessary
-  if (update_kinematics) {
-    UpdateKinematicsCustom (model, &Q, NULL, NULL);
-  }
+//  // update the Kinematics if necessary
+//  if (update_kinematics) {
+//    UpdateKinematicsCustom (model, &Q, NULL, NULL);
+//  }
 
-  SpatialTransform point_trans = 
-    SpatialTransform (Matrix3d::Identity(), 
-        CalcBodyToBaseCoordinates ( model, 
-          Q, 
-          body_id,
-          point_position, 
-          false));
+//  SpatialTransform point_trans =
+//    SpatialTransform (Matrix3d::Identity(),
+//        CalcBodyToBaseCoordinates ( model,
+//          Q,
+//          body_id,
+//          point_position,
+//          false));
 
-  assert (G.rows() == 3 && G.cols() == model.qdot_size );
+//  assert (G.rows() == 3 && G.cols() == model.qdot_size );
 
-  unsigned int reference_body_id = body_id;
+//  unsigned int reference_body_id = body_id;
 
-  if (model.IsFixedBodyId(body_id)) {
-    unsigned int fbody_id = body_id - model.fixed_body_discriminator;
-    reference_body_id = model.mFixedBodies[fbody_id].mMovableParent;
-  }
+//  if (model.IsFixedBodyId(body_id)) {
+//    unsigned int fbody_id = body_id - model.fixed_body_discriminator;
+//    reference_body_id = model.mFixedBodies[fbody_id].mMovableParent;
+//  }
 
-  unsigned int j = reference_body_id;
+//  unsigned int j = reference_body_id;
 
-  // e[j] is set to 1 if joint j contributes to the jacobian that we are
-  // computing. For all other joints the column will be zero.
-  while (j != 0) {
-    unsigned int q_index = model.mJoints[j].q_index;
+//  // e[j] is set to 1 if joint j contributes to the jacobian that we are
+//  // computing. For all other joints the column will be zero.
+//  while (j != 0) {
+//    unsigned int q_index = model.mJoints[j].q_index;
 
-    if(model.mJoints[j].mJointType != JointTypeCustom){
-      if (model.mJoints[j].mDoFCount == 1) {
-        G.block(0,q_index, 3, 1) =
-          point_trans.apply(
-              model.X_base[j].inverse().apply(
-                model.S[j])).block(3,0,3,1);
-      } else if (model.mJoints[j].mDoFCount == 3) {
-        G.block(0, q_index, 3, 3) =
-          ((point_trans
-            * model.X_base[j].inverse()).toMatrix()
-           * model.multdof3_S[j]).block(3,0,3,3);
-      }
-    } else {
-      unsigned int k = model.mJoints[j].custom_joint_index;
+//    if(model.mJoints[j].mJointType != JointTypeCustom){
+//      if (model.mJoints[j].mDoFCount == 1) {
+//        G.block(0,q_index, 3, 1) =
+//          point_trans.apply(
+//              model.X_base[j].inverse().apply(
+//                model.S[j])).block(3,0,3,1);
+//      } else if (model.mJoints[j].mDoFCount == 3) {
+//        G.block(0, q_index, 3, 3) =
+//          ((point_trans
+//            * model.X_base[j].inverse()).toMatrix()
+//           * model.multdof3_S[j]).block(3,0,3,3);
+//      }
+//    } else {
+//      unsigned int k = model.mJoints[j].custom_joint_index;
 
-      G.block(0, q_index, 3, model.mCustomJoints[k]->mDoFCount) =
-        ((point_trans
-          * model.X_base[j].inverse()).toMatrix()
-         * model.mCustomJoints[k]->S).block( 
-           3,0,3,model.mCustomJoints[k]->mDoFCount);
-    }
+//      G.block(0, q_index, 3, model.mCustomJoints[k]->mDoFCount) =
+//        ((point_trans
+//          * model.X_base[j].inverse()).toMatrix()
+//         * model.mCustomJoints[k]->S).block(
+//           3,0,3,model.mCustomJoints[k]->mDoFCount);
+//    }
 
-    j = model.lambda[j];
-  }
-}
+//    j = model.lambda[j];
+//  }
+//}
 
-RBDL_DLLAPI void CalcPointJacobian6D (
-    Model &model,
-    const VectorNd &Q,
-    unsigned int body_id,
-    const Vector3d &point_position,
-    MatrixNd &G,
-    bool update_kinematics) {
-  LOG << "-------- " << __func__ << " --------" << std::endl;
+//RBDL_DLLAPI void CalcPointJacobian6D (
+//    Model &model,
+//    const VectorNd &Q,
+//    unsigned int body_id,
+//    const Vector3d &point_position,
+//    MatrixNd &G,
+//    bool update_kinematics) {
+//  LOG << "-------- " << __func__ << " --------" << std::endl;
 
-  // update the Kinematics if necessary
-  if (update_kinematics) {
-    UpdateKinematicsCustom (model, &Q, NULL, NULL);
-  }
+//  // update the Kinematics if necessary
+//  if (update_kinematics) {
+//    UpdateKinematicsCustom (model, &Q, NULL, NULL);
+//  }
 
-  SpatialTransform point_trans =
-    SpatialTransform (Matrix3d::Identity(),
-        CalcBodyToBaseCoordinates (model,
-          Q,
-          body_id,
-          point_position,
-          false));
+//  SpatialTransform point_trans =
+//    SpatialTransform (Matrix3d::Identity(),
+//        CalcBodyToBaseCoordinates (model,
+//          Q,
+//          body_id,
+//          point_position,
+//          false));
 
-  assert (G.rows() == 6 && G.cols() == model.qdot_size );
+//  assert (G.rows() == 6 && G.cols() == model.qdot_size );
 
-  unsigned int reference_body_id = body_id;
+//  unsigned int reference_body_id = body_id;
 
-  if (model.IsFixedBodyId(body_id)) {
-    unsigned int fbody_id = body_id - model.fixed_body_discriminator;
-    reference_body_id = model.mFixedBodies[fbody_id].mMovableParent;
-  }
+//  if (model.IsFixedBodyId(body_id)) {
+//    unsigned int fbody_id = body_id - model.fixed_body_discriminator;
+//    reference_body_id = model.mFixedBodies[fbody_id].mMovableParent;
+//  }
 
-  unsigned int j = reference_body_id;
+//  unsigned int j = reference_body_id;
 
-  while (j != 0) {
-    unsigned int q_index = model.mJoints[j].q_index;
+//  while (j != 0) {
+//    unsigned int q_index = model.mJoints[j].q_index;
 
-    if(model.mJoints[j].mJointType != JointTypeCustom){
-      if (model.mJoints[j].mDoFCount == 1) {
-        G.block(0,q_index, 6, 1)
-          = point_trans.apply(
-              model.X_base[j].inverse().apply(
-                model.S[j])).block(0,0,6,1);
-      } else if (model.mJoints[j].mDoFCount == 3) {
-        G.block(0, q_index, 6, 3)
-          = ((point_trans
-                * model.X_base[j].inverse()).toMatrix()
-              * model.multdof3_S[j]).block(0,0,6,3);
-      }
-    } else {
-      unsigned int k = model.mJoints[j].custom_joint_index;
+//    if(model.mJoints[j].mJointType != JointTypeCustom){
+//      if (model.mJoints[j].mDoFCount == 1) {
+//        G.block(0,q_index, 6, 1)
+//          = point_trans.apply(
+//              model.X_base[j].inverse().apply(
+//                model.S[j])).block(0,0,6,1);
+//      } else if (model.mJoints[j].mDoFCount == 3) {
+//        G.block(0, q_index, 6, 3)
+//          = ((point_trans
+//                * model.X_base[j].inverse()).toMatrix()
+//              * model.multdof3_S[j]).block(0,0,6,3);
+//      }
+//    } else {
+//      unsigned int k = model.mJoints[j].custom_joint_index;
 
-      G.block(0, q_index, 6, model.mCustomJoints[k]->mDoFCount)
-        = ((point_trans
-              * model.X_base[j].inverse()).toMatrix()
-            * model.mCustomJoints[k]->S).block(
-              0,0,6,model.mCustomJoints[k]->mDoFCount);
-    }
+//      G.block(0, q_index, 6, model.mCustomJoints[k]->mDoFCount)
+//        = ((point_trans
+//              * model.X_base[j].inverse()).toMatrix()
+//            * model.mCustomJoints[k]->S).block(
+//              0,0,6,model.mCustomJoints[k]->mDoFCount);
+//    }
 
-    j = model.lambda[j];
-  }
-}
+//    j = model.lambda[j];
+//  }
+//}
 
 RBDL_DLLAPI void CalcBodySpatialJacobian (
     Model &model,
@@ -603,100 +603,100 @@ RBDL_DLLAPI SpatialVector CalcPointAcceleration6D(
       + SpatialVector (0, 0, 0, a_dash[0], a_dash[1], a_dash[2]));
 }
 
-RBDL_DLLAPI bool InverseKinematics (
-    Model &model,
-    const VectorNd &Qinit,
-    const std::vector<unsigned int>& body_id,
-    const std::vector<Vector3d>& body_point,
-    const std::vector<Vector3d>& target_pos,
-    VectorNd &Qres,
-    double step_tol,
-    double lambda,
-    unsigned int max_iter) {
-  assert (Qinit.size() == model.q_size);
-  assert (body_id.size() == body_point.size());
-  assert (body_id.size() == target_pos.size());
+//RBDL_DLLAPI bool InverseKinematics (
+//    Model &model,
+//    const VectorNd &Qinit,
+//    const std::vector<unsigned int>& body_id,
+//    const std::vector<Vector3d>& body_point,
+//    const std::vector<Vector3d>& target_pos,
+//    VectorNd &Qres,
+//    double step_tol,
+//    double lambda,
+//    unsigned int max_iter) {
+//  assert (Qinit.size() == model.q_size);
+//  assert (body_id.size() == body_point.size());
+//  assert (body_id.size() == target_pos.size());
 
-  MatrixNd J = MatrixNd::Zero(3 * body_id.size(), model.qdot_size);
-  VectorNd e = VectorNd::Zero(3 * body_id.size());
+//  MatrixNd J = MatrixNd::Zero(3 * body_id.size(), model.qdot_size);
+//  VectorNd e = VectorNd::Zero(3 * body_id.size());
 
-  Qres = Qinit;
+//  Qres = Qinit;
 
-  for (unsigned int ik_iter = 0; ik_iter < max_iter; ik_iter++) {
-    UpdateKinematicsCustom (model, &Qres, NULL, NULL);
+//  for (unsigned int ik_iter = 0; ik_iter < max_iter; ik_iter++) {
+//    UpdateKinematicsCustom (model, &Qres, NULL, NULL);
 
-    for (unsigned int k = 0; k < body_id.size(); k++) {
-      MatrixNd G (MatrixNd::Zero(3, model.qdot_size));
-      CalcPointJacobian (model, Qres, body_id[k], body_point[k], G, false);
-      Vector3d point_base = 
-        CalcBodyToBaseCoordinates (model, Qres, body_id[k], body_point[k], false);
-      LOG << "current_pos = " << point_base.transpose() << std::endl;
+//    for (unsigned int k = 0; k < body_id.size(); k++) {
+//      MatrixNd G (MatrixNd::Zero(3, model.qdot_size));
+//      CalcPointJacobian (model, Qres, body_id[k], body_point[k], G, false);
+//      Vector3d point_base =
+//        CalcBodyToBaseCoordinates (model, Qres, body_id[k], body_point[k], false);
+//      LOG << "current_pos = " << point_base.transpose() << std::endl;
 
-      for (unsigned int i = 0; i < 3; i++) {
-        for (unsigned int j = 0; j < model.qdot_size; j++) {
-          unsigned int row = k * 3 + i;
-          LOG << "i = " << i << " j = " << j << " k = " << k << " row = " 
-            << row << " col = " << j << std::endl;
-          J(row, j) = G (i,j);
-        }
+//      for (unsigned int i = 0; i < 3; i++) {
+//        for (unsigned int j = 0; j < model.qdot_size; j++) {
+//          unsigned int row = k * 3 + i;
+//          LOG << "i = " << i << " j = " << j << " k = " << k << " row = "
+//            << row << " col = " << j << std::endl;
+//          J(row, j) = G (i,j);
+//        }
 
-        e[k * 3 + i] = target_pos[k][i] - point_base[i];
-      }
-    }
+//        e[k * 3 + i] = target_pos[k][i] - point_base[i];
+//      }
+//    }
 
-    LOG << "J = " << J << std::endl;
-    LOG << "e = " << e.transpose() << std::endl;
+//    LOG << "J = " << J << std::endl;
+//    LOG << "e = " << e.transpose() << std::endl;
 
-    // abort if we are getting "close"
-    if (Scalar(e.norm()) < Scalar(step_tol)) {
-      LOG << "Reached target close enough after " << ik_iter << " steps" << std::endl;
-      return true;
-    }
+//    // abort if we are getting "close"
+//    if (Scalar(e.norm()) < Scalar(step_tol)) {
+//      LOG << "Reached target close enough after " << ik_iter << " steps" << std::endl;
+//      return true;
+//    }
 
-    MatrixNd JJTe_lambda2_I = 
-      J * J.transpose() 
-      + lambda*lambda * MatrixNd::Identity(e.size());
+//    MatrixNd JJTe_lambda2_I =
+//      J * J.transpose()
+//      + lambda*lambda * MatrixNd::Identity(e.size());
 
-    VectorNd z (body_id.size() * 3);
-#ifndef RBDL_USE_SIMPLE_MATH
-    z = JJTe_lambda2_I.colPivHouseholderQr().solve (e);
-#else
-    bool solve_successful = LinSolveGaussElimPivot (JJTe_lambda2_I, e, z);
-    assert (solve_successful);
-#endif
+//    VectorNd z (body_id.size() * 3);
+//#ifndef RBDL_USE_SIMPLE_MATH
+//    z = JJTe_lambda2_I.colPivHouseholderQr().solve (e);
+//#else
+//    bool solve_successful = LinSolveGaussElimPivot (JJTe_lambda2_I, e, z);
+//    assert (solve_successful);
+//#endif
 
-    LOG << "z = " << z << std::endl;
+//    LOG << "z = " << z << std::endl;
 
-    VectorNd delta_theta = J.transpose() * z;
-    LOG << "change = " << delta_theta << std::endl;
+//    VectorNd delta_theta = J.transpose() * z;
+//    LOG << "change = " << delta_theta << std::endl;
 
-    Qres = Qres + delta_theta;
-    LOG << "Qres = " << Qres.transpose() << std::endl;
+//    Qres = Qres + delta_theta;
+//    LOG << "Qres = " << Qres.transpose() << std::endl;
 
-    if (Scalar(delta_theta.norm()) < Scalar(step_tol)) {
-      LOG << "reached convergence after " << ik_iter << " steps" << std::endl;
-      return true;
-    }
+//    if (Scalar(delta_theta.norm()) < Scalar(step_tol)) {
+//      LOG << "reached convergence after " << ik_iter << " steps" << std::endl;
+//      return true;
+//    }
 
-    VectorNd test_1 (z.size());
-    VectorNd test_res (z.size());
+//    VectorNd test_1 (z.size());
+//    VectorNd test_res (z.size());
 
-    test_1.setZero();
+//    test_1.setZero();
 
-    for (unsigned int i = 0; i < z.size(); i++) {
-      test_1[i] = 1.;
+//    for (unsigned int i = 0; i < z.size(); i++) {
+//      test_1[i] = 1.;
 
-      VectorNd test_delta = J.transpose() * test_1;
+//      VectorNd test_delta = J.transpose() * test_1;
 
-      test_res[i] = test_delta.squaredNorm();
+//      test_res[i] = test_delta.squaredNorm();
 
-      test_1[i] = 0.;
-    }
+//      test_1[i] = 0.;
+//    }
 
-    LOG << "test_res = " << test_res.transpose() << std::endl;
-  }
+//    LOG << "test_res = " << test_res.transpose() << std::endl;
+//  }
 
-  return false;
-}
+//  return false;
+//}
 
 }

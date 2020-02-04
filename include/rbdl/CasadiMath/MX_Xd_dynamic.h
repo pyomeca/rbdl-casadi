@@ -12,7 +12,7 @@
 #include <string>
 #include <memory>
 
-#include <rbdl_casadi/rbdl_casadi_config.h>
+#include <rbdl/rbdl_config.h>
 #include <casadi.hpp>
 
 class MX_Xd_dynamic : public casadi::MX{

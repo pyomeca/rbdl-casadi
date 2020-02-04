@@ -382,7 +382,7 @@ struct RBDL_DLLAPI Joint {
 
     } else if (joint_type == JointTypePrismatic) {
       // make sure we have a unit axis
-      assert (joint_axis.squaredNorm() == 1.);
+      assert (joint_axis.squaredNorm() == Math::Scalar(1.));
 
       mJointAxes[0].set (
           0., 0., 0.,
@@ -412,9 +412,9 @@ struct RBDL_DLLAPI Joint {
       mJointType = JointTypeRevoluteY;
     } else if (axis_0 == Math::SpatialVector(0., 0., 1., 0., 0., 0.)) {
       mJointType = JointTypeRevoluteZ;
-    } else if (axis_0[0] == 0 &&
-         axis_0[1] == 0 &&
-         axis_0[2] == 0) {
+    } else if (axis_0[0] == Math::Scalar(0.) &&
+         axis_0[1] == Math::Scalar(0.) &&
+         axis_0[2] == Math::Scalar(0.)) {
       mJointType = JointTypePrismatic;
     } else {
       mJointType = JointTypeHelical;

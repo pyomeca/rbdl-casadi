@@ -304,21 +304,9 @@ template <unsigned int nrows, unsigned int ncols>
 bool operator==(const MX_Xd_static<nrows, ncols>& m1, const MX_Xd_static<nrows, ncols>& m2){
     return casadi::MX::is_equal(m1, m2);
 }
-bool operator==(const MX_Xd_static<1, 1>& m1, double m2){
-    return casadi::MX::is_equal(m1, m2);
-}
-bool operator==(double m1, const MX_Xd_static<1, 1>& m2){
-    return casadi::MX::is_equal(m1, m2);
-}
 
 template <unsigned int nrows, unsigned int ncols>
 bool operator!=(const MX_Xd_static<nrows, ncols>& m1, const MX_Xd_static<nrows, ncols>& m2){
-    return !casadi::MX::is_equal(m1, m2);
-}
-bool operator!=(const MX_Xd_static<1, 1>& m1, double m2){
-    return !casadi::MX::is_equal(m1, m2);
-}
-bool operator!=(double m1, const MX_Xd_static<1, 1>& m2){
     return !casadi::MX::is_equal(m1, m2);
 }
 
@@ -358,7 +346,8 @@ MX_Xd_static<1, 1> fabs(const MX_Xd_static<nrows, ncols>& m){
 //    return casadi::MX::sqrt(mx);
 //}
 
-bool isnan(const MX_Xd_static<1, 1>&){
+template <unsigned int nrows, unsigned int ncols>
+bool isnan(const MX_Xd_static<nrows, ncols>&){
     return false;
 }
 
