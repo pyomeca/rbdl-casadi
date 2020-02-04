@@ -27,7 +27,7 @@ struct RBDL_DLLAPI Body {
   Body() :
     mMass (0.),
     mCenterOfMass (0., 0., 0.),
-    mInertia (Math::Matrix3d::Zero(3,3)),
+    mInertia (Math::Matrix3d::Zero()),
     mIsVirtual (false)
   { };
   Body(const Body &body) :

@@ -155,7 +155,7 @@ RBDL_DLLAPI void CalcCenterOfMass (
   const Math::VectorNd &q,
   const Math::VectorNd &qdot,
   const Math::VectorNd *qddot,
-  double &mass,
+  Scalar &mass,
   Math::Vector3d &com,
   Math::Vector3d *com_velocity,
   Math::Vector3d *com_acceleration, 
@@ -182,9 +182,9 @@ RBDL_DLLAPI void CalcCenterOfMass (
     }
   }
 
-  SpatialRigidBodyInertia Itot (0., Vector3d (0., 0., 0.), Matrix3d::Zero(3,3));
-  SpatialVector htot (SpatialVector::Zero(6));
-  SpatialVector hdot_tot (SpatialVector::Zero(6));
+  SpatialRigidBodyInertia Itot (0., Vector3d (0., 0., 0.), Matrix3d::Zero());
+  SpatialVector htot (SpatialVector::Zero());
+  SpatialVector hdot_tot (SpatialVector::Zero());
 
   for (size_t i = model.mBodies.size() - 1; i > 0; i--) {
     unsigned int lambda = model.lambda[i];
@@ -261,9 +261,9 @@ RBDL_DLLAPI void CalcZeroMomentPoint (
     model.hdotc[i] = model.Ic[i] * model.a[i] + crossf(model.v[i], model.Ic[i] * model.v[i]);
   }
 
-  SpatialRigidBodyInertia I_tot (0., Vector3d (0., 0., 0.), Matrix3d::Zero(3,3));
-  SpatialVector h_tot (SpatialVector::Zero(6));
-  SpatialVector hdot_tot (SpatialVector::Zero(6));
+  SpatialRigidBodyInertia I_tot (0., Vector3d (0., 0., 0.), Matrix3d::Zero());
+  SpatialVector h_tot (SpatialVector::Zero());
+  SpatialVector hdot_tot (SpatialVector::Zero());
 
   // compute total change of momentum and CoM wrt to root body (idx = 0)
   // by recursively summing up local change of momentum
@@ -282,7 +282,7 @@ RBDL_DLLAPI void CalcZeroMomentPoint (
   }
 
   // compute CoM from mass and total inertia
-  const double mass = I_tot.m;
+  const Scalar mass = I_tot.m;
   const Vector3d com = I_tot.h / mass;
 
   // project angular momentum onto CoM
@@ -309,11 +309,11 @@ RBDL_DLLAPI void CalcZeroMomentPoint (
   return;
 }
 
-RBDL_DLLAPI double CalcPotentialEnergy (
+RBDL_DLLAPI Scalar CalcPotentialEnergy (
     Model &model, 
     const Math::VectorNd &q, 
     bool update_kinematics) {
-  double mass;
+  Scalar mass;
   Vector3d com;
   CalcCenterOfMass (
       model, 
@@ -334,7 +334,7 @@ RBDL_DLLAPI double CalcPotentialEnergy (
   return mass * com.dot(g);
 }
 
-RBDL_DLLAPI double CalcKineticEnergy (
+RBDL_DLLAPI Scalar CalcKineticEnergy (
     Model &model, 
     const Math::VectorNd &q, 
     const Math::VectorNd &qdot, 
@@ -342,7 +342,7 @@ RBDL_DLLAPI double CalcKineticEnergy (
   if (update_kinematics)
     UpdateKinematicsCustom (model, &q, &qdot, NULL);
 
-  double result = 0.;
+  Scalar result = 0.;
 
   for (size_t i = 1; i < model.mBodies.size(); i++) {
     result += 0.5 * model.v[i].transpose() * (model.I[i] * model.v[i]);

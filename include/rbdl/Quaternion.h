@@ -9,6 +9,7 @@
 #define RBDL_QUATERNION_H
 
 #include <cmath>
+#include <assert.h>
 
 namespace RigidBodyDynamics {
 
@@ -26,7 +27,7 @@ class Quaternion : public Vector4d {
     Quaternion (const Vector4d &vec4) :
       Vector4d (vec4)
   {}
-    Quaternion (double x, double y, double z, double w):
+    Quaternion (Scalar x, Scalar y, Scalar z, Scalar w):
       Vector4d (x, y, z, w)
   {}
     Quaternion operator* (const double &s) const {
@@ -68,40 +69,39 @@ class Quaternion : public Vector4d {
 
     Quaternion slerp (double alpha, const Quaternion &quat) const {
       // check whether one of the two has 0 length
-      double s = std::sqrt (squaredNorm() * quat.squaredNorm());
+      Scalar s = sqrt (squaredNorm() * quat.squaredNorm());
 
       // division by 0.f is unhealthy!
       assert (s != 0.);
 
-      double angle = acos (dot(quat) / s);
-      if (angle == 0. || std::isnan(angle)) {
+      Scalar angle = acos (dot(quat) / s);
+      if (angle == 0. || isnan(angle)) {
         return *this;
       }
-      assert(!std::isnan(angle));
 
-      double d = 1. / std::sin (angle);
-      double p0 = std::sin ((1. - alpha) * angle);
-      double p1 = std::sin (alpha * angle);
+      Scalar d = 1. / sin (angle);
+      Scalar p0 = sin ((1. - alpha) * angle);
+      Scalar p1 = sin (alpha * angle);
 
-      if (dot (quat) < 0.) {
+      if (dot (quat) < Scalar(0.)) {
         return Quaternion( ((*this) * p0 - quat * p1) * d);
       }
       return Quaternion( ((*this) * p0 + quat * p1) * d);
     }
 
-    static Quaternion fromAxisAngle (const Vector3d &axis, double angle_rad) {
-      double d = axis.norm();
-      double s2 = std::sin (angle_rad * 0.5) / d;
+    static Quaternion fromAxisAngle (const Vector3d &axis, Scalar angle_rad) {
+      Scalar d = axis.norm();
+      Scalar s2 = sin (angle_rad * 0.5) / d;
       return Quaternion (
           axis[0] * s2,
           axis[1] * s2,
           axis[2] * s2,
-          std::cos(angle_rad * 0.5)
+          cos(angle_rad * 0.5)
           );
     }
 
     static Quaternion fromMatrix (const Matrix3d &mat) {
-      double w = std::sqrt (1. + mat(0,0) + mat(1,1) + mat(2,2)) * 0.5;
+      Scalar w = sqrt (1. + mat(0,0) + mat(1,1) + mat(2,2)) * 0.5;
       return Quaternion (
           (mat(1,2) - mat(2,1)) / (w * 4.),
           (mat(2,0) - mat(0,2)) / (w * 4.),
@@ -128,10 +128,10 @@ class Quaternion : public Vector4d {
     }
 
     Matrix3d toMatrix() const {
-      double x = (*this)[0];
-      double y = (*this)[1];
-      double z = (*this)[2];
-      double w = (*this)[3];
+      Scalar x = (*this)[0];
+      Scalar y = (*this)[1];
+      Scalar z = (*this)[2];
+      Scalar w = (*this)[3];
       return Matrix3d (
           1 - 2*y*y - 2*z*z,
           2*x*y + 2*w*z,
@@ -170,7 +170,7 @@ class Quaternion : public Vector4d {
     }
 
     Quaternion timeStep (const Vector3d &omega, double dt) {
-      double omega_norm = omega.norm();
+      Scalar omega_norm = omega.norm();
       return Quaternion::fromAxisAngle (omega / omega_norm, dt * omega_norm) * (*this);
     }
 

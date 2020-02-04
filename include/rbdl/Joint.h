@@ -604,18 +604,24 @@ struct RBDL_DLLAPI Joint {
     Math::Vector3d rotation (axis[0], axis[1], axis[2]);
     Math::Vector3d translation (axis[3], axis[4], axis[5]);
 
-    if (fabs(rotation.norm()) > 1.0e-8)
+    if (fabs(rotation.norm()) > Math::Scalar(1.0e-8))
       axis_rotational = true;
 
-    if (fabs(translation.norm()) > 1.0e-8)
+    if (fabs(translation.norm()) > Math::Scalar(1.0e-8))
       axis_translational = true;
 
-    if(axis_rotational && rotation.norm() - 1.0 > 1.0e-8) {
+    if(axis_rotational){
+        Math::Scalar toCompare(rotation.norm() - 1);
+        if(toCompare > Math::Scalar(1.0e-8)) {
       std::cerr << "Warning: joint rotation axis is not unit!" << std::endl;
+        }
     }
 
-    if(axis_translational && translation.norm() - 1.0 > 1.0e-8) {
-      std::cerr << "Warning: joint translation axis is not unit!" << std::endl;
+    if(axis_translational){
+        Math::Scalar toCompare(translation.norm() - 1);
+        if (toCompare > Math::Scalar(1.0e-8)) {
+          std::cerr << "Warning: joint translation axis is not unit!" << std::endl;
+        }
     }
     
     return axis_rotational != axis_translational;

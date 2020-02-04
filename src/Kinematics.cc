@@ -648,14 +648,14 @@ RBDL_DLLAPI bool InverseKinematics (
     LOG << "e = " << e.transpose() << std::endl;
 
     // abort if we are getting "close"
-    if (e.norm() < step_tol) {
+    if (Scalar(e.norm()) < Scalar(step_tol)) {
       LOG << "Reached target close enough after " << ik_iter << " steps" << std::endl;
       return true;
     }
 
     MatrixNd JJTe_lambda2_I = 
       J * J.transpose() 
-      + lambda*lambda * MatrixNd::Identity(e.size(), e.size());
+      + lambda*lambda * MatrixNd::Identity(e.size());
 
     VectorNd z (body_id.size() * 3);
 #ifndef RBDL_USE_SIMPLE_MATH
@@ -673,7 +673,7 @@ RBDL_DLLAPI bool InverseKinematics (
     Qres = Qres + delta_theta;
     LOG << "Qres = " << Qres.transpose() << std::endl;
 
-    if (delta_theta.norm() < step_tol) {
+    if (Scalar(delta_theta.norm()) < Scalar(step_tol)) {
       LOG << "reached convergence after " << ik_iter << " steps" << std::endl;
       return true;
     }

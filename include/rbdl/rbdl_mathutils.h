@@ -37,7 +37,7 @@ extern RBDL_DLLAPI Vector3d Vector3dZero;
 extern RBDL_DLLAPI Matrix3d Matrix3dIdentity;
 extern RBDL_DLLAPI Matrix3d Matrix3dZero;
 
-RBDL_DLLAPI inline VectorNd VectorFromPtr (unsigned int n, double *ptr) {
+RBDL_DLLAPI inline VectorNd VectorFromPtr (unsigned int n, Scalar *ptr) {
   // TODO: use memory mapping operators for Eigen
   VectorNd result (n);
 
@@ -48,7 +48,7 @@ RBDL_DLLAPI inline VectorNd VectorFromPtr (unsigned int n, double *ptr) {
   return result;
 }
 
-RBDL_DLLAPI inline MatrixNd MatrixFromPtr (unsigned int rows, unsigned int cols, double *ptr, bool row_major = true) {
+RBDL_DLLAPI inline MatrixNd MatrixFromPtr (unsigned int rows, unsigned int cols, Scalar *ptr, bool row_major = true) {
   MatrixNd result (rows, cols);
 
   if (row_major) {
@@ -75,12 +75,12 @@ RBDL_DLLAPI bool LinSolveGaussElimPivot (MatrixNd A, VectorNd b, VectorNd &x);
 RBDL_DLLAPI void SpatialMatrixSetSubmatrix(SpatialMatrix &dest, unsigned int row, unsigned int col, const Matrix3d &matrix);
 
 RBDL_DLLAPI bool SpatialMatrixCompareEpsilon (const SpatialMatrix &matrix_a,
-    const SpatialMatrix &matrix_b, double epsilon);
+    const SpatialMatrix &matrix_b, Scalar epsilon);
 RBDL_DLLAPI bool SpatialVectorCompareEpsilon (const SpatialVector &vector_a,
-    const SpatialVector &vector_b, double epsilon);
+    const SpatialVector &vector_b, Scalar epsilon);
 
 /** \brief Translates the inertia matrix to a new center. */
-RBDL_DLLAPI Matrix3d parallel_axis (const Matrix3d &inertia, double mass, const Vector3d &com);
+RBDL_DLLAPI Matrix3d parallel_axis (const Matrix3d &inertia, Scalar mass, const Vector3d &com);
 
 /** \brief Creates a transformation of a linear displacement
  *
@@ -101,7 +101,7 @@ RBDL_DLLAPI SpatialMatrix Xtrans_mat (const Vector3d &displacement);
  *
  * \param zrot Rotation angle in radians.
  */
-RBDL_DLLAPI SpatialMatrix Xrotz_mat (const double &zrot);
+RBDL_DLLAPI SpatialMatrix Xrotz_mat (const Scalar &zrot);
 
 /** \brief Creates a rotational transformation around the Y-axis
  *
@@ -110,7 +110,7 @@ RBDL_DLLAPI SpatialMatrix Xrotz_mat (const double &zrot);
  *
  * \param yrot Rotation angle in radians.
  */
-RBDL_DLLAPI SpatialMatrix Xroty_mat (const double &yrot);
+RBDL_DLLAPI SpatialMatrix Xroty_mat (const Scalar &yrot);
 
 /** \brief Creates a rotational transformation around the X-axis
  *
@@ -119,7 +119,7 @@ RBDL_DLLAPI SpatialMatrix Xroty_mat (const double &yrot);
  *
  * \param xrot Rotation angle in radians.
  */
-RBDL_DLLAPI SpatialMatrix Xrotx_mat (const double &xrot);
+RBDL_DLLAPI SpatialMatrix Xrotx_mat (const Scalar &xrot);
 
 /** \brief Creates a spatial transformation for given parameters 
  *
@@ -132,8 +132,8 @@ RBDL_DLLAPI SpatialMatrix Xrotx_mat (const double &xrot);
  */
 RBDL_DLLAPI SpatialMatrix XtransRotZYXEuler (const Vector3d &displacement, const Vector3d &zyx_euler);
 
-RBDL_DLLAPI inline Matrix3d rotx (const double &xrot) {
-  double s, c;
+RBDL_DLLAPI inline Matrix3d rotx (const Scalar &xrot) {
+  Scalar s, c;
   s = sin (xrot);
   c = cos (xrot);
   return Matrix3d (
@@ -143,8 +143,8 @@ RBDL_DLLAPI inline Matrix3d rotx (const double &xrot) {
       );
 }
 
-RBDL_DLLAPI inline Matrix3d roty (const double &yrot) {
-  double s, c;
+RBDL_DLLAPI inline Matrix3d roty (const Scalar &yrot) {
+  Scalar s, c;
   s = sin (yrot);
   c = cos (yrot);
   return Matrix3d (
@@ -154,8 +154,8 @@ RBDL_DLLAPI inline Matrix3d roty (const double &yrot) {
       );
 }
 
-RBDL_DLLAPI inline Matrix3d rotz (const double &zrot) {
-  double s, c;
+RBDL_DLLAPI inline Matrix3d rotz (const Scalar &zrot) {
+  Scalar s, c;
   s = sin (zrot);
   c = cos (zrot);
   return Matrix3d (
@@ -165,8 +165,8 @@ RBDL_DLLAPI inline Matrix3d rotz (const double &zrot) {
       );
 }
 
-RBDL_DLLAPI inline Matrix3d rotxdot (const double &x, const double &xdot) {
-  double s, c;
+RBDL_DLLAPI inline Matrix3d rotxdot (const Scalar &x, const Scalar &xdot) {
+  Scalar s, c;
   s = sin (x);
   c = cos (x);
   return Matrix3d (
@@ -176,8 +176,8 @@ RBDL_DLLAPI inline Matrix3d rotxdot (const double &x, const double &xdot) {
       );
 }
 
-RBDL_DLLAPI inline Matrix3d rotydot (const double &y, const double &ydot) {
-  double s, c;
+RBDL_DLLAPI inline Matrix3d rotydot (const Scalar &y, const Scalar &ydot) {
+  Scalar s, c;
   s = sin (y);
   c = cos (y);
   return Matrix3d (
@@ -187,8 +187,8 @@ RBDL_DLLAPI inline Matrix3d rotydot (const double &y, const double &ydot) {
       );
 }
 
-RBDL_DLLAPI inline Matrix3d rotzdot (const double &z, const double &zdot) {
-  double s, c;
+RBDL_DLLAPI inline Matrix3d rotzdot (const Scalar &z, const Scalar &zdot) {
+  Scalar s, c;
   s = sin (z);
   c = cos (z);
   return Matrix3d (
@@ -199,10 +199,10 @@ RBDL_DLLAPI inline Matrix3d rotzdot (const double &z, const double &zdot) {
 }
 
 RBDL_DLLAPI inline Vector3d angular_velocity_from_angle_rates (const Vector3d &zyx_angles, const Vector3d &zyx_angle_rates) {
-  double sy = sin(zyx_angles[1]);
-  double cy = cos(zyx_angles[1]);
-  double sx = sin(zyx_angles[2]);
-  double cx = cos(zyx_angles[2]);
+  Scalar sy = sin(zyx_angles[1]);
+  Scalar cy = cos(zyx_angles[1]);
+  Scalar sx = sin(zyx_angles[2]);
+  Scalar cx = cos(zyx_angles[2]);
 
   return Vector3d (
       zyx_angle_rates[2] - sy * zyx_angle_rates[0],
@@ -223,16 +223,16 @@ RBDL_DLLAPI inline Vector3d global_angular_velocity_from_rates (const Vector3d &
 }
 
 RBDL_DLLAPI inline Vector3d angular_acceleration_from_angle_rates (const Vector3d &zyx_angles, const Vector3d &zyx_angle_rates, const Vector3d &zyx_angle_rates_dot) {
-  double sy = sin(zyx_angles[1]);
-  double cy = cos(zyx_angles[1]);
-  double sx = sin(zyx_angles[2]);
-  double cx = cos(zyx_angles[2]);
-  double xdot = zyx_angle_rates[2];
-  double ydot = zyx_angle_rates[1];
-  double zdot = zyx_angle_rates[0];
-  double xddot = zyx_angle_rates_dot[2];
-  double yddot = zyx_angle_rates_dot[1];
-  double zddot = zyx_angle_rates_dot[0];
+  Scalar sy = sin(zyx_angles[1]);
+  Scalar cy = cos(zyx_angles[1]);
+  Scalar sx = sin(zyx_angles[2]);
+  Scalar cx = cos(zyx_angles[2]);
+  Scalar xdot = zyx_angle_rates[2];
+  Scalar ydot = zyx_angle_rates[1];
+  Scalar zdot = zyx_angle_rates[0];
+  Scalar xddot = zyx_angle_rates_dot[2];
+  Scalar yddot = zyx_angle_rates_dot[1];
+  Scalar zddot = zyx_angle_rates_dot[0];
 
   return Vector3d (
       xddot - (cy * ydot * zdot + sy * zddot),

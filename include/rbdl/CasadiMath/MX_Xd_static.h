@@ -31,21 +31,32 @@ public:
     }
 
     MX_Xd_static(
-            casadi::MX v0,
-            casadi::MX v1,
-            casadi::MX v2) :
+            const MX_Xd_static<1,1>& v0,
+            const MX_Xd_static<1,1>& v1,
+            const MX_Xd_static<1,1>& v2) :
         casadi::MX(3, 1)
     {
         (*this)(0) = v0(0);
         (*this)(1) = v1(0);
         (*this)(2) = v2(0);
     }
-    MX_Xd_static(casadi::MX v0,
-                 casadi::MX v1,
-                 casadi::MX v2,
-                 casadi::MX v3,
-                 casadi::MX v4,
-                 casadi::MX v5) :
+    MX_Xd_static(const MX_Xd_static<1,1>& v0,
+                 const MX_Xd_static<1,1>& v1,
+                 const MX_Xd_static<1,1>& v2,
+                 const MX_Xd_static<1,1>& v3) :
+        casadi::MX(4, 1)
+    {
+        (*this)(0) = v0(0);
+        (*this)(1) = v1(0);
+        (*this)(2) = v2(0);
+        (*this)(3) = v3(0);
+    }
+    MX_Xd_static(const MX_Xd_static<1,1>& v0,
+                 const MX_Xd_static<1,1>& v1,
+                 const MX_Xd_static<1,1>& v2,
+                 const MX_Xd_static<1,1>& v3,
+                 const MX_Xd_static<1,1>& v4,
+                 const MX_Xd_static<1,1>& v5) :
         casadi::MX(6, 1)
     {
         (*this)(0) = v0(0);
@@ -55,9 +66,28 @@ public:
         (*this)(4) = v4(0);
         (*this)(5) = v5(0);
     }
-    MX_Xd_static(casadi::MX v00, casadi::MX v01, casadi::MX v02,
-                 casadi::MX v10, casadi::MX v11, casadi::MX v12,
-                 casadi::MX v20, casadi::MX v21, casadi::MX v22) :
+    MX_Xd_static(const MX_Xd_static<1,1>& v0,
+                 const MX_Xd_static<1,1>& v1,
+                 const MX_Xd_static<1,1>& v2,
+                 const MX_Xd_static<1,1>& v3,
+                 const MX_Xd_static<1,1>& v4,
+                 const MX_Xd_static<1,1>& v5,
+                 const MX_Xd_static<1,1>& v6,
+                 const MX_Xd_static<1,1>& v7) :
+        casadi::MX(8, 1)
+    {
+        (*this)(0) = v0(0);
+        (*this)(1) = v1(0);
+        (*this)(2) = v2(0);
+        (*this)(3) = v3(0);
+        (*this)(4) = v4(0);
+        (*this)(5) = v5(0);
+        (*this)(6) = v6(0);
+        (*this)(7) = v7(0);
+    }
+    MX_Xd_static(const MX_Xd_static<1,1>& v00, const MX_Xd_static<1,1>& v01, const MX_Xd_static<1,1>& v02,
+                 const MX_Xd_static<1,1>& v10, const MX_Xd_static<1,1>& v11, const MX_Xd_static<1,1>& v12,
+                 const MX_Xd_static<1,1>& v20, const MX_Xd_static<1,1>& v21, const MX_Xd_static<1,1>& v22) :
         casadi::MX(3, 3)
     {
         (*this)(0,0) = v00(0, 0);
@@ -69,6 +99,112 @@ public:
         (*this)(2,0) = v20(0, 0);
         (*this)(2,1) = v21(0, 0);
         (*this)(2,2) = v22(0, 0);
+    }
+    MX_Xd_static(const MX_Xd_static<1,1>& v00, const MX_Xd_static<1,1>& v01, const MX_Xd_static<1,1>& v02, const MX_Xd_static<1,1>& v03, const MX_Xd_static<1,1>& v04, const MX_Xd_static<1,1>& v05,
+                 const MX_Xd_static<1,1>& v10, const MX_Xd_static<1,1>& v11, const MX_Xd_static<1,1>& v12, const MX_Xd_static<1,1>& v13, const MX_Xd_static<1,1>& v14, const MX_Xd_static<1,1>& v15,
+                 const MX_Xd_static<1,1>& v20, const MX_Xd_static<1,1>& v21, const MX_Xd_static<1,1>& v22, const MX_Xd_static<1,1>& v23, const MX_Xd_static<1,1>& v24, const MX_Xd_static<1,1>& v25,
+                 const MX_Xd_static<1,1>& v30, const MX_Xd_static<1,1>& v31, const MX_Xd_static<1,1>& v32, const MX_Xd_static<1,1>& v33, const MX_Xd_static<1,1>& v34, const MX_Xd_static<1,1>& v35,
+                 const MX_Xd_static<1,1>& v40, const MX_Xd_static<1,1>& v41, const MX_Xd_static<1,1>& v42, const MX_Xd_static<1,1>& v43, const MX_Xd_static<1,1>& v44, const MX_Xd_static<1,1>& v45,
+                 const MX_Xd_static<1,1>& v50, const MX_Xd_static<1,1>& v51, const MX_Xd_static<1,1>& v52, const MX_Xd_static<1,1>& v53, const MX_Xd_static<1,1>& v54, const MX_Xd_static<1,1>& v55) :
+        casadi::MX(6, 6)
+    {
+        (*this)(0,0) = v00(0, 0);
+        (*this)(0,1) = v01(0, 0);
+        (*this)(0,2) = v02(0, 0);
+        (*this)(0,3) = v03(0, 0);
+        (*this)(0,4) = v04(0, 0);
+        (*this)(0,5) = v05(0, 0);
+
+        (*this)(1,0) = v10(0, 0);
+        (*this)(1,1) = v11(0, 0);
+        (*this)(1,2) = v12(0, 0);
+        (*this)(1,3) = v13(0, 0);
+        (*this)(1,4) = v14(0, 0);
+        (*this)(1,5) = v15(0, 0);
+
+        (*this)(2,0) = v20(0, 0);
+        (*this)(2,1) = v21(0, 0);
+        (*this)(2,2) = v22(0, 0);
+        (*this)(2,3) = v23(0, 0);
+        (*this)(2,4) = v24(0, 0);
+        (*this)(2,5) = v25(0, 0);
+
+        (*this)(3,0) = v30(0, 0);
+        (*this)(3,1) = v31(0, 0);
+        (*this)(3,2) = v32(0, 0);
+        (*this)(3,3) = v33(0, 0);
+        (*this)(3,4) = v34(0, 0);
+        (*this)(3,5) = v35(0, 0);
+
+        (*this)(4,0) = v40(0, 0);
+        (*this)(4,1) = v41(0, 0);
+        (*this)(4,2) = v42(0, 0);
+        (*this)(4,3) = v43(0, 0);
+        (*this)(4,4) = v44(0, 0);
+        (*this)(4,5) = v45(0, 0);
+
+        (*this)(5,0) = v50(0, 0);
+        (*this)(5,1) = v51(0, 0);
+        (*this)(5,2) = v52(0, 0);
+        (*this)(5,3) = v53(0, 0);
+        (*this)(5,4) = v54(0, 0);
+        (*this)(5,5) = v55(0, 0);
+
+    }
+
+    ///
+    /// \brief set For 3d Vector
+    /// \param v0 X
+    /// \param v1 Y
+    /// \param v2 Z
+    ///
+    void set(
+            const MX_Xd_static<1,1>& v0,
+            const MX_Xd_static<1,1>& v1,
+            const MX_Xd_static<1,1>& v2){
+        (*this)(0) = v0;
+        (*this)(1) = v1;
+        (*this)(2) = v2;
+    }
+    ///
+    /// \brief set For Quaternion
+    /// \param v0 X
+    /// \param v1 Y
+    /// \param v2 Z
+    /// \param v3 W
+    ///
+    void set(
+            const MX_Xd_static<1,1>& v0,
+            const MX_Xd_static<1,1>& v1,
+            const MX_Xd_static<1,1>& v2,
+            const MX_Xd_static<1,1>& v3){
+        (*this)(0) = v0;
+        (*this)(1) = v1;
+        (*this)(2) = v2;
+        (*this)(3) = v3;
+    }
+    ///
+    /// \brief set For SpatialVector
+    /// \param v0
+    /// \param v1
+    /// \param v2
+    /// \param v3
+    /// \param v4
+    /// \param v5
+    ///
+    void set(
+            const MX_Xd_static<1,1>& v0,
+            const MX_Xd_static<1,1>& v1,
+            const MX_Xd_static<1,1>& v2,
+            const MX_Xd_static<1,1>& v3,
+            const MX_Xd_static<1,1>& v4,
+            const MX_Xd_static<1,1>& v5){
+        (*this)(0) = v0;
+        (*this)(1) = v1;
+        (*this)(2) = v2;
+        (*this)(3) = v3;
+        (*this)(4) = v4;
+        (*this)(5) = v5;
     }
 
     static MX_Xd_static Identity(){
@@ -95,22 +231,26 @@ public:
         return out;
     }
 
+    void setZero(){
+        *this = casadi::MX::zeros(this->rows(), this->cols());
+    }
+
     unsigned int rows() const {
-            return nrows;
+        return static_cast<unsigned int>(this->casadi::MX::rows());
     }
 
     unsigned int cols() const {
-            return ncols;
+        return static_cast<unsigned int>(this->casadi::MX::columns());
     }
 
     unsigned int size() const {
-            return nrows * ncols;
+        return rows() * cols();
     }
 
     template <unsigned int row_count, unsigned int col_count>
     MX_Xd_static block (
             unsigned int row_start,
-            unsigned int col_start)
+            unsigned int col_start) const
     {
         return (*this)(
             casadi::Slice(static_cast<casadi_int>(row_start), static_cast<casadi_int>(row_start+row_count)),
@@ -121,11 +261,21 @@ public:
             unsigned int row_start,
             unsigned int col_start,
             unsigned int row_count,
-            unsigned int col_count)
+            unsigned int col_count) const
     {
         return (*this)(
             casadi::Slice(static_cast<casadi_int>(row_start), static_cast<casadi_int>(row_start+row_count)),
             casadi::Slice(static_cast<casadi_int>(col_start), static_cast<casadi_int>(col_start+col_count)));
+    }
+
+    MX_Xd_static<1,1> operator[](unsigned int i) const{
+        return (*this)(i);
+    }
+
+
+
+    MX_Xd_static<1, 1> dot(const MX_Xd_static<3, 1> &other_vector) const {
+        return casadi::MX::dot(*this, other_vector);
     }
 
     MX_Xd_static<3, 1> cross(const MX_Xd_static<3, 1> &other_vector) const {
@@ -141,65 +291,76 @@ public:
         return T();
     }
 
-    casadi::MX operator[](unsigned int i) const{
-        return (*this)(i);
+    MX_Xd_static<1, 1> norm() const{
+        return casadi::MX::norm_1(*this);
     }
 
-//    bool operator==(double val){
-//        if (rows() != 1 || cols() != 1){
-//            return false;
-//        }
-//        if ((*this)(0, 0) != val){
-//            return false;
-//        }
-//        return true;
-//    }
-
-    bool operator==(const MX_Xd_static& m2){
-        if (rows() != m2.rows() || cols() != m2.cols()){
-            return false;
-        }
-        if (this->operator==(static_cast<casadi::MX>(m2))){
-            std::cout << "yo" << std::endl;
-            return true;
-        } else {
-            std::cout << "coucou" << std::endl;
-            return false;
-        }
-//        for (unsigned int i=0; i<nrows; ++i){
-//            for (unsigned int j=0; j<ncols; ++j){
-
-//                if ((*this)(i, j) != m2(i, j)){
-//                    return false;
-//                }
-//            }
-//        }
-        return true;
-    }
-
-    void set(
-            casadi::MX v0,
-            casadi::MX v1,
-            casadi::MX v2){
-        (*this)(0) = v0;
-        (*this)(1) = v1;
-        (*this)(2) = v2;
-    }
-    void set(
-            casadi::MX v0,
-            casadi::MX v1,
-            casadi::MX v2,
-            casadi::MX v3,
-            casadi::MX v4,
-            casadi::MX v5){
-        (*this)(0) = v0;
-        (*this)(1) = v1;
-        (*this)(2) = v2;
-        (*this)(3) = v3;
-        (*this)(4) = v4;
-        (*this)(5) = v5;
+    MX_Xd_static<1, 1> squaredNorm() const{
+        return casadi::MX::norm_2(*this);
     }
 };
+
+template <unsigned int nrows, unsigned int ncols>
+bool operator==(const MX_Xd_static<nrows, ncols>& m1, const MX_Xd_static<nrows, ncols>& m2){
+    return casadi::MX::is_equal(m1, m2);
+}
+bool operator==(const MX_Xd_static<1, 1>& m1, double m2){
+    return casadi::MX::is_equal(m1, m2);
+}
+bool operator==(double m1, const MX_Xd_static<1, 1>& m2){
+    return casadi::MX::is_equal(m1, m2);
+}
+
+template <unsigned int nrows, unsigned int ncols>
+bool operator!=(const MX_Xd_static<nrows, ncols>& m1, const MX_Xd_static<nrows, ncols>& m2){
+    return !casadi::MX::is_equal(m1, m2);
+}
+bool operator!=(const MX_Xd_static<1, 1>& m1, double m2){
+    return !casadi::MX::is_equal(m1, m2);
+}
+bool operator!=(double m1, const MX_Xd_static<1, 1>& m2){
+    return !casadi::MX::is_equal(m1, m2);
+}
+
+template <unsigned int nrows, unsigned int ncols>
+bool operator<(const MX_Xd_static<nrows,ncols>& m1, const MX_Xd_static<nrows,ncols>& m2){
+//    return casadi::MX::lt(m1, m2);
+    std::cout << "Warning! operator< for MX always return false" << std::endl;
+    return false;
+}
+template <unsigned int nrows, unsigned int ncols>
+bool operator<=(const MX_Xd_static<nrows,ncols>& m1, const MX_Xd_static<nrows,ncols>& m2){
+//    return casadi::MX::lt(m1, m2);
+    std::cout << "Warning! operator<= for MX always return false" << std::endl;
+    return false;
+}
+
+template <unsigned int nrows, unsigned int ncols>
+bool operator>(const MX_Xd_static<nrows,ncols>& m1, const MX_Xd_static<nrows,ncols>& m2){
+//    return casadi::MX::lt(m1, m2);
+    std::cout << "Warning! operator> for MX always return true" << std::endl;
+    return true;
+}
+template <unsigned int nrows, unsigned int ncols>
+bool operator>=(const MX_Xd_static<nrows,ncols>& m1, const MX_Xd_static<nrows,ncols>& m2){
+//    return casadi::MX::lt(m1, m2);
+    std::cout << "Warning! operator>= for MX always return true" << std::endl;
+    return true;
+}
+
+template <unsigned int nrows, unsigned int ncols>
+MX_Xd_static<1, 1> fabs(const MX_Xd_static<nrows, ncols>& m){
+    return casadi::MX::abs(m);
+}
+
+
+//MX_Xd_static<1, 1> sqrt(const casadi::MX& mx){
+//    return casadi::MX::sqrt(mx);
+//}
+
+bool isnan(const MX_Xd_static<1, 1>&){
+    return false;
+}
 
 /* MX_XD_STATIC_H */
 #endif

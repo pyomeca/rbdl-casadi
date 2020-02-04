@@ -20,6 +20,7 @@
 #include "rbdl/SimpleMath/SimpleMathMap.h"
 #include <vector>
 
+typedef double Vector1_t;
 typedef SimpleMath::Fixed::Matrix<double, 2,1> Vector2_t;
 typedef SimpleMath::Fixed::Matrix<double, 3,1> Vector3_t;
 typedef SimpleMath::Fixed::Matrix<double, 3,3> Matrix3_t;
@@ -33,16 +34,14 @@ typedef SimpleMath::Fixed::Matrix<double, 4,3> Matrix43_t;
 
 typedef SimpleMath::Dynamic::Matrix<double> MatrixN_t;
 typedef SimpleMath::Dynamic::Matrix<double> VectorN_t;
-
-#elseif RBDL_USE_CASADI_MATH
-#include <Body.h>
+using namespace std;
 
 #else
 #ifdef RBDL_USE_CASADI_MATH
 #include "rbdl/CasadiMath/MX_Xd_static.h"
 #include "rbdl/CasadiMath/MX_Xd_dynamic.h"
 
-typedef MX_Xd_static<1,1> Scalar;
+typedef MX_Xd_static<1,1> Vector1_t;
 typedef MX_Xd_static<2,1> Vector2_t;
 typedef MX_Xd_static<3,1> Vector3_t;
 typedef MX_Xd_static<3,3> Matrix3_t;
@@ -65,11 +64,14 @@ typedef MX_Xd_dynamic VectorN_t;
 
 #include "rbdl/rbdl_eigenmath.h"
 
+typedef double Vector1_t;
 typedef Eigen::Matrix<double, 6, 3> Matrix63_t;
 typedef Eigen::Matrix<double, 4, 3> Matrix43_t;
 
 typedef Eigen::VectorXd VectorN_t;
 typedef Eigen::MatrixXd MatrixN_t;
+
+using namespace std;
 #endif
 #endif
 
@@ -77,6 +79,7 @@ namespace RigidBodyDynamics {
 
 /** \brief Math types such as vectors and matrices and utility functions. */
 namespace Math {
+typedef Vector1_t  Scalar;
 typedef Vector2_t Vector2d;
 typedef Vector3_t Vector3d;
 typedef Vector4_t Vector4d;
