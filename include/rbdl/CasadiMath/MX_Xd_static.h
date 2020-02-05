@@ -12,8 +12,7 @@
 #include <string>
 #include <memory>
 
-//#include <rbdl/rbdl_config.h>
-#include <casadi.hpp>
+#include "casadi.hpp"
 
 template <unsigned int nrows, unsigned int ncols>
 class MX_Xd_static : public casadi::MX{
