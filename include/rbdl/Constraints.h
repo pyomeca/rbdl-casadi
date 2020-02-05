@@ -473,7 +473,7 @@ struct RBDL_DLLAPI ConstraintSet {
 #ifdef RBDL_USE_SIMPLE_MATH
   SimpleMath::HouseholderQR<Math::MatrixNd> GT_qr;
 #else
-  Eigen::HouseholderQR<Math::MatrixNd> GT_qr;
+//  Eigen::HouseholderQR<Math::MatrixNd> GT_qr;
 #endif
 
   Math::MatrixNd GT_qr_Q;

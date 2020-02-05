@@ -300,7 +300,10 @@ struct RBDL_DLLAPI SpatialTransform {
   }
 
   SpatialTransform operator* (const SpatialTransform &XT) const {
-    return SpatialTransform (E * XT.E, XT.r + XT.E.transpose() * r);
+      std::cout << "enter" << std::endl;
+      E.transpose() * XT.E;
+      std::cout << "exit" << std::endl;
+    return SpatialTransform(E.transpose().transpose() * XT.E, XT.r + XT.E.transpose() * r);
   }
 
   void operator*= (const SpatialTransform &XT) {

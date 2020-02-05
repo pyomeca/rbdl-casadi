@@ -83,10 +83,17 @@ class Quaternion : public Vector4d {
       Scalar p0 = sin ((1. - alpha) * angle);
       Scalar p1 = sin (alpha * angle);
 
-      if (dot (quat) < Scalar(0.)) {
+#ifdef RBDL_USE_CASADI_MATH
+      return Quaternion (casadi::MX::if_else(casadi::MX::lt(dot (quat), 0.),
+                                 Quaternion( ((*this) * p0 - quat * p1) * d),
+                                 Quaternion( ((*this) * p0 + quat * p1) * d)) );
+#else
+    if (dot (quat) < Scalar(0.)) {
         return Quaternion( ((*this) * p0 - quat * p1) * d);
-      }
-      return Quaternion( ((*this) * p0 + quat * p1) * d);
+    } else {
+        return Quaternion( ((*this) * p0 + quat * p1) * d);
+    }
+#endif
     }
 
     static Quaternion fromAxisAngle (const Vector3d &axis, Scalar angle_rad) {

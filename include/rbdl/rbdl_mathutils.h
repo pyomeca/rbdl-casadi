@@ -68,16 +68,20 @@ RBDL_DLLAPI inline MatrixNd MatrixFromPtr (unsigned int rows, unsigned int cols,
   return result;
 }
 
+#ifndef RBDL_USE_CASADI_MATH
 /// \brief Solves a linear system using gaussian elimination with pivoting
 RBDL_DLLAPI bool LinSolveGaussElimPivot (MatrixNd A, VectorNd b, VectorNd &x);
+#endif
 
 // \todo write test 
 RBDL_DLLAPI void SpatialMatrixSetSubmatrix(SpatialMatrix &dest, unsigned int row, unsigned int col, const Matrix3d &matrix);
 
+#ifndef RBDL_USE_CASADI_MATH
 RBDL_DLLAPI bool SpatialMatrixCompareEpsilon (const SpatialMatrix &matrix_a,
     const SpatialMatrix &matrix_b, Scalar epsilon);
 RBDL_DLLAPI bool SpatialVectorCompareEpsilon (const SpatialVector &vector_a,
     const SpatialVector &vector_b, Scalar epsilon);
+#endif
 
 /** \brief Translates the inertia matrix to a new center. */
 RBDL_DLLAPI Matrix3d parallel_axis (const Matrix3d &inertia, Scalar mass, const Vector3d &com);

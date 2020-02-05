@@ -12,8 +12,8 @@
 #include <string>
 #include <memory>
 
-#include <rbdl/rbdl_config.h>
 #include <casadi.hpp>
+#include "MX_Xd_static.h"
 
 class MX_Xd_dynamic : public casadi::MX{
 public:
@@ -43,6 +43,13 @@ public:
     }
 
     MX_Xd_dynamic operator*(const MX_Xd_dynamic& m2){
+        std::cout << "coucou5" << std::endl;
+        return casadi::MX::mtimes(*this, m2);
+    }
+
+    template <unsigned int nrows, unsigned int ncols>
+    MX_Xd_dynamic operator*(const MX_Xd_static<nrows, ncols>& m2){
+        std::cout << "coucou6" << std::endl;
         return casadi::MX::mtimes(*this, m2);
     }
 

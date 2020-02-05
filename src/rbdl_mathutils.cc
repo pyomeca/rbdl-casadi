@@ -33,6 +33,7 @@ RBDL_DLLAPI Matrix3d Matrix3dZero (
 
 RBDL_DLLAPI SpatialVector SpatialVectorZero ( 0., 0., 0., 0., 0., 0.);
 
+#ifndef RBDL_USE_CASADI_MATH
 RBDL_DLLAPI bool LinSolveGaussElimPivot (MatrixNd A, VectorNd b, VectorNd &x) {
   x = VectorNd::Zero(x.size());
 
@@ -120,6 +121,7 @@ RBDL_DLLAPI bool LinSolveGaussElimPivot (MatrixNd A, VectorNd b, VectorNd &x) {
 
   return true;
 }
+#endif
 
 RBDL_DLLAPI void SpatialMatrixSetSubmatrix(
     SpatialMatrix &dest, 
@@ -141,6 +143,7 @@ RBDL_DLLAPI void SpatialMatrixSetSubmatrix(
   dest(row*3 + 2,col*3 + 2) = matrix(2,2);
 }
 
+#ifndef RBDL_USE_CASADI_MATH
 RBDL_DLLAPI bool SpatialMatrixCompareEpsilon (
     const SpatialMatrix &matrix_a, 
     const SpatialMatrix &matrix_b, 
@@ -182,6 +185,7 @@ RBDL_DLLAPI bool SpatialVectorCompareEpsilon (
 
   return true;
 }
+#endif
 
 RBDL_DLLAPI Matrix3d parallel_axis (
     const Matrix3d &inertia, 

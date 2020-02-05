@@ -12,7 +12,7 @@
 #include <string>
 #include <memory>
 
-#include "casadi.hpp"
+#include <casadi.hpp>
 
 template <unsigned int nrows, unsigned int ncols>
 class MX_Xd_static : public casadi::MX{
@@ -221,13 +221,11 @@ public:
     }
 
     static MX_Xd_static Zero(){
-        MX_Xd_static<nrows, ncols> out;
-        for (unsigned int i=0; i<nrows; ++i){
-            for (unsigned int j=0; j<ncols; ++j){
-                out(i, j) = 0;
-            }
-        }
-        return out;
+        return MX_Xd_static<nrows, ncols>::zeros(nrows, ncols);
+    }
+
+    static MX_Xd_static One(){
+        return MX_Xd_static<nrows, ncols>::ones(nrows, ncols);
     }
 
     void setZero(){
@@ -271,7 +269,15 @@ public:
         return (*this)(i);
     }
 
-
+    template <unsigned int nrows2, unsigned int ncols2>
+    MX_Xd_static<nrows, ncols2> operator*(const MX_Xd_static<nrows2, ncols2>& m2){
+        std::cout << "coucou3" << std::endl;
+        return casadi::MX::mtimes(*this, m2);
+    }
+//    MX_Xd_static<nrows, nrows> operator*(const MX_Xd_static<ncols, nrows>& m2){
+//        std::cout << "coucou4" << std::endl;
+//        return casadi::MX::mtimes(*this, m2);
+//    }
 
     MX_Xd_static<1, 1> dot(const MX_Xd_static<3, 1> &other_vector) const {
         return casadi::MX::dot(*this, other_vector);
@@ -286,7 +292,7 @@ public:
             return result;
     }
 
-    MX_Xd_static transpose() const {
+    MX_Xd_static<ncols, nrows> transpose() const {
         return T();
     }
 
@@ -310,40 +316,9 @@ bool operator!=(const MX_Xd_static<nrows, ncols>& m1, const MX_Xd_static<nrows, 
 }
 
 template <unsigned int nrows, unsigned int ncols>
-bool operator<(const MX_Xd_static<nrows,ncols>& m1, const MX_Xd_static<nrows,ncols>& m2){
-//    return casadi::MX::lt(m1, m2);
-    std::cout << "Warning! operator< for MX always return false" << std::endl;
-    return false;
-}
-template <unsigned int nrows, unsigned int ncols>
-bool operator<=(const MX_Xd_static<nrows,ncols>& m1, const MX_Xd_static<nrows,ncols>& m2){
-//    return casadi::MX::lt(m1, m2);
-    std::cout << "Warning! operator<= for MX always return false" << std::endl;
-    return false;
-}
-
-template <unsigned int nrows, unsigned int ncols>
-bool operator>(const MX_Xd_static<nrows,ncols>& m1, const MX_Xd_static<nrows,ncols>& m2){
-//    return casadi::MX::lt(m1, m2);
-    std::cout << "Warning! operator> for MX always return true" << std::endl;
-    return true;
-}
-template <unsigned int nrows, unsigned int ncols>
-bool operator>=(const MX_Xd_static<nrows,ncols>& m1, const MX_Xd_static<nrows,ncols>& m2){
-//    return casadi::MX::lt(m1, m2);
-    std::cout << "Warning! operator>= for MX always return true" << std::endl;
-    return true;
-}
-
-template <unsigned int nrows, unsigned int ncols>
 MX_Xd_static<1, 1> fabs(const MX_Xd_static<nrows, ncols>& m){
     return casadi::MX::abs(m);
 }
-
-
-//MX_Xd_static<1, 1> sqrt(const casadi::MX& mx){
-//    return casadi::MX::sqrt(mx);
-//}
 
 template <unsigned int nrows, unsigned int ncols>
 bool isnan(const MX_Xd_static<nrows, ncols>&){
