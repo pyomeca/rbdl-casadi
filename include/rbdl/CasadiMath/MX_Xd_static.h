@@ -321,6 +321,15 @@ public:
 //            const MX_Xd_static<nrows2, ncols2>& m2) {
 //        *this = casadi::MX::mtimes(*this, m2);
 //    }
+    template <unsigned int ncols2>
+    MX_Xd_static<nrows, ncols2> operator*(const MX_Xd_static<ncols, ncols2>& other){
+        return casadi::MX::mtimes(*this, other);
+    }
+
+    MX_Xd_static<1, 1> operator/(
+            const MX_Xd_static<1, 1>& other){
+        return this->casadi::MX::operator/=(other);
+    }
 };
 
 template <unsigned int nrows, unsigned int ncols>

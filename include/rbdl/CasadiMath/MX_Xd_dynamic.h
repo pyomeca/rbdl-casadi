@@ -53,7 +53,7 @@ public:
         return casadi::MX::eye(size);
     }
 
-    MX_Xd_dynamic operator[](unsigned int i) const {
+    MX_Xd_static<1, 1> operator[](unsigned int i) const {
         return (*this)(i, 0);
     }
     MX_Xd_dynamic operator()(unsigned int i, unsigned int j=0) const {
@@ -126,8 +126,16 @@ public:
     MX_Xd_dynamic operator*(const MX_Xd_static<nrows, ncols>& other){
         return casadi::MX::mtimes(*this, other);
     }
+    MX_Xd_dynamic operator*(const MX_Xd_dynamic& other){
+        return casadi::MX::mtimes(*this, other);
+    }
 
 };
+
+template <unsigned int nrows, unsigned int ncols>
+MX_Xd_dynamic operator*(const MX_Xd_static<nrows, ncols>& first, const MX_Xd_dynamic& other){
+    return casadi::MX::mtimes(first, other);
+}
 
 //template <unsigned int nrows1, unsigned int ncols1, unsigned int nrows2, unsigned int ncols2>
 //MX_Xd_static<nrows1, ncols2> operator*(
