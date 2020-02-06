@@ -79,12 +79,30 @@ public:
         return T();
     }
 
+    MX_Xd_dynamic inverse() const {
+        return inv(*this);
+    }
+
+    MX_Xd_static<1, 1> dot(const MX_Xd_dynamic &other_vector) const {
+        return casadi::MX::dot(*this, other_vector);
+    }
+
     MX_Xd_dynamic norm() const {
         return casadi::MX::norm_1(*this);
     }
 
     MX_Xd_dynamic squaredNorm() const {
         return casadi::MX::norm_2(*this);
+    }
+
+    void operator+=(
+            const MX_Xd_dynamic& m2) {
+        this->casadi::MX::operator+=(m2);
+    }
+
+    void operator-=(
+            const MX_Xd_dynamic& m2) {
+        this->casadi::MX::operator-=(m2);
     }
 };
 

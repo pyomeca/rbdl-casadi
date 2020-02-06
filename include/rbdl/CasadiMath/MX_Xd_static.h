@@ -270,7 +270,7 @@ public:
     }
 
 
-    MX_Xd_static<1, 1> dot(const MX_Xd_static<3, 1> &other_vector) const {
+    MX_Xd_static<1, 1> dot(const MX_Xd_static<ncols, 1> &other_vector) const {
         return casadi::MX::dot(*this, other_vector);
     }
 
@@ -286,6 +286,9 @@ public:
     MX_Xd_static<ncols, nrows> transpose() const {
         return T();
     }
+    MX_Xd_static<ncols, nrows> inverse() const {
+        return inv(*this);
+    }
 
     MX_Xd_static<1, 1> norm() const{
         return casadi::MX::norm_1(*this);
@@ -296,20 +299,19 @@ public:
     }
 
     template <unsigned int nrows2, unsigned int ncols2>
-    MX_Xd_static<nrows, ncols> operator+=(
+    void operator+=(
             const MX_Xd_static<nrows2, ncols2>& m2) {
-        return this->casadi::MX::operator+=(m2);
+        this->casadi::MX::operator+=(m2);
     }
     template <unsigned int nrows2, unsigned int ncols2>
-    MX_Xd_static<nrows, ncols> operator-=(
+    void operator-=(
             const MX_Xd_static<nrows2, ncols2>& m2) {
-        return this->casadi::MX::operator-=(m2);
+        this->casadi::MX::operator-=(m2);
     }
     template <unsigned int nrows2, unsigned int ncols2>
-    MX_Xd_static<nrows, ncols> operator*=(
+    void operator*=(
             const MX_Xd_static<nrows2, ncols2>& m2) {
         *this = casadi::MX::mtimes(*this, m2);
-        return *this;
     }
 };
 
@@ -334,26 +336,6 @@ template <unsigned int nrows, unsigned int ncols>
 MX_Xd_static<nrows, ncols> operator-(
         MX_Xd_static<nrows, ncols> m1) {
     return m1.casadi::MX::operator-();
-}
-
-template <unsigned int nrows1, unsigned int ncols1nrows2, unsigned int ncols2>
-MX_Xd_static<nrows1, ncols2> operator*(
-        const MX_Xd_static<nrows1, ncols1nrows2>& m1,
-        const MX_Xd_static<ncols1nrows2, ncols2>& m2){
-    return casadi::MX::mtimes(m1, m2);
-}
-
-template <unsigned int nrows, unsigned int ncols>
-MX_Xd_static<nrows, ncols> operator*(
-        const MX_Xd_static<nrows, ncols>& m1,
-        const double& m2){
-    return casadi::MX::times(m1, m2);
-}
-template <unsigned int nrows, unsigned int ncols>
-MX_Xd_static<nrows, ncols> operator*(
-        const double& m1,
-        const MX_Xd_static<nrows, ncols>& m2){
-    return casadi::MX::times(m2, m1);
 }
 
 template <unsigned int nrows, unsigned int ncols>

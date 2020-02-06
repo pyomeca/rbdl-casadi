@@ -309,7 +309,7 @@ RBDL_DLLAPI void SparseSolveLx (Model &model, Math::MatrixNd &L, Math::VectorNd 
 }
 
 RBDL_DLLAPI void SparseSolveLTx (Model &model, Math::MatrixNd &L, Math::VectorNd &x) {
-  for (int i = model.qdot_size; i > 0; i--) {
+  for (unsigned int i = model.qdot_size; i > 0; i--) {
     x[i - 1] = x[i - 1] / L(i - 1,i - 1);
     unsigned int j = model.lambda_q[i];
     while (j != 0) {
