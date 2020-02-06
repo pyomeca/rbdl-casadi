@@ -271,7 +271,11 @@ bool ConstraintSet::Bind (const Model &model) {
 #ifdef RBDL_USE_SIMPLE_MATH
   GT_qr = SimpleMath::HouseholderQR<Math::MatrixNd> (G.transpose());
 #else
+#ifdef RBDL_USE_CASADI_MATH
+
+#else
   GT_qr = Eigen::HouseholderQR<Math::MatrixNd> (G.transpose());
+#endif
 #endif
   GT_qr_Q = MatrixNd::Zero (model.dof_count, model.dof_count);
   Y = MatrixNd::Zero (model.dof_count, G.rows());

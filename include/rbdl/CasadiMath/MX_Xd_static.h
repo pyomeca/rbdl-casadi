@@ -31,6 +31,14 @@ public:
 
     MX_Xd_static(
             const MX_Xd_static<1,1>& v0,
+            const MX_Xd_static<1,1>& v1) :
+        casadi::MX(2, 1)
+    {
+        (*this)(0) = v0(0);
+        (*this)(1) = v1(0);
+    }
+    MX_Xd_static(
+            const MX_Xd_static<1,1>& v0,
             const MX_Xd_static<1,1>& v1,
             const MX_Xd_static<1,1>& v2) :
         casadi::MX(3, 1)
@@ -298,21 +306,21 @@ public:
         return casadi::MX::norm_2(*this);
     }
 
-    template <unsigned int nrows2, unsigned int ncols2>
-    void operator+=(
-            const MX_Xd_static<nrows2, ncols2>& m2) {
-        this->casadi::MX::operator+=(m2);
-    }
-    template <unsigned int nrows2, unsigned int ncols2>
-    void operator-=(
-            const MX_Xd_static<nrows2, ncols2>& m2) {
-        this->casadi::MX::operator-=(m2);
-    }
-    template <unsigned int nrows2, unsigned int ncols2>
-    void operator*=(
-            const MX_Xd_static<nrows2, ncols2>& m2) {
-        *this = casadi::MX::mtimes(*this, m2);
-    }
+//    template <unsigned int nrows2, unsigned int ncols2>
+//    void operator+=(
+//            const MX_Xd_static<nrows2, ncols2>& m2) {
+//        this->casadi::MX::operator+=(m2);
+//    }
+//    template <unsigned int nrows2, unsigned int ncols2>
+//    void operator-=(
+//            const MX_Xd_static<nrows2, ncols2>& m2) {
+//        this->casadi::MX::operator-=(m2);
+//    }
+//    template <unsigned int nrows2, unsigned int ncols2>
+//    void operator*=(
+//            const MX_Xd_static<nrows2, ncols2>& m2) {
+//        *this = casadi::MX::mtimes(*this, m2);
+//    }
 };
 
 template <unsigned int nrows, unsigned int ncols>
@@ -325,18 +333,18 @@ bool operator!=(const MX_Xd_static<nrows, ncols>& m1, const MX_Xd_static<nrows, 
     return !casadi::MX::is_equal(m1, m2);
 }
 
-template <unsigned int nrows, unsigned int ncols>
-MX_Xd_static<nrows, ncols> operator+(
-        MX_Xd_static<nrows, ncols> m1,
-        const MX_Xd_static<nrows, ncols>& m2) {
-    return m1.casadi::MX::operator+=(m2);
-}
+//template <unsigned int nrows, unsigned int ncols>
+//MX_Xd_static<nrows, ncols> operator+(
+//        MX_Xd_static<nrows, ncols> m1,
+//        const MX_Xd_static<nrows, ncols>& m2) {
+//    return m1.casadi::MX::operator+=(m2);
+//}
 
-template <unsigned int nrows, unsigned int ncols>
-MX_Xd_static<nrows, ncols> operator-(
-        MX_Xd_static<nrows, ncols> m1) {
-    return m1.casadi::MX::operator-();
-}
+//template <unsigned int nrows, unsigned int ncols>
+//MX_Xd_static<nrows, ncols> operator-(
+//        MX_Xd_static<nrows, ncols> m1) {
+//    return m1.casadi::MX::operator-();
+//}
 
 template <unsigned int nrows, unsigned int ncols>
 MX_Xd_static<1, 1> fabs(const MX_Xd_static<nrows, ncols>& m){

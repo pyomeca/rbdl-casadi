@@ -26,6 +26,21 @@ public:
         casadi::MX(m){
     }
 
+    void conservativeResize (unsigned int nrows, unsigned int ncols = 1) {
+        MX_Xd_dynamic result = casadi::MX::zeros(nrows, ncols);
+
+        unsigned int arows = std::min (nrows, rows());
+        unsigned int acols = std::min (ncols, cols());
+
+        for (unsigned int i = 0; i < arows; i++) {
+            for (unsigned int j = 0; j < acols; j++) {
+                result(i,j) = (*this)(i,j);
+            }
+        }
+
+        *this = result;
+    }
+
     static MX_Xd_dynamic Zero(unsigned int nrows, unsigned int ncols = 1){
         return casadi::MX::zeros(nrows, ncols);
     }
@@ -40,6 +55,9 @@ public:
 
     MX_Xd_dynamic operator[](unsigned int i) const {
         return (*this)(i, 0);
+    }
+    MX_Xd_dynamic operator()(unsigned int i, unsigned int j=0) const {
+        return this->casadi::MX::operator()(i, j);
     }
 
     unsigned int rows() const {
@@ -59,7 +77,7 @@ public:
             unsigned int row_start,
             unsigned int col_start) const
     {
-        return (*this)(
+        return this->casadi::MX::operator()(
             casadi::Slice(static_cast<casadi_int>(row_start), static_cast<casadi_int>(row_start+row_count)),
             casadi::Slice(static_cast<casadi_int>(col_start), static_cast<casadi_int>(col_start+col_count)));
     }
@@ -70,7 +88,7 @@ public:
             unsigned int row_count,
             unsigned int col_count) const
     {
-        return (*this)(
+        return this->casadi::MX::operator()(
             casadi::Slice(static_cast<casadi_int>(row_start), static_cast<casadi_int>(row_start+row_count)),
             casadi::Slice(static_cast<casadi_int>(col_start), static_cast<casadi_int>(col_start+col_count)));
     }
@@ -95,57 +113,44 @@ public:
         return casadi::MX::norm_2(*this);
     }
 
-    void operator+=(
-            const MX_Xd_dynamic& m2) {
-        this->casadi::MX::operator+=(m2);
+//    void operator+=(
+//            const MX_Xd_dynamic& m2) {
+//        this->casadi::MX::operator+=(m2);
+//    }
+
+//    void operator-=(
+//            const MX_Xd_dynamic& m2) {
+//        this->casadi::MX::operator-=(m2);
+//    }
+    template <unsigned int nrows, unsigned int ncols>
+    MX_Xd_dynamic operator*(const MX_Xd_static<nrows, ncols>& other){
+        return casadi::MX::mtimes(*this, other);
     }
 
-    void operator-=(
-            const MX_Xd_dynamic& m2) {
-        this->casadi::MX::operator-=(m2);
-    }
 };
 
-template <unsigned int nrows1, unsigned int ncols1, unsigned int nrows2, unsigned int ncols2>
-MX_Xd_static<nrows1, ncols2> operator*(
-        const MX_Xd_static<nrows1, ncols1>& m1,
-        const MX_Xd_static<nrows2, ncols2>& m2){
-    return casadi::MX::mtimes(m1, m2);
-}
-MX_Xd_static<1, 1> operator*(
-        const casadi::SubMatrix<casadi::MX, unsigned int, unsigned int>& m1,
-        const casadi::SubMatrix<casadi::MX, unsigned int, unsigned int>& m2){
-    return casadi::MX::mtimes(m1, m2);
-}
+//template <unsigned int nrows1, unsigned int ncols1, unsigned int nrows2, unsigned int ncols2>
+//MX_Xd_static<nrows1, ncols2> operator*(
+//        const MX_Xd_static<nrows1, ncols1>& m1,
+//        const MX_Xd_static<nrows2, ncols2>& m2){
+//    return casadi::MX::mtimes(m1, m2);
+//}
+//inline MX_Xd_static<1, 1> operator*(
+//        const casadi::SubMatrix<casadi::MX, unsigned int, unsigned int>& m1,
+//        const casadi::SubMatrix<casadi::MX, unsigned int, unsigned int>& m2){
+//    return casadi::MX::mtimes(m1, m2);
+//}
 
-template <unsigned int nrows, unsigned int ncols>
-MX_Xd_dynamic operator*(
-        const MX_Xd_static<nrows, ncols>& m1,
-        const MX_Xd_dynamic& m2){
-    return casadi::MX::mtimes(m1, m2);
-}
-template <unsigned int nrows, unsigned int ncols>
-MX_Xd_dynamic operator*(
-        const MX_Xd_static<nrows, ncols>& m1,
-        const casadi::MX& m2){
-    return casadi::MX::mtimes(m1, m2);
-}
-template <unsigned int nrows, unsigned int ncols>
-MX_Xd_dynamic operator*(
-        const MX_Xd_dynamic& m1,
-        const MX_Xd_static<nrows, ncols>& m2){
-    return casadi::MX::mtimes(m1, m2);
-}
-template <unsigned int nrows, unsigned int ncols>
-MX_Xd_dynamic operator*(
-        const casadi::MX& m1,
-        const MX_Xd_static<nrows, ncols>& m2){
-    return casadi::MX::mtimes(m1, m2);
-}
-
+//template <unsigned int nrows, unsigned int ncols>
 //MX_Xd_dynamic operator*(
-//        const MX_Xd_dynamic& m1,
+//        const MX_Xd_static<nrows, ncols>& m1,
 //        const MX_Xd_dynamic& m2){
+//    return casadi::MX::mtimes(m1, m2);
+//}
+//template <unsigned int nrows, unsigned int ncols>
+//MX_Xd_dynamic operator*(
+//        const MX_Xd_static<nrows, ncols>& m1,
+//        const casadi::MX& m2){
 //    return casadi::MX::mtimes(m1, m2);
 //}
 //template <unsigned int nrows, unsigned int ncols>
@@ -154,57 +159,43 @@ MX_Xd_dynamic operator*(
 //        const MX_Xd_static<nrows, ncols>& m2){
 //    return casadi::MX::mtimes(m1, m2);
 //}
+//template <unsigned int nrows, unsigned int ncols>
 //MX_Xd_dynamic operator*(
+//        const casadi::MX& m1,
+//        const MX_Xd_static<nrows, ncols>& m2){
+//    return casadi::MX::mtimes(m1, m2);
+//}
+//inline MX_Xd_dynamic operator*(
 //        const MX_Xd_dynamic& m1,
 //        const casadi::MX& m2){
 //    return casadi::MX::mtimes(m1, m2);
 //}
-//MX_Xd_dynamic operator*(
+//inline MX_Xd_dynamic operator*(
 //        const casadi::MX& m1,
 //        const MX_Xd_dynamic& m2){
 //    return casadi::MX::mtimes(m1, m2);
 //}
-//template <unsigned int nrows, unsigned int ncols>
-//MX_Xd_dynamic operator*(
-//        const MX_Xd_static<nrows, ncols>&m1,
+//inline MX_Xd_dynamic operator*(
+//        const casadi::MX& m1,
+//        const casadi::MX& m2){
+//    return casadi::MX::mtimes(m1, m2);
+//}
+//inline MX_Xd_dynamic operator*(
+//        const MX_Xd_dynamic& m1,
 //        const MX_Xd_dynamic& m2){
 //    return casadi::MX::mtimes(m1, m2);
 //}
-MX_Xd_dynamic operator*(
-        const casadi::MX& m1,
-        const casadi::MX& m2){
-    return casadi::MX::mtimes(m1, m2);
-}
-MX_Xd_dynamic operator*(
-        const MX_Xd_dynamic& m1,
-        const MX_Xd_dynamic& m2){
-    return casadi::MX::mtimes(m1, m2);
-}
-
-template <unsigned int nrows, unsigned int ncols>
-MX_Xd_dynamic operator/(
-        MX_Xd_static<nrows, ncols> m1,
-        const MX_Xd_dynamic& m2){
-    return m1.casadi::MX::operator/=(m2);
-}
-MX_Xd_dynamic operator/(
-        MX_Xd_dynamic m1,
-        const MX_Xd_dynamic& m2){
-    return m1.casadi::MX::operator/=(m2);
-}
 
 //template <unsigned int nrows, unsigned int ncols>
-//MX_Xd_static<nrows, ncols> operator*(
-//        const MX_Xd_static<1, 1>& m1,
-//        const MX_Xd_static<nrows, ncols>& m2){
-//    return casadi::MX::mtimes(m1, m2);
+//MX_Xd_dynamic operator/(
+//        MX_Xd_static<nrows, ncols> m1,
+//        const MX_Xd_dynamic& m2){
+//    return m1.casadi::MX::operator/=(m2);
 //}
-
-//template <unsigned int nrows, unsigned int ncols>
-//MX_Xd_static<nrows, ncols> operator*(
-//        const MX_Xd_static<nrows, ncols>& m1,
-//        const MX_Xd_static<1, 1>& m2){
-//    return casadi::MX::mtimes(m1, m2);
+//inline MX_Xd_dynamic operator/(
+//        MX_Xd_dynamic m1,
+//        const MX_Xd_dynamic& m2){
+//    return m1.casadi::MX::operator/=(m2);
 //}
 
 //template <unsigned int nrows1, unsigned int ncols1nrows2, unsigned int ncols2>
@@ -214,82 +205,88 @@ MX_Xd_dynamic operator/(
 //    return casadi::MX::mtimes(m1, m2);
 //}
 
-template <unsigned int nrows, unsigned int ncols>
-MX_Xd_static<nrows, ncols> operator*(
-        const MX_Xd_static<nrows, ncols>& m1,
-        const double& m2){
-    return casadi::MX::times(m1, m2);
-}
-MX_Xd_dynamic operator*(
-        const casadi::MX& m1,
-        const double& m2){
-    return casadi::MX::times(m1, m2);
-}
-MX_Xd_dynamic operator*(
-        const MX_Xd_dynamic& m1,
-        const casadi::SubMatrix<casadi::MX, unsigned int, unsigned int>& m2){
-    return casadi::MX::times(m1, m2);
-}
-MX_Xd_dynamic operator*(
-        const MX_Xd_dynamic& m1,
-        const double& m2){
-    return casadi::MX::times(m1, m2);
-}
-
-template <unsigned int nrows, unsigned int ncols>
-MX_Xd_static<nrows, ncols> operator*(
-        const double& m1,
-        const MX_Xd_static<nrows, ncols>& m2){
-    return casadi::MX::times(m2, m1);
-}
-MX_Xd_dynamic operator*(
-        const double& m1,
-        const casadi::MX& m2){
-    return casadi::MX::times(m2, m1);
-}
-MX_Xd_dynamic operator*(
-        const casadi::SubMatrix<casadi::MX, unsigned int, unsigned int>& m1,
-        const MX_Xd_dynamic& m2){
-    return casadi::MX::times(m1, m2);
-}
-MX_Xd_dynamic operator*(
-        const double& m1,
-        const MX_Xd_dynamic& m2){
-    return casadi::MX::times(m1, m2);
-}
-
-MX_Xd_dynamic operator+(
-        const MX_Xd_dynamic& m1,
-        const MX_Xd_dynamic& m2) {
-    return static_cast<casadi::MX>(m1).casadi::MX::operator+=(m2);
-}
-MX_Xd_dynamic operator-(
-        const MX_Xd_dynamic& m1) {
-    return m1.casadi::MX::operator-();
-}
-MX_Xd_dynamic operator-(
-        const MX_Xd_dynamic& m1,
-        const MX_Xd_dynamic& m2) {
-    return static_cast<casadi::MX>(m1).casadi::MX::operator-=(m2);
-}
-template <unsigned int nrows, unsigned int ncols>
-MX_Xd_static<nrows, ncols> operator-(
-        const MX_Xd_static<nrows, ncols>& m1,
-        const MX_Xd_dynamic& m2) {
-    return static_cast<casadi::MX>(m1).casadi::MX::operator-=(m2);
-}
-template <unsigned int nrows, unsigned int ncols>
-MX_Xd_static<nrows, ncols> operator-(
-        const MX_Xd_dynamic& m1,
-        const MX_Xd_static<nrows, ncols>& m2
-       ) {
-    return -static_cast<casadi::MX>(m2).casadi::MX::operator-=(m1);
-}
+//template <unsigned int nrows1, unsigned int ncols1, unsigned int nrows2, unsigned int ncols2>
+//inline MX_Xd_static<nrows1, ncols2> operator*(
+//        const MX_Xd_static<nrows1, ncols1>& m1,
+//        const MX_Xd_static<nrows2, ncols2>& m2){
+//    return casadi::MX::mtimes(m1, m2);
+//}
+//template <unsigned int nrows, unsigned int ncols>
+//MX_Xd_static<nrows, ncols> operator*(
+//        const MX_Xd_static<nrows, ncols>& m1,
+//        const double& m2){
+//    return casadi::MX::times(m1, m2);
+//}
+//inline MX_Xd_dynamic operator*(
+//        const casadi::MX& m1,
+//        const double& m2){
+//    return casadi::MX::times(m1, m2);
+//}
+//inline MX_Xd_dynamic operator*(
+//        const casadi::SubMatrix<casadi::MX, unsigned int, unsigned int>& m1,
+//        const casadi::SubMatrix<casadi::MX, unsigned int, unsigned int>& m2){
+//    return casadi::MX::times(m1, m2);
+//}
+//inline MX_Xd_dynamic operator*(
+//        const MX_Xd_dynamic& m1,
+//        const double& m2){
+//    return casadi::MX::times(m1, m2);
+//}
 
 //template <unsigned int nrows, unsigned int ncols>
-//MX_Xd_dynamic fabs(const MX_Xd_dynamic& m){
-//    return casadi::MX::abs(m);
+//MX_Xd_static<nrows, ncols> operator*(
+//        const double& m1,
+//        const MX_Xd_static<nrows, ncols>& m2){
+//    return casadi::MX::times(m2, m1);
 //}
+//inline MX_Xd_dynamic operator*(
+//        const double& m1,
+//        const casadi::MX& m2){
+//    return casadi::MX::times(m2, m1);
+//}
+//inline MX_Xd_dynamic operator*(
+//        const casadi::SubMatrix<casadi::MX, unsigned int, unsigned int>& m1,
+//        const MX_Xd_dynamic& m2){
+//    return casadi::MX::times(m1, m2);
+//}
+//inline MX_Xd_dynamic operator*(
+//        const double& m1,
+//        const MX_Xd_dynamic& m2){
+//    return casadi::MX::times(m1, m2);
+//}
+
+//inline MX_Xd_dynamic operator+(
+//        const MX_Xd_dynamic& m1,
+//        const MX_Xd_dynamic& m2) {
+//    return static_cast<casadi::MX>(m1).casadi::MX::operator+=(m2);
+//}
+//inline MX_Xd_dynamic operator-(
+//        const MX_Xd_dynamic& m1) {
+//    return m1.casadi::MX::operator-();
+//}
+//inline MX_Xd_dynamic operator-(
+//        const MX_Xd_dynamic& m1,
+//        const MX_Xd_dynamic& m2) {
+//    return static_cast<casadi::MX>(m1).casadi::MX::operator-=(m2);
+//}
+//template <unsigned int nrows, unsigned int ncols>
+//MX_Xd_static<nrows, ncols> operator-(
+//        const MX_Xd_static<nrows, ncols>& m1,
+//        const MX_Xd_dynamic& m2) {
+//    return static_cast<casadi::MX>(m1).casadi::MX::operator-=(m2);
+//}
+//template <unsigned int nrows, unsigned int ncols>
+//MX_Xd_static<nrows, ncols> operator-(
+//        const MX_Xd_dynamic& m1,
+//        const MX_Xd_static<nrows, ncols>& m2
+//       ) {
+//    return -static_cast<casadi::MX>(m2).casadi::MX::operator-=(m1);
+//}
+
+template <unsigned int nrows, unsigned int ncols>
+MX_Xd_dynamic fabs(const MX_Xd_dynamic& m){
+    return casadi::MX::abs(m);
+}
 
 /* MX_XD_DYNAMICS_H */
 #endif
