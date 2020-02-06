@@ -583,7 +583,7 @@ RBDL_DLLAPI void ForwardDynamicsLagrangian (
   LOG << "A = " << std::endl << *H << std::endl;
   LOG << "b = " << std::endl << *C * -1. + Tau << std::endl;
 
-#ifndef RBDL_USE_SIMPLE_MATH
+#ifdef RBDL_USE_EIGEN_MATH
   switch (linear_solver) {
     case (LinearSolverPartialPivLU) :
       QDDot = H->partialPivLu().solve (*C * -1. + Tau);
@@ -603,8 +603,13 @@ RBDL_DLLAPI void ForwardDynamicsLagrangian (
       break;
   }
 #else
+#ifdef RBDL_USE_CASADI_MATH
+  std::cout << "BETTER SOLVER HERE" << std::endl;
+    QDDot = H->inverse() * (*C * -1. + Tau);
+#else
   bool solve_successful = LinSolveGaussElimPivot (*H, *C * -1. + Tau, QDDot);
   assert (solve_successful);
+#endif
 #endif
 
   if (free_C) {
