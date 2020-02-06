@@ -42,17 +42,6 @@ public:
         return (*this)(i, 0);
     }
 
-    MX_Xd_dynamic operator*(const MX_Xd_dynamic& m2){
-        std::cout << "coucou5" << std::endl;
-        return casadi::MX::mtimes(*this, m2);
-    }
-
-    template <unsigned int nrows, unsigned int ncols>
-    MX_Xd_dynamic operator*(const MX_Xd_static<nrows, ncols>& m2){
-        std::cout << "coucou6" << std::endl;
-        return casadi::MX::mtimes(*this, m2);
-    }
-
     unsigned int rows() const {
         return static_cast<unsigned int>(this->casadi::MX::rows());
     }
