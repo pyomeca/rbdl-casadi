@@ -176,21 +176,21 @@ protected:
 };
 
 MX_Xd_dynamic operator*(
-        const casadi::SubMatrix<casadi::MX, casadi::Slice, casadi::Slice>& me,
+        const MX_Xd_SubMatrix& me,
         const MX_Xd_scalar& other){
-    return casadi::SubMatrix<casadi::MX, casadi::Slice, casadi::Slice>::mtimes(me, other);
+    return MX_Xd_SubMatrix::mtimes(me, other);
 }
 MX_Xd_dynamic operator*(
-        const casadi::SubMatrix<casadi::MX, casadi::Slice, casadi::Slice>& me,
-        const casadi::SubMatrix<casadi::MX, casadi::Slice, casadi::Slice>& other){
-    return casadi::SubMatrix<casadi::MX, casadi::Slice, casadi::Slice>::mtimes(me, other);
+        const MX_Xd_SubMatrix& me,
+        const MX_Xd_SubMatrix& other){
+    return MX_Xd_SubMatrix::mtimes(me, other);
 }
 
 MX_Xd_SubMatrix operator/(
-        const casadi::SubMatrix<casadi::MX, casadi::Slice, casadi::Slice>& me,
-        const casadi::SubMatrix<casadi::MX, casadi::Slice, casadi::Slice>& scalar) {
+        const MX_Xd_SubMatrix& me,
+        const MX_Xd_SubMatrix& scalar) {
     MX_Xd_SubMatrix result (me);
-    result.casadi::SubMatrix<casadi::MX, casadi::Slice, casadi::Slice>::operator/=(scalar);
+    result.MX_Xd_SubMatrix::operator/=(scalar);
     return result;
 }
 
@@ -215,14 +215,14 @@ MX_Xd_dynamic operator*(
 }
 template <unsigned int nrows, unsigned int ncols>
 MX_Xd_dynamic operator*(
-        const casadi::SubMatrix<casadi::MX, casadi::Slice, casadi::Slice>& m1,
+        const MX_Xd_SubMatrix& m1,
         const MX_Xd_static<nrows, ncols>& m2){
     return casadi::MX::mtimes(m1, m2);
 }
 template <unsigned int nrows, unsigned int ncols>
 MX_Xd_dynamic operator*(
         const MX_Xd_static<nrows, ncols>& m1,
-        const casadi::SubMatrix<casadi::MX, casadi::Slice, casadi::Slice>& m2){
+        const MX_Xd_SubMatrix& m2){
     return casadi::MX::mtimes(m1, m2);
 }
 
@@ -249,7 +249,7 @@ MX_Xd_scalar operator+(
     return out.casadi::MX::operator+=(other);
 }
 MX_Xd_dynamic operator+(
-        const casadi::SubMatrix<casadi::MX, casadi::Slice, casadi::Slice>& me,
+        const MX_Xd_SubMatrix& me,
         const MX_Xd_dynamic& other
         ) {
     MX_Xd_dynamic out(other);
@@ -257,7 +257,7 @@ MX_Xd_dynamic operator+(
 }
 MX_Xd_dynamic operator+(
         const MX_Xd_dynamic& me,
-        const casadi::SubMatrix<casadi::MX, casadi::Slice, casadi::Slice>& other
+        const MX_Xd_SubMatrix& other
         ) {
     MX_Xd_dynamic out(me);
     return out.casadi::MX::operator+=(other);
@@ -286,7 +286,7 @@ MX_Xd_scalar operator-(
     return out.casadi::MX::operator-=(other);
 }
 MX_Xd_dynamic operator-(
-        const casadi::SubMatrix<casadi::MX, casadi::Slice, casadi::Slice>& me,
+        const MX_Xd_SubMatrix& me,
         const MX_Xd_dynamic& other
         ) {
     MX_Xd_dynamic out(-other);
@@ -294,7 +294,7 @@ MX_Xd_dynamic operator-(
 }
 MX_Xd_dynamic operator-(
         const MX_Xd_dynamic& me,
-        const casadi::SubMatrix<casadi::MX, casadi::Slice, casadi::Slice>& other
+        const MX_Xd_SubMatrix& other
         ) {
     MX_Xd_dynamic out(me);
     return out.casadi::MX::operator-=(other);
