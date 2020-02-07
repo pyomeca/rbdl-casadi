@@ -268,20 +268,18 @@ bool ConstraintSet::Bind (const Model &model) {
   GSJ.conservativeResize (6, model.qdot_size);
 
   // HouseHolderQR crashes if matrix G has more rows than columns.
+#ifndef RBDL_USE_CASADI_MATH
 #ifdef RBDL_USE_SIMPLE_MATH
   GT_qr = SimpleMath::HouseholderQR<Math::MatrixNd> (G.transpose());
 #else
-#ifdef RBDL_USE_CASADI_MATH
-
-#else
   GT_qr = Eigen::HouseholderQR<Math::MatrixNd> (G.transpose());
-#endif
 #endif
   GT_qr_Q = MatrixNd::Zero (model.dof_count, model.dof_count);
   Y = MatrixNd::Zero (model.dof_count, G.rows());
   Z = MatrixNd::Zero (model.dof_count, model.dof_count - G.rows());
   qddot_y = VectorNd::Zero (model.dof_count);
   qddot_z = VectorNd::Zero (model.dof_count);
+#endif
 
   K.conservativeResize (n_constr, n_constr);
   K.setZero();
@@ -376,6 +374,9 @@ void SolveConstrainedSystemDirect (
   LOG << "A = " << std::endl << A << std::endl;
   LOG << "b = " << std::endl << b << std::endl;
 
+#ifdef RBDL_USE_CASADI_MATH
+  x = A.inverse() * b;
+#else
   switch (linear_solver) {
     case (LinearSolverPartialPivLU) :
 #ifdef RBDL_USE_SIMPLE_MATH
@@ -396,6 +397,7 @@ void SolveConstrainedSystemDirect (
       assert (0);
       break;
   }
+#endif
 
   LOG << "x = " << std::endl << x << std::endl;
 }
@@ -430,13 +432,18 @@ void SolveConstrainedSystemRangeSpaceSparse (
 
   a = gamma - Y.transpose() * z;
 
+#ifdef RBDL_USE_CASADI_MATH
+  lambda = K.inverse() * a;
+#else
   lambda = K.llt().solve(a);
+#endif
 
   qddot = c + G.transpose() * lambda;
   SparseSolveLTx (model, H, qddot);
   SparseSolveLx (model, H, qddot);
 }
 
+#ifndef RBDL_USE_CASADI_MATH
 RBDL_DLLAPI
 void SolveConstrainedSystemNullSpace (
   Math::MatrixNd &H, 
@@ -451,6 +458,7 @@ void SolveConstrainedSystemNullSpace (
   Math::VectorNd &qddot_z,
   Math::LinearSolver &linear_solver
   ) {
+
   switch (linear_solver) {
     case (LinearSolverPartialPivLU) :
 #ifdef RBDL_USE_SIMPLE_MATH
@@ -476,11 +484,13 @@ void SolveConstrainedSystemNullSpace (
 
   qddot = Y * qddot_y + Z * qddot_z;
 
+
+
   switch (linear_solver) {
     case (LinearSolverPartialPivLU) :
 #ifdef RBDL_USE_SIMPLE_MATH
       // SimpleMath does not have a LU solver so just use its QR solver
-      qddot_y = (G * Y).householderQr().solve (gamma);
+      lambda = (G * Y).householderQr().solve (Y.transpose() * (H * qddot - c));
 #else
       lambda = (G * Y).partialPivLu().solve (Y.transpose() * (H * qddot - c));
 #endif
@@ -497,6 +507,7 @@ void SolveConstrainedSystemNullSpace (
       break;
   }
 }
+#endif
 
 RBDL_DLLAPI
 void CalcConstraintsPositionError (
@@ -591,9 +602,12 @@ void CalcConstraintsJacobian (
   for (unsigned int i = 0; i < CS.mContactConstraintIndices.size(); i++) {
     const unsigned int c = CS.mContactConstraintIndices[i];
 
-    // only compute the matrix Gi if actually needed
-    if (prev_body_id_1 != CS.body[c] 
+    // only compute the matrix Gi if actually needed (always compute with Casadi)
+#ifndef RBDL_USE_CASADI_MATH
+    if (prev_body_id_1 != CS.body[c]
         || prev_body_X_1.r != CS.point[c]) {
+#endif
+
 
       // Compute the jacobian for the point.
       CS.Gi.setZero();
@@ -602,7 +616,9 @@ void CalcConstraintsJacobian (
       // Update variables for optimization check.
       prev_body_id_1 = CS.body[c];
       prev_body_X_1 = Xtrans(CS.point[c]);
+#ifndef RBDL_USE_CASADI_MATH
     }
+#endif
 
     for(unsigned int j = 0; j < model.dof_count; j++) {
       Vector3d gaxis (CS.Gi(0,j), CS.Gi(1,j), CS.Gi(2,j));
@@ -620,13 +636,15 @@ void CalcConstraintsJacobian (
   for (unsigned int i = 0; i < CS.mLoopConstraintIndices.size(); i++) {
     const unsigned int c = CS.mLoopConstraintIndices[i];
 
-    // Only recompute variables if necessary.
+    // Only recompute variables if necessary (always compute with Casadi)
+#ifndef RBDL_USE_CASADI_MATH
     if( prev_body_id_1 != CS.body_p[c]
         || prev_body_id_2 != CS.body_s[c]
         || prev_body_X_1.r != CS.X_p[c].r
         || prev_body_X_2.r != CS.X_s[c].r
         || prev_body_X_1.E != CS.X_p[c].E
         || prev_body_X_2.E != CS.X_s[c].E) {
+#endif
 
       // Compute the 6D jacobians of the two contact points.
       CS.GSpi.setZero();
@@ -647,7 +665,9 @@ void CalcConstraintsJacobian (
       prev_body_id_2 = CS.body_s[c];
       prev_body_X_1 = CS.X_p[c];
       prev_body_X_2 = CS.X_s[c];
+#ifndef RBDL_USE_CASADI_MATH
     }
+#endif
 
     // Express the constraint axis in the base frame.
     axis = X_0p.apply(CS.constraintAxis[c]);
@@ -739,13 +759,17 @@ void CalcConstrainedSystemVariables (
   for (unsigned int i = 0; i < CS.mContactConstraintIndices.size(); i++) {
     const unsigned int c = CS.mContactConstraintIndices[i];
 
-    // only compute point accelerations when necessary
+    // only compute point accelerations when necessary (alwas compute with Casadi)
+#ifndef RBDL_USE_CASADI_MATH
     if (prev_body_id != CS.body[c] || prev_body_point != CS.point[c]) {
+#endif
       gamma_i = CalcPointAcceleration (model, Q, QDot, CS.QDDot_0, CS.body[c]
           , CS.point[c], false);
       prev_body_id = CS.body[c];
       prev_body_point = CS.point[c];
+#ifndef RBDL_USE_CASADI_MATH
     }
+#endif
 
     // we also substract ContactData[c].acceleration such that the contact
     // point will have the desired acceleration
@@ -819,6 +843,7 @@ void CalcConstrainedSystemVariables (
 
 }
 
+#ifndef RBDL_USE_CASADI_MATH
 RBDL_DLLAPI
 bool CalcAssemblyQ (
   Model &model,
@@ -925,7 +950,9 @@ bool CalcAssemblyQ (
   Q = QInit;
   return false;
 }
+#endif
 
+#ifndef RBDL_USE_CASADI_MATH
 RBDL_DLLAPI
 void CalcAssemblyQDot (
   Model &model,
@@ -979,6 +1006,7 @@ void CalcAssemblyQDot (
   // Copy the result to the output variable.
   QDot = x.block (0, 0, model.dof_count, 1);
 }
+#endif
 
 RBDL_DLLAPI
 void ForwardDynamicsConstraintsDirect (
@@ -1023,6 +1051,7 @@ void ForwardDynamicsConstraintsRangeSpaceSparse (
     , CS.gamma, QDDot, CS.force, CS.K, CS.a, CS.linear_solver);
 }
 
+#ifndef RBDL_USE_CASADI_MATH
 RBDL_DLLAPI
 void ForwardDynamicsConstraintsNullSpace (
   Model &model,
@@ -1052,6 +1081,7 @@ void ForwardDynamicsConstraintsNullSpace (
     , CS.force, CS.Y, CS.Z, CS.qddot_y, CS.qddot_z, CS.linear_solver);
 
 }
+#endif
 
 RBDL_DLLAPI
 void ComputeConstraintImpulsesDirect (
@@ -1104,6 +1134,7 @@ void ComputeConstraintImpulsesRangeSpaceSparse (
 
 }
 
+#ifndef RBDL_USE_CASADI_MATH
 RBDL_DLLAPI
 void ComputeConstraintImpulsesNullSpace (
   Model &model,
@@ -1131,6 +1162,7 @@ void ComputeConstraintImpulsesNullSpace (
     , QDotPlus, CS.impulse, CS.Y, CS.Z, CS.qddot_y, CS.qddot_z
     , CS.linear_solver);
 }
+#endif
 
 /** \brief Compute only the effects of external forces on the generalized accelerations
  *
@@ -1155,7 +1187,11 @@ void ForwardDynamicsApplyConstraintForces (
     model.IA[i] = model.I[i].toMatrix();;
     model.pA[i] = crossf(model.v[i],model.I[i] * model.v[i]);
 
+#ifdef RBDL_USE_CASADI_MATH
+    if (CS.f_ext_constraints[i].is_zero()) {
+#else
     if (CS.f_ext_constraints[i] != SpatialVector::Zero()) {
+#endif
       LOG << "External force (" << i << ") = " << model.X_base[i].toMatrixAdjoint() * CS.f_ext_constraints[i] << std::endl;
       model.pA[i] -= model.X_base[i].toMatrixAdjoint() * CS.f_ext_constraints[i];
     }
@@ -1595,7 +1631,7 @@ void ForwardDynamicsContactsKokkevis (
   LOG << "K = " << std::endl << CS.K << std::endl;
   LOG << "a = " << std::endl << CS.a << std::endl;
 
-#ifndef RBDL_USE_SIMPLE_MATH
+#ifdef RBDL_USE_EIGEN_MATH
   switch (CS.linear_solver) {
     case (LinearSolverPartialPivLU) :
       CS.force = CS.K.partialPivLu().solve(CS.a);
@@ -1612,8 +1648,12 @@ void ForwardDynamicsContactsKokkevis (
       break;
   }
 #else
+#ifdef RBDL_USE_CASADI_MATH
+    CS.force = CS.K.inverse() * CS.a;
+#else
   bool solve_successful = LinSolveGaussElimPivot (CS.K, CS.a, CS.force);
   assert (solve_successful);
+#endif
 #endif
 
   LOG << "f = " << CS.force.transpose() << std::endl;
@@ -1652,6 +1692,9 @@ void SolveLinearSystem (
   }
 
   // Solve the sistem A*x = b.
+#ifdef RBDL_USE_CASADI_MATH
+  x = A.inverse() * b;
+#else
   switch (ls) {
   case (LinearSolverPartialPivLU) :
     #ifdef RBDL_USE_SIMPLE_MATH
@@ -1673,6 +1716,7 @@ void SolveLinearSystem (
     abort();
     break;
   }
+#endif
 }
 
 unsigned int GetMovableBodyId (Model& model, unsigned int id) {

@@ -243,131 +243,131 @@ RBDL_DLLAPI Matrix3d CalcBodyWorldOrientation(
   return model.X_base[body_id].E;
 }
 
-//RBDL_DLLAPI void CalcPointJacobian (
-//    Model &model,
-//    const VectorNd &Q,
-//    unsigned int body_id,
-//    const Vector3d &point_position,
-//    MatrixNd &G,
-//    bool update_kinematics) {
-//  LOG << "-------- " << __func__ << " --------" << std::endl;
+RBDL_DLLAPI void CalcPointJacobian (
+    Model &model,
+    const VectorNd &Q,
+    unsigned int body_id,
+    const Vector3d &point_position,
+    MatrixNd &G,
+    bool update_kinematics) {
+  LOG << "-------- " << __func__ << " --------" << std::endl;
 
-//  // update the Kinematics if necessary
-//  if (update_kinematics) {
-//    UpdateKinematicsCustom (model, &Q, NULL, NULL);
-//  }
+  // update the Kinematics if necessary
+  if (update_kinematics) {
+    UpdateKinematicsCustom (model, &Q, NULL, NULL);
+  }
 
-//  SpatialTransform point_trans =
-//    SpatialTransform (Matrix3d::Identity(),
-//        CalcBodyToBaseCoordinates ( model,
-//          Q,
-//          body_id,
-//          point_position,
-//          false));
+  SpatialTransform point_trans =
+    SpatialTransform (Matrix3d::Identity(),
+        CalcBodyToBaseCoordinates ( model,
+          Q,
+          body_id,
+          point_position,
+          false));
 
-//  assert (G.rows() == 3 && G.cols() == model.qdot_size );
+  assert (G.rows() == 3 && G.cols() == model.qdot_size );
 
-//  unsigned int reference_body_id = body_id;
+  unsigned int reference_body_id = body_id;
 
-//  if (model.IsFixedBodyId(body_id)) {
-//    unsigned int fbody_id = body_id - model.fixed_body_discriminator;
-//    reference_body_id = model.mFixedBodies[fbody_id].mMovableParent;
-//  }
+  if (model.IsFixedBodyId(body_id)) {
+    unsigned int fbody_id = body_id - model.fixed_body_discriminator;
+    reference_body_id = model.mFixedBodies[fbody_id].mMovableParent;
+  }
 
-//  unsigned int j = reference_body_id;
+  unsigned int j = reference_body_id;
 
-//  // e[j] is set to 1 if joint j contributes to the jacobian that we are
-//  // computing. For all other joints the column will be zero.
-//  while (j != 0) {
-//    unsigned int q_index = model.mJoints[j].q_index;
+  // e[j] is set to 1 if joint j contributes to the jacobian that we are
+  // computing. For all other joints the column will be zero.
+  while (j != 0) {
+    unsigned int q_index = model.mJoints[j].q_index;
 
-//    if(model.mJoints[j].mJointType != JointTypeCustom){
-//      if (model.mJoints[j].mDoFCount == 1) {
-//        G.block(0,q_index, 3, 1) =
-//          point_trans.apply(
-//              model.X_base[j].inverse().apply(
-//                model.S[j])).block(3,0,3,1);
-//      } else if (model.mJoints[j].mDoFCount == 3) {
-//        G.block(0, q_index, 3, 3) =
-//          ((point_trans
-//            * model.X_base[j].inverse()).toMatrix()
-//           * model.multdof3_S[j]).block(3,0,3,3);
-//      }
-//    } else {
-//      unsigned int k = model.mJoints[j].custom_joint_index;
+    if(model.mJoints[j].mJointType != JointTypeCustom){
+      if (model.mJoints[j].mDoFCount == 1) {
+        G.block(0,q_index, 3, 1) =
+          point_trans.apply(
+              model.X_base[j].inverse().apply(
+                model.S[j])).block<3, 1>(3,0);
+      } else if (model.mJoints[j].mDoFCount == 3) {
+        G.block(0, q_index, 3, 3) =
+          ((point_trans
+            * model.X_base[j].inverse()).toMatrix()
+           * model.multdof3_S[j]).block<3, 3>(3,0);
+      }
+    } else {
+      unsigned int k = model.mJoints[j].custom_joint_index;
 
-//      G.block(0, q_index, 3, model.mCustomJoints[k]->mDoFCount) =
-//        ((point_trans
-//          * model.X_base[j].inverse()).toMatrix()
-//         * model.mCustomJoints[k]->S).block(
-//           3,0,3,model.mCustomJoints[k]->mDoFCount);
-//    }
+      G.block(0, q_index, 3, model.mCustomJoints[k]->mDoFCount) =
+        ((point_trans
+          * model.X_base[j].inverse()).toMatrix()
+         * model.mCustomJoints[k]->S).block(
+           3,0,3,model.mCustomJoints[k]->mDoFCount);
+    }
 
-//    j = model.lambda[j];
-//  }
-//}
+    j = model.lambda[j];
+  }
+}
 
-//RBDL_DLLAPI void CalcPointJacobian6D (
-//    Model &model,
-//    const VectorNd &Q,
-//    unsigned int body_id,
-//    const Vector3d &point_position,
-//    MatrixNd &G,
-//    bool update_kinematics) {
-//  LOG << "-------- " << __func__ << " --------" << std::endl;
+RBDL_DLLAPI void CalcPointJacobian6D (
+    Model &model,
+    const VectorNd &Q,
+    unsigned int body_id,
+    const Vector3d &point_position,
+    MatrixNd &G,
+    bool update_kinematics) {
+  LOG << "-------- " << __func__ << " --------" << std::endl;
 
-//  // update the Kinematics if necessary
-//  if (update_kinematics) {
-//    UpdateKinematicsCustom (model, &Q, NULL, NULL);
-//  }
+  // update the Kinematics if necessary
+  if (update_kinematics) {
+    UpdateKinematicsCustom (model, &Q, NULL, NULL);
+  }
 
-//  SpatialTransform point_trans =
-//    SpatialTransform (Matrix3d::Identity(),
-//        CalcBodyToBaseCoordinates (model,
-//          Q,
-//          body_id,
-//          point_position,
-//          false));
+  SpatialTransform point_trans =
+    SpatialTransform (Matrix3d::Identity(),
+        CalcBodyToBaseCoordinates (model,
+          Q,
+          body_id,
+          point_position,
+          false));
 
-//  assert (G.rows() == 6 && G.cols() == model.qdot_size );
+  assert (G.rows() == 6 && G.cols() == model.qdot_size );
 
-//  unsigned int reference_body_id = body_id;
+  unsigned int reference_body_id = body_id;
 
-//  if (model.IsFixedBodyId(body_id)) {
-//    unsigned int fbody_id = body_id - model.fixed_body_discriminator;
-//    reference_body_id = model.mFixedBodies[fbody_id].mMovableParent;
-//  }
+  if (model.IsFixedBodyId(body_id)) {
+    unsigned int fbody_id = body_id - model.fixed_body_discriminator;
+    reference_body_id = model.mFixedBodies[fbody_id].mMovableParent;
+  }
 
-//  unsigned int j = reference_body_id;
+  unsigned int j = reference_body_id;
 
-//  while (j != 0) {
-//    unsigned int q_index = model.mJoints[j].q_index;
+  while (j != 0) {
+    unsigned int q_index = model.mJoints[j].q_index;
 
-//    if(model.mJoints[j].mJointType != JointTypeCustom){
-//      if (model.mJoints[j].mDoFCount == 1) {
-//        G.block(0,q_index, 6, 1)
-//          = point_trans.apply(
-//              model.X_base[j].inverse().apply(
-//                model.S[j])).block(0,0,6,1);
-//      } else if (model.mJoints[j].mDoFCount == 3) {
-//        G.block(0, q_index, 6, 3)
-//          = ((point_trans
-//                * model.X_base[j].inverse()).toMatrix()
-//              * model.multdof3_S[j]).block(0,0,6,3);
-//      }
-//    } else {
-//      unsigned int k = model.mJoints[j].custom_joint_index;
+    if(model.mJoints[j].mJointType != JointTypeCustom){
+      if (model.mJoints[j].mDoFCount == 1) {
+        G.block(0,q_index, 6, 1)
+          = point_trans.apply(
+              model.X_base[j].inverse().apply(
+                model.S[j])).block<6, 1>(0,0);
+      } else if (model.mJoints[j].mDoFCount == 3) {
+        G.block(0, q_index, 6, 3)
+          = ((point_trans
+                * model.X_base[j].inverse()).toMatrix()
+              * model.multdof3_S[j]).block<6, 3>(0,0);
+      }
+    } else {
+      unsigned int k = model.mJoints[j].custom_joint_index;
 
-//      G.block(0, q_index, 6, model.mCustomJoints[k]->mDoFCount)
-//        = ((point_trans
-//              * model.X_base[j].inverse()).toMatrix()
-//            * model.mCustomJoints[k]->S).block(
-//              0,0,6,model.mCustomJoints[k]->mDoFCount);
-//    }
+      G.block(0, q_index, 6, model.mCustomJoints[k]->mDoFCount)
+        = ((point_trans
+              * model.X_base[j].inverse()).toMatrix()
+            * model.mCustomJoints[k]->S).block(
+              0,0,6,model.mCustomJoints[k]->mDoFCount);
+    }
 
-//    j = model.lambda[j];
-//  }
-//}
+    j = model.lambda[j];
+  }
+}
 
 RBDL_DLLAPI void CalcBodySpatialJacobian (
     Model &model,

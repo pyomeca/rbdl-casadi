@@ -118,61 +118,61 @@ RBDL_DLLAPI Math::Matrix3d CalcBodyWorldOrientation (
     const unsigned int body_id,
     bool update_kinematics = true);
 
-///** \brief Computes the point jacobian for a point on a body
-// *
-// * If a position of a point is computed by a function \f$g(q(t))\f$ for which its
-// * time derivative is \f$\frac{d}{dt} g(q(t)) = G(q)\dot{q}\f$ then this
-// * function computes the jacobian matrix \f$G(q)\f$.
-// *
-// * \param model   rigid body model
-// * \param Q       state vector of the internal joints
-// * \param body_id the id of the body
-// * \param point_position the position of the point in body-local data
-// * \param G       a matrix of dimensions 3 x \#qdot_size where the result will be stored in
-// * \param update_kinematics whether UpdateKinematics() should be called or not (default: true)
-// *
-// * The result will be returned via the G argument.
-// *
-// * \note This function only evaluates the entries of G that are non-zero. One
-// * Before calling this function one has to ensure that all other values
-// * have been set to zero, e.g. by calling G.setZero().
-// *
-// */
-//RBDL_DLLAPI void CalcPointJacobian (Model &model,
-//    const Math::VectorNd &Q,
-//    unsigned int body_id,
-//    const Math::Vector3d &point_position,
-//    Math::MatrixNd &G,
-//    bool update_kinematics = true
-//    );
+/** \brief Computes the point jacobian for a point on a body
+ *
+ * If a position of a point is computed by a function \f$g(q(t))\f$ for which its
+ * time derivative is \f$\frac{d}{dt} g(q(t)) = G(q)\dot{q}\f$ then this
+ * function computes the jacobian matrix \f$G(q)\f$.
+ *
+ * \param model   rigid body model
+ * \param Q       state vector of the internal joints
+ * \param body_id the id of the body
+ * \param point_position the position of the point in body-local data
+ * \param G       a matrix of dimensions 3 x \#qdot_size where the result will be stored in
+ * \param update_kinematics whether UpdateKinematics() should be called or not (default: true)
+ *
+ * The result will be returned via the G argument.
+ *
+ * \note This function only evaluates the entries of G that are non-zero. One
+ * Before calling this function one has to ensure that all other values
+ * have been set to zero, e.g. by calling G.setZero().
+ *
+ */
+RBDL_DLLAPI void CalcPointJacobian (Model &model,
+    const Math::VectorNd &Q,
+    unsigned int body_id,
+    const Math::Vector3d &point_position,
+    Math::MatrixNd &G,
+    bool update_kinematics = true
+    );
 
-///** \brief Computes a 6-D Jacobian for a point on a body
-// *
-// * Computes the 6-D Jacobian \f$G(q)\f$ that when multiplied with
-// * \f$\dot{q}\f$ gives a 6-D vector that has the angular velocity as the
-// * first three entries and the linear velocity as the last three entries.
-// *
-// * \param model   rigid body model
-// * \param Q       state vector of the internal joints
-// * \param body_id the id of the body
-// * \param point_position the position of the point in body-local data
-// * \param G       a matrix of dimensions 6 x \#qdot_size where the result will be stored in
-// * \param update_kinematics whether UpdateKinematics() should be called or not (default: true)
-// *
-// * The result will be returned via the G argument.
-// *
-// * \note This function only evaluates the entries of G that are non-zero. One
-// * Before calling this function one has to ensure that all other values
-// * have been set to zero, e.g. by calling G.setZero().
-// *
-// */
-//RBDL_DLLAPI void CalcPointJacobian6D (Model &model,
-//    const Math::VectorNd &Q,
-//    unsigned int body_id,
-//    const Math::Vector3d &point_position,
-//    Math::MatrixNd &G,
-//    bool update_kinematics = true
-//    );
+/** \brief Computes a 6-D Jacobian for a point on a body
+ *
+ * Computes the 6-D Jacobian \f$G(q)\f$ that when multiplied with
+ * \f$\dot{q}\f$ gives a 6-D vector that has the angular velocity as the
+ * first three entries and the linear velocity as the last three entries.
+ *
+ * \param model   rigid body model
+ * \param Q       state vector of the internal joints
+ * \param body_id the id of the body
+ * \param point_position the position of the point in body-local data
+ * \param G       a matrix of dimensions 6 x \#qdot_size where the result will be stored in
+ * \param update_kinematics whether UpdateKinematics() should be called or not (default: true)
+ *
+ * The result will be returned via the G argument.
+ *
+ * \note This function only evaluates the entries of G that are non-zero. One
+ * Before calling this function one has to ensure that all other values
+ * have been set to zero, e.g. by calling G.setZero().
+ *
+ */
+RBDL_DLLAPI void CalcPointJacobian6D (Model &model,
+    const Math::VectorNd &Q,
+    unsigned int body_id,
+    const Math::Vector3d &point_position,
+    Math::MatrixNd &G,
+    bool update_kinematics = true
+    );
 
 /** \brief Computes the spatial jacobian for a body
  *

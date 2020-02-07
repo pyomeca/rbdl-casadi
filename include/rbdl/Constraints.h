@@ -470,17 +470,19 @@ struct RBDL_DLLAPI ConstraintSet {
   Math::MatrixNd GSJ;
 
   /// Workspace for the QR decomposition of the null-space method
+#ifndef RBDL_USE_CASADI_MATH
 #ifdef RBDL_USE_SIMPLE_MATH
   SimpleMath::HouseholderQR<Math::MatrixNd> GT_qr;
 #else
-//  Eigen::HouseholderQR<Math::MatrixNd> GT_qr;
+  Eigen::HouseholderQR<Math::MatrixNd> GT_qr;
 #endif
-
   Math::MatrixNd GT_qr_Q;
   Math::MatrixNd Y;
   Math::MatrixNd Z;
   Math::VectorNd qddot_y;
   Math::VectorNd qddot_z;
+#endif
+
 
   // Variables used by the IABI methods
 
@@ -611,6 +613,7 @@ void CalcConstrainedSystemVariables (
   std::vector<Math::SpatialVector> *f_ext = NULL
 );
 
+#ifndef RBDL_USE_CASADI_MATH
 /** \brief Computes a feasible initial value of the generalized joint positions.
   * 
   * \param model the model
@@ -637,7 +640,9 @@ bool CalcAssemblyQ(
   double tolerance = 1e-12,
   unsigned int max_iter = 100
 );
+#endif
 
+#ifndef RBDL_USE_CASADI_MATH
 /** \brief Computes a feasible initial value of the generalized joint velocities.
   * 
   * \param model the model
@@ -658,6 +663,7 @@ void CalcAssemblyQDot(
   Math::VectorNd &QDot,
   const Math::VectorNd &weights
 );
+#endif
 
 /** \brief Computes forward dynamics with contact by constructing and solving 
  *  the full lagrangian equation
@@ -732,6 +738,7 @@ void ForwardDynamicsConstraintsRangeSpaceSparse (
   std::vector<Math::SpatialVector> *f_ext = NULL
 );
 
+#ifndef RBDL_USE_CASADI_MATH
 RBDL_DLLAPI
 void ForwardDynamicsConstraintsNullSpace (
   Model &model,
@@ -742,6 +749,7 @@ void ForwardDynamicsConstraintsNullSpace (
   Math::VectorNd &QDDot,
   std::vector<Math::SpatialVector> *f_ext = NULL
 );
+#endif
 
 /** \brief Computes forward dynamics that accounts for active contacts in 
  *  ConstraintSet.
@@ -886,6 +894,7 @@ void ComputeConstraintImpulsesRangeSpaceSparse (
   Math::VectorNd &QDotPlus
 );
 
+#ifndef RBDL_USE_CASADI_MATH
 /** \brief Resolves contact gain using SolveContactSystemNullSpace()
  */
 RBDL_DLLAPI
@@ -896,6 +905,7 @@ void ComputeConstraintImpulsesNullSpace (
   ConstraintSet &CS,
   Math::VectorNd &QDotPlus
 );
+#endif
 
 /** \brief Solves the full contact system directly, i.e. simultaneously for 
  *  contact forces and joint accelerations.
@@ -965,6 +975,7 @@ void SolveConstrainedSystemRangeSpaceSparse (
   Math::LinearSolver linear_solver
 );
 
+#ifndef RBDL_USE_CASADI_MATH
 /** \brief Solves the contact system by first solving for the joint 
  *  accelerations and then for the constraint forces.
  *
@@ -1001,6 +1012,7 @@ void SolveConstrainedSystemNullSpace (
   Math::VectorNd &qddot_z,
   Math::LinearSolver &linear_solver
 );
+#endif
 
 
 /** \brief Interface to define general-purpose constraints.
