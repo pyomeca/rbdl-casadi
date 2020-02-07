@@ -48,19 +48,6 @@ public:
         return 1;
     }
 
-    bool operator==(const MX_Xd_scalar& other) const {
-        return casadi::MX::is_equal(*this, other);
-    }
-    bool operator==(const double& val) const {
-        return casadi::MX::is_equal(*this, MX_Xd_scalar(val));
-    }
-    bool operator!=(const MX_Xd_scalar& other) const {
-        return !casadi::MX::is_equal(*this, other);
-    }
-    bool operator!=(const double& val) const {
-        return !casadi::MX::is_equal(*this, MX_Xd_scalar(val));
-    }
-
     MX_Xd_scalar operator[](unsigned int i) const{
         return (*this)(i);
     }
@@ -104,13 +91,6 @@ public:
         return out.casadi::MX::operator/=(other);
     }
 };
-
-inline bool operator==(const double& m1, const MX_Xd_scalar& m2){
-    return casadi::MX::is_equal(MX_Xd_scalar(m1), m2);
-}
-inline bool operator!=(const double& m1, const MX_Xd_scalar& m2){
-    return !casadi::MX::is_equal(MX_Xd_scalar(m1), m2);
-}
 
 inline MX_Xd_scalar operator*(
         double other,

@@ -106,9 +106,15 @@ struct RBDL_DLLAPI Body {
    */
   void Join (const Math::SpatialTransform &transform, const Body &other_body) {
     // nothing to do if we join a massles body to the current.
+#ifdef RBDL_USE_CASADI_MATH
+    if (other_body.mMass == 0. && other_body.mInertia.is_zero()) {
+      return;
+    }
+#else
     if (other_body.mMass == 0. && other_body.mInertia == Math::Matrix3d::Zero()) {
       return;
     }
+#endif
 
     double other_mass = other_body.mMass;
     double new_mass = mMass + other_mass;

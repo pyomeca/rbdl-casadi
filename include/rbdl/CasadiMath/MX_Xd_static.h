@@ -310,12 +310,6 @@ public:
         return casadi::MX::norm_2(*this);
     }
 
-    bool operator==(const MX_Xd_static<nrows, ncols>& other) const {
-        return casadi::MX::is_equal(*this, other);
-    }
-    bool operator!=(const MX_Xd_static<nrows, ncols>& other) const {
-        return !casadi::MX::is_equal(*this, other);
-    }
 
     void operator+=(
             const MX_Xd_static<nrows, ncols>& other) {
@@ -361,7 +355,6 @@ public:
     }
     MX_Xd_static<nrows, ncols> operator/(
             const MX_Xd_SubMatrix& scalar) const {
-//        assert(scalar.rows() == 1 && scalar.columns() == 1);
         MX_Xd_static<nrows, ncols> result (*this);
         for (unsigned int i = 0; i < nrows * ncols; i++)
             result[i] /= scalar;

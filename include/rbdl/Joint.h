@@ -382,7 +382,9 @@ struct RBDL_DLLAPI Joint {
 
     } else if (joint_type == JointTypePrismatic) {
       // make sure we have a unit axis
-      assert (joint_axis.squaredNorm() == Math::Scalar(1.));
+#ifndef RBDL_USE_CASADI_MATH
+      assert (joint_axis.squaredNorm() == 1.);
+#endif
 
       mJointAxes[0].set (
           0., 0., 0.,
@@ -406,15 +408,29 @@ struct RBDL_DLLAPI Joint {
     mDoFCount = 1;
     mJointAxes = new Math::SpatialVector[mDoFCount];
     mJointAxes[0] = Math::SpatialVector (axis_0);
+#ifdef RBDL_USE_CASADI_MATH
+    if (!axis_0[0].is_zero()) {
+#else
     if (axis_0 == Math::SpatialVector(1., 0., 0., 0., 0., 0.)) {
+#endif
       mJointType = JointTypeRevoluteX;
+#ifdef RBDL_USE_CASADI_MATH
+    } else if (!axis_0[1].is_zero()) {
+#else
     } else if (axis_0 == Math::SpatialVector(0., 1., 0., 0., 0., 0.)) {
+#endif
       mJointType = JointTypeRevoluteY;
+#ifdef RBDL_USE_CASADI_MATH
+    } else if (!axis_0[2].is_zero()) {
+#else
     } else if (axis_0 == Math::SpatialVector(0., 0., 1., 0., 0., 0.)) {
+#endif
       mJointType = JointTypeRevoluteZ;
-    } else if (axis_0[0] == Math::Scalar(0.) &&
-         axis_0[1] == Math::Scalar(0.) &&
-         axis_0[2] == Math::Scalar(0.)) {
+#ifdef RBDL_USE_CASADI_MATH
+    } else if (axis_0[0].is_zero() && axis_0[1].is_zero() && axis_0[2].is_zero()) {
+#else
+    } else if (axis_0[0] == 0. && axis_0[1] == 0. && axis_0[2] == 0.) {
+#endif
       mJointType = JointTypePrismatic;
     } else {
       mJointType = JointTypeHelical;

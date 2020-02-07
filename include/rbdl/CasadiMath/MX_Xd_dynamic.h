@@ -122,12 +122,6 @@ public:
     }
 
 
-    bool operator==(const MX_Xd_dynamic& other) const {
-        return casadi::MX::is_equal(*this, other);
-    }
-    bool operator!=(const MX_Xd_dynamic& other) const {
-        return !casadi::MX::is_equal(*this, other);
-    }
 
     void operator+=(
             const MX_Xd_dynamic& other) {
@@ -173,7 +167,6 @@ public:
     }
     MX_Xd_dynamic operator/(
             const MX_Xd_SubMatrix& scalar) const {
-//        assert(scalar.rows() == 1 && scalar.columns() == 1);
         MX_Xd_dynamic result (*this);
         for (unsigned int i = 0; i < rows() * cols(); i++)
             result[i] /= scalar;
@@ -233,7 +226,12 @@ MX_Xd_dynamic operator*(
 }
 
 inline MX_Xd_dynamic operator/(double scalar, MX_Xd_SubMatrix mat){
-    return mat.casadi::SubMatrix<casadi::MX, casadi::Slice, casadi::Slice>::operator/=(scalar);
+    for (unsigned int i=0; i<mat.rows(); ++i){
+        for (unsigned int j=0; j<mat.columns(); ++j){
+            mat(i, j) = scalar / mat(i, j);
+        }
+    }
+    return mat;
 }
 
 template <unsigned int nrows, unsigned int ncols>

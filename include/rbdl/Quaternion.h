@@ -72,12 +72,20 @@ class Quaternion : public Vector4d {
       Scalar s = sqrt (squaredNorm() * quat.squaredNorm());
 
       // division by 0.f is unhealthy!
+#ifndef RBDL_USE_CASADI_MATH
       assert (s != 0.);
+#endif
 
       Scalar angle = acos (dot(quat) / s);
+#ifdef RBDL_USE_CASADI_MATH
+      if (angle.is_zero() || isnan(angle)) {
+        return *this;
+      }
+#else
       if (angle == 0. || isnan(angle)) {
         return *this;
       }
+#endif
 
       Scalar d = 1. / sin (angle);
       Scalar p0 = sin ((1. - alpha) * angle);

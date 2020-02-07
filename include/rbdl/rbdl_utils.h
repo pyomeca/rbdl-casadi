@@ -18,10 +18,14 @@ struct Model;
 
 /** \brief Namespace that contains optional helper functions */
 namespace Utils {
+#ifndef RBDL_USE_CASADI_MATH
 /** \brief Creates a human readable overview of the model. */
 RBDL_DLLAPI std::string GetModelHierarchy (const Model &model);
+#endif
+#ifndef RBDL_USE_CASADI_MATH
 /** \brief Creates a human readable overview of the Degrees of Freedom. */
 RBDL_DLLAPI std::string GetModelDOFOverview (const Model &model);
+#endif
 /** \brief Creates a human readable overview of the locations of all bodies that have names. */
 RBDL_DLLAPI std::string GetNamedBodyOriginsOverview (Model &model);
 

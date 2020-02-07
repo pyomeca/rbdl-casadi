@@ -21,6 +21,7 @@ namespace Utils {
 using namespace std;
 using namespace Math;
 
+#ifndef RBDL_USE_CASADI_MATH
 string get_dof_name (const SpatialVector &joint_dof) {
   if (joint_dof == SpatialVector (1., 0., 0., 0., 0., 0.)) 
     return "RX";
@@ -39,6 +40,7 @@ string get_dof_name (const SpatialVector &joint_dof) {
   dof_stream << "custom (" << joint_dof.transpose() << ")";
   return dof_stream.str();
 }
+#endif
 
 string get_body_name (const RigidBodyDynamics::Model &model, unsigned int body_id) {
   if (model.mBodies[body_id].mIsVirtual) {
@@ -52,6 +54,7 @@ string get_body_name (const RigidBodyDynamics::Model &model, unsigned int body_i
   return model.GetBodyName(body_id);
 }
 
+#ifndef RBDL_USE_CASADI_MATH
 RBDL_DLLAPI std::string GetModelDOFOverview (const Model &model) {
   stringstream result ("");
 
@@ -70,7 +73,9 @@ RBDL_DLLAPI std::string GetModelDOFOverview (const Model &model) {
 
   return result.str();
 }
+#endif
 
+#ifndef RBDL_USE_CASADI_MATH
 std::string print_hierarchy (const RigidBodyDynamics::Model &model, unsigned int body_index = 0, int indent = 0) {
   stringstream result ("");
 
@@ -121,7 +126,9 @@ std::string print_hierarchy (const RigidBodyDynamics::Model &model, unsigned int
 
   return result.str();
 }
+#endif
 
+#ifndef RBDL_USE_CASADI_MATH
 RBDL_DLLAPI std::string GetModelHierarchy (const Model &model) {
   stringstream result ("");
 
@@ -129,6 +136,7 @@ RBDL_DLLAPI std::string GetModelHierarchy (const Model &model) {
 
   return result.str();
 }
+#endif
 
 RBDL_DLLAPI std::string GetNamedBodyOriginsOverview (Model &model) {
   stringstream result ("");

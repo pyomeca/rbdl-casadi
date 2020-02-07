@@ -217,9 +217,18 @@ unsigned int AddBodyMultiDofJoint (
           joint.mJointAxes[j][4],
           joint.mJointAxes[j][5]);
 
+#ifdef RBDL_USE_CASADI_MATH
+      if (rotation.is_zero()) {
+#else
       if (rotation == Vector3d (0., 0., 0.)) {
+#endif
         single_dof_joint = Joint (JointTypePrismatic, translation);
-      } else if (translation == Vector3d (0., 0., 0.)) {
+      }
+#ifdef RBDL_USE_CASADI_MATH
+      else if (translation.is_zero()) {
+#else
+      else if (translation == Vector3d (0., 0., 0.)) {
+#endif
         single_dof_joint = Joint (JointTypeRevolute, rotation);
       }
     }
