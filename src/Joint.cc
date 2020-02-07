@@ -41,9 +41,9 @@ RBDL_DLLAPI void jcalc (
     jcalc_X_lambda_S(model, joint_id, q);
     Scalar Jqd = qdot[model.mJoints[joint_id].q_index];
     model.v_J[joint_id] = model.S[joint_id] * Jqd;
-    
-    Vector3d St = model.S[joint_id].block(0,0,3,1);
-    Vector3d c = model.X_J[joint_id].E * model.mJoints[joint_id].mJointAxes[0].block(3,0,3,1);
+
+    Vector3d St = model.S[joint_id].block<3, 1>(0,0);
+    Vector3d c = model.X_J[joint_id].E * model.mJoints[joint_id].mJointAxes[0].block<3, 1>(3,0);
     c = St.cross(c);
     c *= -Jqd * Jqd;    
     model.c_J[joint_id] = SpatialVector(0,0,0,c[0],c[1],c[2]);
@@ -292,7 +292,7 @@ RBDL_DLLAPI void jcalc_X_lambda_S (
     SpatialTransform XJ = jcalc_XJ (model, joint_id, q);
     model.X_lambda[joint_id] = XJ * model.X_T[joint_id];
     // Set the joint axis
-    Vector3d trans = XJ.E * model.mJoints[joint_id].mJointAxes[0].block(3,0,3,1);
+    Vector3d trans = XJ.E * model.mJoints[joint_id].mJointAxes[0].block<3, 1>(3,0);
     
     model.S[joint_id] = SpatialVector(model.mJoints[joint_id].mJointAxes[0][0],
            model.mJoints[joint_id].mJointAxes[0][1],

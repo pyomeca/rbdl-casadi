@@ -38,10 +38,11 @@ using namespace std;
 
 #else
 #ifdef RBDL_USE_CASADI_MATH
+#include "rbdl/CasadiMath/MX_Xd_scalar.h"
 #include "rbdl/CasadiMath/MX_Xd_static.h"
 #include "rbdl/CasadiMath/MX_Xd_dynamic.h"
 
-typedef MX_Xd_static<1,1> Vector1_t;
+typedef MX_Xd_scalar Vector1_t;
 typedef MX_Xd_static<2,1> Vector2_t;
 typedef MX_Xd_static<3,1> Vector3_t;
 typedef MX_Xd_static<3,3> Matrix3_t;
