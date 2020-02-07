@@ -183,7 +183,6 @@ public:
     void operator=(double mat){
         this->casadi::SubMatrix<casadi::MX, casadi::Slice, casadi::Slice>::operator =(mat);
     }
-
 };
 
 /* MX_XD_SCALAR_H */

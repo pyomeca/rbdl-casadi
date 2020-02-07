@@ -54,8 +54,8 @@ RBDL_DLLAPI void UpdateKinematics(
       if (model.mJoints[i].mDoFCount == 1) {
         model.a[i] = model.a[i] + model.S[i] * QDDot[q_index];
       } else if (model.mJoints[i].mDoFCount == 3) {
-        Vector3d omegadot_temp (QDDot[q_index], 
-            QDDot[q_index + 1], 
+        Vector3d omegadot_temp (QDDot[q_index],
+            QDDot[q_index + 1],
             QDDot[q_index + 2]);
         model.a[i] = model.a[i] + model.multdof3_S[i] * omegadot_temp;
       }
@@ -65,7 +65,7 @@ RBDL_DLLAPI void UpdateKinematics(
       unsigned int joint_dof_count = custom_joint->mDoFCount;
 
       model.a[i] = model.a[i]
-        + ( model.mCustomJoints[custom_index]->S 
+        + ( model.mCustomJoints[custom_index]->S
             * QDDot.block(q_index, 0, joint_dof_count, 1));
     }
   }
@@ -136,10 +136,10 @@ RBDL_DLLAPI void UpdateKinematicsCustom(
         if (model.mJoints[i].mDoFCount == 1) {
           model.a[i] = model.a[i] + model.S[i] * (*QDDot)[q_index];
         } else if (model.mJoints[i].mDoFCount == 3) {
-          Vector3d omegadot_temp ((*QDDot)[q_index], 
-              (*QDDot)[q_index + 1], 
+          Vector3d omegadot_temp ((*QDDot)[q_index],
+              (*QDDot)[q_index + 1],
               (*QDDot)[q_index + 2]);
-          model.a[i] = model.a[i] 
+          model.a[i] = model.a[i]
             + model.multdof3_S[i] * omegadot_temp;
         }
       } else {
@@ -152,7 +152,7 @@ RBDL_DLLAPI void UpdateKinematicsCustom(
           + (  (model.mCustomJoints[k]->S)
               *(QDDot->block(q_index, 0, joint_dof_count, 1)));
       }
-    } 
+    }
   }
 }
 
@@ -171,15 +171,15 @@ RBDL_DLLAPI Vector3d CalcBodyToBaseCoordinates (
     unsigned int fbody_id = body_id - model.fixed_body_discriminator;
     unsigned int parent_id = model.mFixedBodies[fbody_id].mMovableParent;
 
-    Matrix3d fixed_rotation = 
+    Matrix3d fixed_rotation =
       model.mFixedBodies[fbody_id].mParentTransform.E.transpose();
     Vector3d fixed_position = model.mFixedBodies[fbody_id].mParentTransform.r;
 
     Matrix3d parent_body_rotation = model.X_base[parent_id].E.transpose();
     Vector3d parent_body_position = model.X_base[parent_id].r;
 
-    return (parent_body_position 
-        + (parent_body_rotation 
+    return (parent_body_position
+        + (parent_body_rotation
           * (fixed_position + fixed_rotation * (point_body_coordinates))) );
   }
 
@@ -209,9 +209,9 @@ RBDL_DLLAPI Vector3d CalcBaseToBodyCoordinates (
     Matrix3d parent_body_rotation = model.X_base[parent_id].E;
     Vector3d parent_body_position = model.X_base[parent_id].r;
 
-    return (fixed_rotation 
-        * ( - fixed_position 
-          - parent_body_rotation 
+    return (fixed_rotation
+        * ( - fixed_position
+          - parent_body_rotation
           * (parent_body_position - point_base_coordinates)));
   }
 
@@ -233,8 +233,8 @@ RBDL_DLLAPI Matrix3d CalcBodyWorldOrientation(
 
   if (body_id >= model.fixed_body_discriminator) {
     unsigned int fbody_id = body_id - model.fixed_body_discriminator;
-    model.mFixedBodies[fbody_id].mBaseTransform = 
-      model.mFixedBodies[fbody_id].mParentTransform 
+    model.mFixedBodies[fbody_id].mBaseTransform =
+      model.mFixedBodies[fbody_id].mParentTransform
       * model.X_base[model.mFixedBodies[fbody_id].mMovableParent];
 
     return model.mFixedBodies[fbody_id].mBaseTransform.E;
@@ -459,15 +459,15 @@ RBDL_DLLAPI Vector3d CalcPointVelocity (
   if (model.IsFixedBodyId(body_id)) {
     unsigned int fbody_id = body_id - model.fixed_body_discriminator;
     reference_body_id = model.mFixedBodies[fbody_id].mMovableParent;
-    Vector3d base_coords = 
+    Vector3d base_coords =
       CalcBodyToBaseCoordinates(model, Q, body_id, point_position, false);
     reference_point =
       CalcBaseToBodyCoordinates(model, Q, reference_body_id, base_coords,false);
   }
 
-  SpatialVector point_spatial_velocity = 
+  SpatialVector point_spatial_velocity =
     SpatialTransform (
-        CalcBodyWorldOrientation (model, Q, reference_body_id, false).transpose(), 
+        CalcBodyWorldOrientation (model, Q, reference_body_id, false).transpose(),
         reference_point).apply(model.v[reference_body_id]);
 
   return Vector3d (
@@ -503,14 +503,14 @@ RBDL_DLLAPI Math::SpatialVector CalcPointVelocity6D(
   if (model.IsFixedBodyId(body_id)) {
     unsigned int fbody_id = body_id - model.fixed_body_discriminator;
     reference_body_id = model.mFixedBodies[fbody_id].mMovableParent;
-    Vector3d base_coords = 
+    Vector3d base_coords =
       CalcBodyToBaseCoordinates(model, Q, body_id, point_position, false);
-    reference_point = 
+    reference_point =
       CalcBaseToBodyCoordinates(model, Q, reference_body_id, base_coords,false);
   }
 
   return SpatialTransform (
-      CalcBodyWorldOrientation (model, Q, reference_body_id, false).transpose(), 
+      CalcBodyWorldOrientation (model, Q, reference_body_id, false).transpose(),
       reference_point).apply(model.v[reference_body_id]);
 }
 
@@ -539,9 +539,9 @@ RBDL_DLLAPI Vector3d CalcPointAcceleration (
   if (model.IsFixedBodyId(body_id)) {
     unsigned int fbody_id = body_id - model.fixed_body_discriminator;
     reference_body_id = model.mFixedBodies[fbody_id].mMovableParent;
-    Vector3d base_coords = 
+    Vector3d base_coords =
       CalcBodyToBaseCoordinates (model, Q, body_id, point_position, false);
-    reference_point = 
+    reference_point =
       CalcBaseToBodyCoordinates (model, Q, reference_body_id,base_coords,false);
   }
 
@@ -586,9 +586,9 @@ RBDL_DLLAPI SpatialVector CalcPointAcceleration6D(
   if (model.IsFixedBodyId(body_id)) {
     unsigned int fbody_id = body_id - model.fixed_body_discriminator;
     reference_body_id = model.mFixedBodies[fbody_id].mMovableParent;
-    Vector3d base_coords = 
+    Vector3d base_coords =
       CalcBodyToBaseCoordinates (model, Q, body_id, point_position, false);
-    reference_point = 
+    reference_point =
       CalcBaseToBodyCoordinates (model, Q, reference_body_id,base_coords,false);
   }
 
@@ -599,7 +599,7 @@ RBDL_DLLAPI SpatialVector CalcPointAcceleration6D(
   SpatialVector p_v_i = p_X_i.apply(model.v[reference_body_id]);
   Vector3d a_dash = Vector3d (p_v_i[0], p_v_i[1], p_v_i[2]
       ).cross(Vector3d (p_v_i[3], p_v_i[4], p_v_i[5]));
-  return (p_X_i.apply(model.a[reference_body_id]) 
+  return (p_X_i.apply(model.a[reference_body_id])
       + SpatialVector (0, 0, 0, a_dash[0], a_dash[1], a_dash[2]));
 }
 
