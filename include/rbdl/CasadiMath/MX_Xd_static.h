@@ -19,25 +19,14 @@ template <unsigned int nrows, unsigned int ncols>
 class MX_Xd_static : public casadi::MX{
 public:
     MX_Xd_static() : casadi::MX(nrows, ncols){
-        m_currentSlice = new MX_Xd_SubMatrix(
-                    *this,
-                    casadi::Slice(static_cast<casadi_int>(0), static_cast<casadi_int>(nrows)),
-                    casadi::Slice(static_cast<casadi_int>(0), static_cast<casadi_int>(ncols)));
     }
 
-    MX_Xd_static(const double val) : casadi::MX(1, 1){
+    MX_Xd_static(const double val) : casadi::MX(1, 1)
+    {
         (*this)(0, 0) = val;
-        m_currentSlice = new MX_Xd_SubMatrix(
-                    *this,
-                    casadi::Slice(static_cast<casadi_int>(0), static_cast<casadi_int>(1)),
-                    casadi::Slice(static_cast<casadi_int>(0), static_cast<casadi_int>(1)));
     }
 
     MX_Xd_static(const casadi::MX& m) : casadi::MX(m){
-        m_currentSlice = new MX_Xd_SubMatrix(
-                    *this,
-                    casadi::Slice(static_cast<casadi_int>(0), static_cast<casadi_int>(m.rows())),
-                    casadi::Slice(static_cast<casadi_int>(0), static_cast<casadi_int>(m.columns())));
     }
 
     MX_Xd_static(
@@ -47,10 +36,6 @@ public:
     {
         (*this)(0) = v0(0);
         (*this)(1) = v1(0);
-        m_currentSlice = new MX_Xd_SubMatrix(
-                    *this,
-                    casadi::Slice(static_cast<casadi_int>(0), static_cast<casadi_int>(2)),
-                    casadi::Slice(static_cast<casadi_int>(0), static_cast<casadi_int>(1)));
     }
     MX_Xd_static(
             const MX_Xd_scalar& v0,
@@ -62,10 +47,6 @@ public:
         (*this)(1) = v1(0);
         (*this)(2) = v2(0);
 
-        m_currentSlice = new MX_Xd_SubMatrix(
-                    *this,
-                    casadi::Slice(static_cast<casadi_int>(0), static_cast<casadi_int>(3)),
-                    casadi::Slice(static_cast<casadi_int>(0), static_cast<casadi_int>(1)));
     }
     MX_Xd_static(const MX_Xd_scalar& v0,
                  const MX_Xd_scalar& v1,
@@ -77,10 +58,6 @@ public:
         (*this)(1) = v1(0);
         (*this)(2) = v2(0);
         (*this)(3) = v3(0);
-        m_currentSlice = new MX_Xd_SubMatrix(
-                    *this,
-                    casadi::Slice(static_cast<casadi_int>(0), static_cast<casadi_int>(4)),
-                    casadi::Slice(static_cast<casadi_int>(0), static_cast<casadi_int>(1)));
     }
     MX_Xd_static(const MX_Xd_scalar& v0,
                  const MX_Xd_scalar& v1,
@@ -96,12 +73,8 @@ public:
         (*this)(3) = v3(0);
         (*this)(4) = v4(0);
         (*this)(5) = v5(0);
-
-        m_currentSlice = new MX_Xd_SubMatrix(
-                    *this,
-                    casadi::Slice(static_cast<casadi_int>(0), static_cast<casadi_int>(6)),
-                    casadi::Slice(static_cast<casadi_int>(0), static_cast<casadi_int>(1)));
     }
+
     MX_Xd_static(const MX_Xd_scalar& v0,
                  const MX_Xd_scalar& v1,
                  const MX_Xd_scalar& v2,
@@ -120,10 +93,7 @@ public:
         (*this)(5) = v5(0);
         (*this)(6) = v6(0);
         (*this)(7) = v7(0);
-        m_currentSlice = new MX_Xd_SubMatrix(
-                    *this,
-                    casadi::Slice(static_cast<casadi_int>(0), static_cast<casadi_int>(8)),
-                    casadi::Slice(static_cast<casadi_int>(0), static_cast<casadi_int>(1)));
+
     }
     MX_Xd_static(const MX_Xd_scalar& v00, const MX_Xd_scalar& v01, const MX_Xd_scalar& v02,
                  const MX_Xd_scalar& v10, const MX_Xd_scalar& v11, const MX_Xd_scalar& v12,
@@ -139,11 +109,8 @@ public:
         (*this)(2,0) = v20(0, 0);
         (*this)(2,1) = v21(0, 0);
         (*this)(2,2) = v22(0, 0);
-        m_currentSlice = new MX_Xd_SubMatrix(
-                    *this,
-                    casadi::Slice(static_cast<casadi_int>(0), static_cast<casadi_int>(3)),
-                    casadi::Slice(static_cast<casadi_int>(0), static_cast<casadi_int>(3)));
     }
+
     MX_Xd_static(const MX_Xd_scalar& v00, const MX_Xd_scalar& v01, const MX_Xd_scalar& v02, const MX_Xd_scalar& v03, const MX_Xd_scalar& v04, const MX_Xd_scalar& v05,
                  const MX_Xd_scalar& v10, const MX_Xd_scalar& v11, const MX_Xd_scalar& v12, const MX_Xd_scalar& v13, const MX_Xd_scalar& v14, const MX_Xd_scalar& v15,
                  const MX_Xd_scalar& v20, const MX_Xd_scalar& v21, const MX_Xd_scalar& v22, const MX_Xd_scalar& v23, const MX_Xd_scalar& v24, const MX_Xd_scalar& v25,
@@ -193,11 +160,6 @@ public:
         (*this)(5,3) = v53(0, 0);
         (*this)(5,4) = v54(0, 0);
         (*this)(5,5) = v55(0, 0);
-
-        m_currentSlice = new MX_Xd_SubMatrix(
-                    *this,
-                    casadi::Slice(static_cast<casadi_int>(0), static_cast<casadi_int>(6)),
-                    casadi::Slice(static_cast<casadi_int>(0), static_cast<casadi_int>(6)));
     }
 
     ///
@@ -308,10 +270,9 @@ public:
         return (*this)(i);
     }
     MX_Xd_SubMatrix operator()(unsigned int i, unsigned int j=0) {
-        *m_currentSlice = this->casadi::MX::operator()(
+        return this->casadi::MX::operator()(
                     casadi::Slice(static_cast<casadi_int>(i), static_cast<casadi_int>(i+1)),
                     casadi::Slice(static_cast<casadi_int>(j), static_cast<casadi_int>(j+1)));
-        return *m_currentSlice;
     }
     MX_Xd_scalar operator[](unsigned int i) const {
         return (*this)(i);
@@ -406,9 +367,6 @@ public:
             result[i] /= scalar;
         return result;
     }
-
-protected:
-    MX_Xd_SubMatrix *m_currentSlice;
 };
 
 #include "MX_Xd_dynamic.h"

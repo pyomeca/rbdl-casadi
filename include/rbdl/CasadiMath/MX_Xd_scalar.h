@@ -133,8 +133,8 @@ inline MX_Xd_scalar operator-(
 inline MX_Xd_scalar operator-(
         double other,
         const MX_Xd_scalar& me) {
-    MX_Xd_scalar out(me);
-    return out.casadi::MX::operator-=(other);
+    MX_Xd_scalar out(-me);
+    return out.casadi::MX::operator+=(other);
 }
 
 inline MX_Xd_scalar fabs(const MX_Xd_scalar& m){
