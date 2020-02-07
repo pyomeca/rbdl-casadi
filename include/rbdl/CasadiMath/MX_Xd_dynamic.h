@@ -81,7 +81,16 @@ public:
     }
 
     template <unsigned int row_count, unsigned int col_count>
-    MX_Xd_dynamic block (
+    MX_Xd_SubMatrix block(
+            unsigned int row_start,
+            unsigned int col_start)
+    {
+        return this->casadi::MX::operator()(
+            casadi::Slice(static_cast<casadi_int>(row_start), static_cast<casadi_int>(row_start+row_count)),
+            casadi::Slice(static_cast<casadi_int>(col_start), static_cast<casadi_int>(col_start+col_count)));
+    }
+    template <unsigned int row_count, unsigned int col_count>
+    MX_Xd_dynamic block(
             unsigned int row_start,
             unsigned int col_start) const
     {
@@ -90,7 +99,17 @@ public:
             casadi::Slice(static_cast<casadi_int>(col_start), static_cast<casadi_int>(col_start+col_count)));
     }
 
-    MX_Xd_dynamic block (
+    MX_Xd_SubMatrix block(
+            unsigned int row_start,
+            unsigned int col_start,
+            unsigned int row_count,
+            unsigned int col_count)
+    {
+        return this->casadi::MX::operator()(
+            casadi::Slice(static_cast<casadi_int>(row_start), static_cast<casadi_int>(row_start+row_count)),
+            casadi::Slice(static_cast<casadi_int>(col_start), static_cast<casadi_int>(col_start+col_count)));
+    }
+    MX_Xd_dynamic block(
             unsigned int row_start,
             unsigned int col_start,
             unsigned int row_count,

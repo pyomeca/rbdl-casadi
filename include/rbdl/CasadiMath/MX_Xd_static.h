@@ -256,9 +256,9 @@ public:
     }
 
     template <unsigned int row_count, unsigned int col_count>
-    MX_Xd_static<row_count, col_count> block (
+    MX_Xd_SubMatrix block (
             unsigned int row_start,
-            unsigned int col_start) const
+            unsigned int col_start)
     {
         return this->casadi::MX::operator()(
             casadi::Slice(static_cast<casadi_int>(row_start), static_cast<casadi_int>(row_start+row_count)),
