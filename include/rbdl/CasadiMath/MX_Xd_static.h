@@ -44,7 +44,7 @@ public:
             const MX_Xd_scalar& v2) :
         casadi::MX(3, 1)
     {
-        (*this)(0) = v0(0);
+        this->casadi::MX::operator ()(0) = v0(0);
         (*this)(1) = v1(0);
         (*this)(2) = v2(0);
     }
@@ -263,11 +263,13 @@ public:
             casadi::Slice(static_cast<casadi_int>(col_start), static_cast<casadi_int>(col_start+col_count)));
     }
 
+
     MX_Xd_scalar operator[](unsigned int i) const{
         return (*this)(i);
     }
-    MX_Xd_scalar operator()(unsigned int i, unsigned int j=0) const{
-        return (*this)(i, j);
+    MX_Xd_scalar& operator()(unsigned int i, unsigned int j=0) {
+        m_currentSlice = this->casadi::MX::operator()(i, j);
+        return m_currentSlice;
     }
 
 
@@ -348,6 +350,9 @@ public:
             result[i] /= scalar;
         return result;
     }
+
+protected:
+    casadi::SubMatrix<casadi::MX, casadi::Slice, casadi::Slice> m_currentSlice;
 };
 
 #include "MX_Xd_dynamic.h"
