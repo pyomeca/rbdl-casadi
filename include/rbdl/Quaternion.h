@@ -69,7 +69,7 @@ class Quaternion : public Vector4d {
 
     Quaternion slerp (double alpha, const Quaternion &quat) const {
       // check whether one of the two has 0 length
-      Scalar s = sqrt (squaredNorm() * quat.squaredNorm());
+      Scalar s = std::sqrt (squaredNorm() * quat.squaredNorm());
 
       // division by 0.f is unhealthy!
 #ifndef RBDL_USE_CASADI_MATH
@@ -78,18 +78,18 @@ class Quaternion : public Vector4d {
 
       Scalar angle = acos (dot(quat) / s);
 #ifdef RBDL_USE_CASADI_MATH
-      if (angle.is_zero() || isnan(angle)) {
+      if (angle.is_zero() || std::isnan(angle)) {
         return *this;
       }
 #else
-      if (angle == 0. || isnan(angle)) {
+      if (angle == 0. || std::isnan(angle)) {
         return *this;
       }
 #endif
 
-      Scalar d = 1. / sin (angle);
-      Scalar p0 = sin ((1. - alpha) * angle);
-      Scalar p1 = sin (alpha * angle);
+      Scalar d = 1. / std::sin (angle);
+      Scalar p0 = std::sin ((1. - alpha) * angle);
+      Scalar p1 = std::sin (alpha * angle);
 
 #ifdef RBDL_USE_CASADI_MATH
       return Quaternion (casadi::MX::if_else(casadi::MX::lt(dot (quat), 0.),
@@ -106,17 +106,17 @@ class Quaternion : public Vector4d {
 
     static Quaternion fromAxisAngle (const Vector3d &axis, Scalar angle_rad) {
       Scalar d = axis.norm();
-      Scalar s2 = sin (angle_rad * 0.5) / d;
+      Scalar s2 = std::sin (angle_rad * 0.5) / d;
       return Quaternion (
           axis[0] * s2,
           axis[1] * s2,
           axis[2] * s2,
-          cos(angle_rad * 0.5)
+          std::cos(angle_rad * 0.5)
           );
     }
 
     static Quaternion fromMatrix (const Matrix3d &mat) {
-      Scalar w = sqrt (1. + mat(0,0) + mat(1,1) + mat(2,2)) * 0.5;
+      Scalar w = std::sqrt (1. + mat(0,0) + mat(1,1) + mat(2,2)) * 0.5;
       return Quaternion (
           (mat(1,2) - mat(2,1)) / (w * 4.),
           (mat(2,0) - mat(0,2)) / (w * 4.),

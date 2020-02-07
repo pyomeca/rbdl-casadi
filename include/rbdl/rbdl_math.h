@@ -57,8 +57,23 @@ typedef MX_Xd_static<4,3> Matrix43_t;
 typedef MX_Xd_dynamic MatrixN_t;
 typedef MX_Xd_dynamic VectorN_t;
 
+namespace std {
+inline MX_Xd_scalar sqrt(const casadi::MX& x){
+    return casadi::MX::sqrt(x);
+}
+inline MX_Xd_scalar sin(const casadi::MX& x){
+    return casadi::MX::sin(x);
+}
+inline MX_Xd_scalar cos(const casadi::MX& x){
+    return casadi::MX::cos(x);
+}
+inline MX_Xd_scalar isnan(const casadi::MX& x){
+    return casadi::MX::isnan(x);
+}
+
+}
+
 #else
-#define USE_EIGEN_MATH
 #include <Eigen/Dense>
 #include <Eigen/StdVector>
 #include <Eigen/QR>
@@ -72,7 +87,8 @@ typedef Eigen::Matrix<double, 4, 3> Matrix43_t;
 typedef Eigen::VectorXd VectorN_t;
 typedef Eigen::MatrixXd MatrixN_t;
 
-using namespace std;
+
+
 #endif
 #endif
 
@@ -91,6 +107,7 @@ typedef Matrix63_t Matrix63;
 typedef Matrix43_t Matrix43;
 typedef VectorN_t VectorNd;
 typedef MatrixN_t MatrixNd;
+
 } /* Math */
 
 } /* RigidBodyDynamics */
@@ -100,7 +117,7 @@ typedef MatrixN_t MatrixNd;
 
 // If we use Eigen3 we have to create specializations of the STL
 // std::vector such that the alignment is done properly.
-#ifdef USE_EIGEN_MATH
+#ifdef RBDL_USE_EIGEN3_MATH
   EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(RigidBodyDynamics::Math::SpatialVector)
   EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(RigidBodyDynamics::Math::SpatialMatrix)
   EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(RigidBodyDynamics::Math::Matrix63)
