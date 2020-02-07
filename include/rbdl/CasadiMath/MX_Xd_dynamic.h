@@ -20,10 +20,18 @@ public:
     MX_Xd_dynamic(
             unsigned int nrows = 1,
             unsigned int ncols = 1) : casadi::MX(nrows, ncols){
+        m_currentSlice = new MX_Xd_SubMatrix(
+                    *this,
+                    casadi::Slice(static_cast<casadi_int>(0), static_cast<casadi_int>(nrows)),
+                    casadi::Slice(static_cast<casadi_int>(0), static_cast<casadi_int>(ncols)));
     }
 
     MX_Xd_dynamic(const casadi::MX& m) :
         casadi::MX(m){
+        m_currentSlice = new MX_Xd_SubMatrix(
+                    *this,
+                    casadi::Slice(static_cast<casadi_int>(0), static_cast<casadi_int>(m.rows())),
+                    casadi::Slice(static_cast<casadi_int>(0), static_cast<casadi_int>(m.columns())));
     }
 
     void conservativeResize (unsigned int nrows, unsigned int ncols = 1) {
@@ -53,8 +61,17 @@ public:
         return casadi::MX::eye(size);
     }
 
+    MX_Xd_SubMatrix operator[](unsigned int i) {
+        return (*this)(i, 0);
+    }
     MX_Xd_scalar operator[](unsigned int i) const {
         return (*this)(i, 0);
+    }
+    MX_Xd_SubMatrix operator()(unsigned int i, unsigned int j=0) {
+        *m_currentSlice = this->casadi::MX::operator()(
+                    casadi::Slice(static_cast<casadi_int>(i), static_cast<casadi_int>(i+1)),
+                    casadi::Slice(static_cast<casadi_int>(j), static_cast<casadi_int>(j+1)));
+        return *m_currentSlice;
     }
     MX_Xd_scalar operator()(unsigned int i, unsigned int j=0) const {
         return this->casadi::MX::operator()(i, j);
@@ -152,6 +169,10 @@ public:
     MX_Xd_dynamic operator*(const double& other) const {
         return casadi::MX::mtimes(*this, other);
     }
+
+protected:
+    MX_Xd_SubMatrix * m_currentSlice;
+
 };
 
 #include "MX_Xd_static.h"
@@ -184,6 +205,7 @@ MX_Xd_static<nrows, ncols> operator-(
         ) {
     MX_Xd_static<nrows, ncols> out(me);
     return out.casadi::MX::operator-=(other);
+
 }
 
 template <unsigned int nrows, unsigned int ncols>
