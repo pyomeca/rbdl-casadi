@@ -307,7 +307,7 @@ public:
     MX_Xd_SubMatrix operator[](unsigned int i) {
         return (*this)(i);
     }
-    const MX_Xd_scalar& operator[](unsigned int i) const {
+    MX_Xd_scalar operator[](unsigned int i) const {
         return (*this)(i);
     }
     MX_Xd_SubMatrix operator()(unsigned int i, unsigned int j=0) {
