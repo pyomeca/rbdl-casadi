@@ -92,6 +92,17 @@ public:
             double other) {
         return casadi::MX::times(*this, other);
     }
+
+    void operator/=(
+            const MX_Xd_scalar& other
+            ){
+        this->casadi::MX::operator/=(other);
+    }
+    MX_Xd_scalar operator/(
+            const MX_Xd_scalar& other) const {
+        MX_Xd_scalar out(*this);
+        return out.casadi::MX::operator/=(other);
+    }
 };
 
 inline bool operator==(const double& m1, const MX_Xd_scalar& m2){
@@ -153,6 +164,12 @@ public:
     {
 
     }
+    MX_Xd_SubMatrix(const casadi::SubMatrix<casadi::MX, casadi::Slice, casadi::Slice>& me) :
+        casadi::SubMatrix<casadi::MX, casadi::Slice, casadi::Slice>(me)
+    {
+
+    }
+
 
     void operator=(const casadi::SubMatrix<casadi::MX, casadi::Slice, casadi::Slice>& submat){
         this->casadi::SubMatrix<casadi::MX, casadi::Slice, casadi::Slice>::operator=(submat);
@@ -160,13 +177,13 @@ public:
     void operator=(const casadi::MX& mat){
         this->casadi::SubMatrix<casadi::MX, casadi::Slice, casadi::Slice>::operator =(mat);
     }
-    void operator=(MX_Xd_scalar& mat){
+    void operator=(const MX_Xd_scalar& mat){
+        this->casadi::SubMatrix<casadi::MX, casadi::Slice, casadi::Slice>::operator =(mat);
+    }
+    void operator=(double mat){
         this->casadi::SubMatrix<casadi::MX, casadi::Slice, casadi::Slice>::operator =(mat);
     }
 
-    MX_Xd_SubMatrix operator[](unsigned int i) {
-        return (*this)(i);
-    }
 };
 
 /* MX_XD_SCALAR_H */

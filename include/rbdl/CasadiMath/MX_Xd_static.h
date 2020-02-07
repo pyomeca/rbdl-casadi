@@ -307,14 +307,14 @@ public:
     MX_Xd_SubMatrix operator[](unsigned int i) {
         return (*this)(i);
     }
-    MX_Xd_scalar operator[](unsigned int i) const {
-        return (*this)(i);
-    }
     MX_Xd_SubMatrix operator()(unsigned int i, unsigned int j=0) {
         *m_currentSlice = this->casadi::MX::operator()(
                     casadi::Slice(static_cast<casadi_int>(i), static_cast<casadi_int>(i+1)),
                     casadi::Slice(static_cast<casadi_int>(j), static_cast<casadi_int>(j+1)));
         return *m_currentSlice;
+    }
+    MX_Xd_scalar operator[](unsigned int i) const {
+        return (*this)(i);
     }
     MX_Xd_scalar operator()(unsigned int i, unsigned int j=0) const {
         return this->casadi::MX::operator()(i, j);
@@ -398,6 +398,14 @@ public:
             result[i] /= scalar;
         return result;
     }
+    MX_Xd_static<nrows, ncols> operator/(
+            const casadi::SubMatrix<casadi::MX, casadi::Slice, casadi::Slice>& scalar) const {
+//        assert(scalar.rows() == 1 && scalar.columns() == 1);
+        MX_Xd_static<nrows, ncols> result (*this);
+        for (unsigned int i = 0; i < nrows * ncols; i++)
+            result[i] /= scalar;
+        return result;
+    }
 
 protected:
     MX_Xd_SubMatrix *m_currentSlice;
@@ -440,6 +448,21 @@ MX_Xd_static<nrows, ncols> operator+(
     return out.casadi::MX::operator+=(other);
 }
 template <unsigned int nrows, unsigned int ncols>
+MX_Xd_static<nrows, ncols> operator+(
+        const MX_Xd_static<nrows, ncols>& me,
+        const casadi::SubMatrix<casadi::MX, casadi::Slice, casadi::Slice>& other) {
+    MX_Xd_static<nrows, ncols> out(me);
+    return out.casadi::MX::operator+=(other);
+}
+template <unsigned int nrows, unsigned int ncols>
+MX_Xd_static<nrows, ncols> operator+(
+        const casadi::SubMatrix<casadi::MX, casadi::Slice, casadi::Slice>& me,
+        const MX_Xd_static<nrows, ncols>& other) {
+    MX_Xd_static<nrows, ncols> out(other);
+    return out.casadi::MX::operator+=(me);
+}
+
+template <unsigned int nrows, unsigned int ncols>
 MX_Xd_static<nrows, ncols> operator-(
         const MX_Xd_static<nrows, ncols>& other) {
     return other.casadi::MX::operator-();
@@ -450,6 +473,20 @@ MX_Xd_static<nrows, ncols> operator-(
         const MX_Xd_dynamic& other) {
     MX_Xd_static<nrows, ncols> out(me);
     return out.casadi::MX::operator-=(other);
+}
+template <unsigned int nrows, unsigned int ncols>
+MX_Xd_static<nrows, ncols> operator-(
+        const MX_Xd_static<nrows, ncols>& me,
+        const casadi::SubMatrix<casadi::MX, casadi::Slice, casadi::Slice>& other) {
+    MX_Xd_static<nrows, ncols> out(me);
+    return out.casadi::MX::operator-=(other);
+}
+template <unsigned int nrows, unsigned int ncols>
+MX_Xd_static<nrows, ncols> operator-(
+        const casadi::SubMatrix<casadi::MX, casadi::Slice, casadi::Slice>& me,
+        const MX_Xd_static<nrows, ncols>& other) {
+    MX_Xd_static<nrows, ncols> out(other);
+    return out.casadi::MX::operator-=(me);
 }
 
 template <unsigned int nrows, unsigned int ncols>
