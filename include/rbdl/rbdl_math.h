@@ -67,8 +67,8 @@ inline MX_Xd_scalar sin(const casadi::MX& x){
 inline MX_Xd_scalar cos(const casadi::MX& x){
     return casadi::MX::cos(x);
 }
-inline MX_Xd_scalar isnan(const casadi::MX& x){
-    return casadi::MX::isnan(x);
+inline bool isnan(const casadi::MX& x){
+    return x.is_regular();
 }
 
 }
