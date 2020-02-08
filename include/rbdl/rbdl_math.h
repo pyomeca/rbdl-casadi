@@ -31,16 +31,15 @@ typedef SimpleMath::Fixed::Matrix<double, 6,6> SpatialMatrix_t;
 
 typedef SimpleMath::Fixed::Matrix<double, 6,3> Matrix63_t;
 typedef SimpleMath::Fixed::Matrix<double, 4,3> Matrix43_t;
+typedef SimpleMath::Fixed::Matrix<double, 4,4> Matrix4_t;
 
 typedef SimpleMath::Dynamic::Matrix<double> MatrixN_t;
 typedef SimpleMath::Dynamic::Matrix<double> VectorN_t;
-using namespace std;
+
 
 #else
 #ifdef RBDL_USE_CASADI_MATH
-#include "rbdl/CasadiMath/MX_Xd_scalar.h"
-#include "rbdl/CasadiMath/MX_Xd_static.h"
-#include "rbdl/CasadiMath/MX_Xd_dynamic.h"
+#include "rbdl/CasadiMath/MX_Xd_utils.h"
 
 typedef MX_Xd_scalar Vector1_t;
 typedef MX_Xd_static<2,1> Vector2_t;
@@ -53,25 +52,11 @@ typedef MX_Xd_static<6,6> SpatialMatrix_t;
 
 typedef MX_Xd_static<6,3> Matrix63_t;
 typedef MX_Xd_static<4,3> Matrix43_t;
+typedef MX_Xd_static<4,4> Matrix4_t;
 
 typedef MX_Xd_dynamic MatrixN_t;
 typedef MX_Xd_dynamic VectorN_t;
 
-namespace std {
-inline MX_Xd_scalar sqrt(const casadi::MX& x){
-    return casadi::MX::sqrt(x);
-}
-inline MX_Xd_scalar sin(const casadi::MX& x){
-    return casadi::MX::sin(x);
-}
-inline MX_Xd_scalar cos(const casadi::MX& x){
-    return casadi::MX::cos(x);
-}
-inline bool isnan(const casadi::MX& x){
-    return x.is_regular();
-}
-
-}
 
 #else
 #include <Eigen/Dense>
@@ -83,6 +68,7 @@ inline bool isnan(const casadi::MX& x){
 typedef double Vector1_t;
 typedef Eigen::Matrix<double, 6, 3> Matrix63_t;
 typedef Eigen::Matrix<double, 4, 3> Matrix43_t;
+typedef Eigen::Matrix<double, 4, 4> Matrix4_t;
 
 typedef Eigen::VectorXd VectorN_t;
 typedef Eigen::MatrixXd MatrixN_t;
@@ -105,6 +91,7 @@ typedef SpatialVector_t SpatialVector;
 typedef SpatialMatrix_t SpatialMatrix;
 typedef Matrix63_t Matrix63;
 typedef Matrix43_t Matrix43;
+typedef Matrix4_t Matrix4d;
 typedef VectorN_t VectorNd;
 typedef MatrixN_t MatrixNd;
 

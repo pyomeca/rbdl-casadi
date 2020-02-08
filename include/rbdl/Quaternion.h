@@ -72,7 +72,9 @@ class Quaternion : public Vector4d {
       Scalar s = std::sqrt (squaredNorm() * quat.squaredNorm());
 
       // division by 0.f is unhealthy!
-#ifndef RBDL_USE_CASADI_MATH
+#ifdef RBDL_USE_CASADI_MATH
+      assert (!s.is_zero());
+#else
       assert (s != 0.);
 #endif
 
@@ -96,11 +98,11 @@ class Quaternion : public Vector4d {
                                  Quaternion( ((*this) * p0 - quat * p1) * d),
                                  Quaternion( ((*this) * p0 + quat * p1) * d)) );
 #else
-    if (dot (quat) < 0.) {
-        return Quaternion( ((*this) * p0 - quat * p1) * d);
-    } else {
-        return Quaternion( ((*this) * p0 + quat * p1) * d);
-    }
+      if (dot (quat) < 0.) {
+          return Quaternion( ((*this) * p0 - quat * p1) * d);
+      } else {
+          return Quaternion( ((*this) * p0 + quat * p1) * d);
+      }
 #endif
     }
 
