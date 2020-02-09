@@ -72,6 +72,10 @@ public:
         return this->casadi::MX::operator()(i, j);
     }
 
+    void resize(unsigned int newI, unsigned int newJ = 1){
+        casadi::MX::reshape(*this, newI, newJ);
+    }
+
     unsigned int rows() const {
         return static_cast<unsigned int>(this->casadi::MX::rows());
     }
@@ -123,6 +127,18 @@ public:
             casadi::Slice(static_cast<casadi_int>(row_start), static_cast<casadi_int>(row_start+row_count)),
             casadi::Slice(static_cast<casadi_int>(col_start), static_cast<casadi_int>(col_start+col_count)));
     }
+
+    MX_Xd_SubMatrix topRows(
+            unsigned int numberRows)
+    {
+        return (*this).block(0, 0, numberRows, cols());
+    }
+    MX_Xd_dynamic topRows(
+            unsigned int numberRows) const
+    {
+        return (*this).block(0, 0, numberRows, cols());
+    }
+
 
     MX_Xd_dynamic transpose() const {
         return T();

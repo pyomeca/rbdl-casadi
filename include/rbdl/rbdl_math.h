@@ -23,6 +23,7 @@
 typedef double Vector1_t;
 typedef SimpleMath::Fixed::Matrix<double, 2,1> Vector2_t;
 typedef SimpleMath::Fixed::Matrix<double, 3,1> Vector3_t;
+typedef SimpleMath::Fixed::Matrix<double, 2,2> Matrix2_t;
 typedef SimpleMath::Fixed::Matrix<double, 3,3> Matrix3_t;
 typedef SimpleMath::Fixed::Matrix<double, 4,1> Vector4_t;
 
@@ -44,6 +45,7 @@ typedef SimpleMath::Dynamic::Matrix<double> VectorN_t;
 typedef MX_Xd_scalar Vector1_t;
 typedef MX_Xd_static<2,1> Vector2_t;
 typedef MX_Xd_static<3,1> Vector3_t;
+typedef MX_Xd_static<2,2> Matrix2_t;
 typedef MX_Xd_static<3,3> Matrix3_t;
 typedef MX_Xd_static<4,1> Vector4_t;
 
@@ -86,6 +88,7 @@ typedef Vector1_t  Scalar;
 typedef Vector2_t Vector2d;
 typedef Vector3_t Vector3d;
 typedef Vector4_t Vector4d;
+typedef Matrix2_t Matrix2d;
 typedef Matrix3_t Matrix3d;
 typedef SpatialVector_t SpatialVector;
 typedef SpatialMatrix_t SpatialMatrix;

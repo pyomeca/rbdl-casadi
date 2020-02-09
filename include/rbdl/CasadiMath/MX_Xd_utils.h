@@ -53,6 +53,11 @@ inline MX_Xd_scalar operator+(
         const MX_Xd_SubMatrix& other) {
     return me.casadi::MX::operator+=(other);
 }
+inline MX_Xd_scalar operator+(
+        MX_Xd_scalar me,
+        const double& other) {
+    return me.casadi::MX::operator+=(other);
+}
 template <unsigned int nrows, unsigned int ncols>
 MX_Xd_static<nrows, ncols> operator+(
         const MX_Xd_SubMatrix& me,
@@ -88,7 +93,6 @@ MX_Xd_static<nrows, ncols> operator-(
     return out.casadi::MX::operator-=(me);
 }
 
-
 inline MX_Xd_dynamic operator*(
         const MX_Xd_SubMatrix& me,
         const MX_Xd_scalar& other){
@@ -103,6 +107,13 @@ inline MX_Xd_dynamic operator*(
 inline MX_Xd_SubMatrix operator/(
         const MX_Xd_SubMatrix& me,
         const MX_Xd_SubMatrix& scalar) {
+    MX_Xd_SubMatrix result (me);
+    result.MX_Xd_SubMatrix::operator/=(scalar);
+    return result;
+}
+inline MX_Xd_SubMatrix operator/(
+        const MX_Xd_SubMatrix& me,
+        const double& scalar) {
     MX_Xd_SubMatrix result (me);
     result.MX_Xd_SubMatrix::operator/=(scalar);
     return result;
@@ -156,6 +167,28 @@ inline MX_Xd_dynamic operator/(double scalar, MX_Xd_SubMatrix mat){
     }
     return mat;
 }
+inline MX_Xd_dynamic operator/(double scalar, MX_Xd_dynamic mat){
+    for (unsigned int i=0; i<mat.rows(); ++i){
+        for (unsigned int j=0; j<mat.columns(); ++j){
+            mat(i, j) = scalar / mat(i, j);
+        }
+    }
+    return mat;
+}
+inline MX_Xd_scalar operator/(double scalar, const MX_Xd_scalar& mat){
+    MX_Xd_scalar out(scalar);
+    return out.casadi::MX::operator/=(mat(0, 0));
+}
+template <unsigned int nrows, unsigned int ncols>
+inline MX_Xd_dynamic operator/(double scalar, MX_Xd_static<nrows, ncols> mat){
+    for (unsigned int i=0; i<nrows; ++i){
+        for (unsigned int j=0; j<ncols; ++j){
+            mat(i, j) = scalar / mat(i, j);
+        }
+    }
+    return mat;
+}
+
 
 template <unsigned int nrows, unsigned int ncols>
 MX_Xd_static<nrows, ncols> operator+(
@@ -177,6 +210,11 @@ inline MX_Xd_dynamic operator-(
         MX_Xd_SubMatrix me,
         const MX_Xd_scalar& scalar){
     return me.casadi::SubMatrix<casadi::MX, casadi::Slice, casadi::Slice>::operator-=(scalar);
+}
+inline MX_Xd_scalar operator-(
+        MX_Xd_scalar me,
+        const MX_Xd_SubMatrix& other) {
+    return me.casadi::MX::operator-=(other);
 }
 inline MX_Xd_scalar operator+(
         const MX_Xd_dynamic& me,
@@ -311,11 +349,14 @@ inline bool isnan(const casadi::MX& x){
 }
 
 template <unsigned int nrows, unsigned int ncols>
-MX_Xd_dynamic fabs(const MX_Xd_dynamic& m){
+inline MX_Xd_dynamic fabs(const MX_Xd_dynamic& m){
     return casadi::MX::abs(m);
 }
 template <unsigned int nrows, unsigned int ncols>
-MX_Xd_scalar fabs(const MX_Xd_static<nrows, ncols>& m){
+inline MX_Xd_scalar fabs(const MX_Xd_static<nrows, ncols>& m){
+    return casadi::MX::abs(m);
+}
+inline MX_Xd_scalar fabs(const MX_Xd_scalar& m){
     return casadi::MX::abs(m);
 }
 
