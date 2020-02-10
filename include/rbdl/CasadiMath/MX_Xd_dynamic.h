@@ -23,6 +23,11 @@ public:
             unsigned int ncols = 1) : casadi::MX(nrows, ncols){
     }
 
+    virtual ~MX_Xd_dynamic(){
+
+    }
+
+
     MX_Xd_dynamic(const casadi::MX& m) :
         casadi::MX(m){
     }
@@ -45,9 +50,15 @@ public:
     static MX_Xd_dynamic Zero(unsigned int nrows, unsigned int ncols = 1){
         return casadi::MX::zeros(nrows, ncols);
     }
-
     void setZero(){
         *this = casadi::MX::zeros(this->rows(), this->cols());
+    }
+
+    static MX_Xd_dynamic One(unsigned int nrows, unsigned int ncols = 1){
+        return casadi::MX::ones(nrows, ncols);
+    }
+    void setOnes(){
+        *this = casadi::MX::ones(this->rows(), this->cols());
     }
 
     static MX_Xd_dynamic Identity(unsigned int size){

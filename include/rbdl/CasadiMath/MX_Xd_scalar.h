@@ -21,6 +21,11 @@ public:
 
     }
 
+    virtual ~MX_Xd_scalar(){
+
+    }
+
+
     MX_Xd_scalar(const double val) : casadi::MX(1, 1){
         (*this)(0, 0) = val;
     }

@@ -22,6 +22,10 @@ public:
     MX_Xd_static() : casadi::MX(nrows, ncols){
     }
 
+    virtual ~MX_Xd_static(){
+
+    }
+
     MX_Xd_static(const double val) : casadi::MX(1, 1)
     {
         (*this)(0, 0) = val;
@@ -258,6 +262,9 @@ public:
 
     static MX_Xd_static One(){
         return MX_Xd_static<nrows, ncols>::ones(nrows, ncols);
+    }
+    void setOnes(){
+        *this = casadi::MX::ones(this->rows(), this->cols());
     }
 
 
