@@ -68,9 +68,9 @@ typedef MX_Xd_dynamic VectorN_t;
 #include "rbdl/rbdl_eigenmath.h"
 
 typedef double Vector1_t;
+typedef Eigen::Matrix<double, 2, 2> Matrix2_t;
 typedef Eigen::Matrix<double, 6, 3> Matrix63_t;
 typedef Eigen::Matrix<double, 4, 3> Matrix43_t;
-typedef Eigen::Matrix<double, 4, 4> Matrix4_t;
 
 typedef Eigen::VectorXd VectorN_t;
 typedef Eigen::MatrixXd MatrixN_t;

@@ -656,7 +656,7 @@ RBDL_DLLAPI bool InverseKinematics (
 
     MatrixNd JJTe_lambda2_I =
       J * J.transpose()
-      + lambda*lambda * MatrixNd::Identity(e.size());
+      + lambda*lambda * MatrixNd::Identity(e.size(), e.size());
 
     VectorNd z (body_id.size() * 3);
 #ifndef RBDL_USE_SIMPLE_MATH

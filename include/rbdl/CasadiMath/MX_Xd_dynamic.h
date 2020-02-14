@@ -61,7 +61,7 @@ public:
         *this = casadi::MX::ones(this->rows(), this->cols());
     }
 
-    static MX_Xd_dynamic Identity(unsigned int size){
+    static MX_Xd_dynamic Identity(unsigned int size, unsigned int ignoredSize = 0){
         return casadi::MX::eye(size);
     }
     void setIdentity(){
