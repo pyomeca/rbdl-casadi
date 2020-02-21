@@ -14,6 +14,7 @@
 
 #include <casadi.hpp>
 
+namespace RBDLCasadiMath {
 
 class MX_Xd_scalar : public casadi::MX{
 public:
@@ -102,6 +103,7 @@ public:
     }
 };
 
+}
 
 /* MX_XD_SCALAR_H */
 #endif

@@ -42,22 +42,22 @@ typedef SimpleMath::Dynamic::Matrix<double> VectorN_t;
 #ifdef RBDL_USE_CASADI_MATH
 #include "rbdl/CasadiMath/MX_Xd_utils.h"
 
-typedef MX_Xd_scalar Vector1_t;
-typedef MX_Xd_static<2,1> Vector2_t;
-typedef MX_Xd_static<3,1> Vector3_t;
-typedef MX_Xd_static<2,2> Matrix2_t;
-typedef MX_Xd_static<3,3> Matrix3_t;
-typedef MX_Xd_static<4,1> Vector4_t;
+typedef RBDLCasadiMath::MX_Xd_scalar Vector1_t;
+typedef RBDLCasadiMath::MX_Xd_static<2,1> Vector2_t;
+typedef RBDLCasadiMath::MX_Xd_static<3,1> Vector3_t;
+typedef RBDLCasadiMath::MX_Xd_static<2,2> Matrix2_t;
+typedef RBDLCasadiMath::MX_Xd_static<3,3> Matrix3_t;
+typedef RBDLCasadiMath::MX_Xd_static<4,1> Vector4_t;
 
-typedef MX_Xd_static<6,1> SpatialVector_t;
-typedef MX_Xd_static<6,6> SpatialMatrix_t;
+typedef RBDLCasadiMath::MX_Xd_static<6,1> SpatialVector_t;
+typedef RBDLCasadiMath::MX_Xd_static<6,6> SpatialMatrix_t;
 
-typedef MX_Xd_static<6,3> Matrix63_t;
-typedef MX_Xd_static<4,3> Matrix43_t;
-typedef MX_Xd_static<4,4> Matrix4_t;
+typedef RBDLCasadiMath::MX_Xd_static<6,3> Matrix63_t;
+typedef RBDLCasadiMath::MX_Xd_static<4,3> Matrix43_t;
+typedef RBDLCasadiMath::MX_Xd_static<4,4> Matrix4_t;
 
-typedef MX_Xd_dynamic MatrixN_t;
-typedef MX_Xd_dynamic VectorN_t;
+typedef RBDLCasadiMath::MX_Xd_dynamic MatrixN_t;
+typedef RBDLCasadiMath::MX_Xd_dynamic VectorN_t;
 
 
 #else

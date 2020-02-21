@@ -16,6 +16,9 @@
 #include "MX_Xd_scalar.h"
 #include "MX_Xd_dynamic.h"
 
+
+namespace RBDLCasadiMath {
+
 template <unsigned int nrows, unsigned int ncols>
 class MX_Xd_static : public casadi::MX{
 public:
@@ -423,6 +426,8 @@ public:
         return result;
     }
 };
+
+}
 
 /* MX_XD_STATIC_H */
 #endif

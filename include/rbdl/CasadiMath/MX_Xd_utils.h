@@ -7,6 +7,8 @@
 #include "rbdl/CasadiMath/MX_Xd_subMatrix.h"
 
 
+namespace RBDLCasadiMath {
+
 template <unsigned int nrows, unsigned int ncols>
 MX_Xd_static<nrows, ncols> operator*(
         const MX_Xd_static<nrows, ncols>& me,
@@ -321,7 +323,11 @@ inline MX_Xd_scalar operator-(
     return out.casadi::MX::operator+=(other);
 }
 
+}
+
+
 namespace std {
+using namespace RBDLCasadiMath;
 
 inline MX_Xd_scalar sqrt(const MX_Xd_scalar& x){
     return casadi::MX::sqrt(x);
@@ -381,7 +387,6 @@ inline MX_Xd_scalar pow(const MX_Xd_scalar& m, unsigned int exponent){
 inline MX_Xd_scalar pow(const MX_Xd_scalar& m, double exponent){
     return casadi::MX::mpower(m, exponent);
 }
-
 
 }
 

@@ -16,6 +16,8 @@
 #include "MX_Xd_scalar.h"
 #include "MX_Xd_subMatrix.h"
 
+namespace RBDLCasadiMath {
+
 class MX_Xd_dynamic : public casadi::MX{
 public:
     MX_Xd_dynamic(
@@ -231,6 +233,7 @@ public:
     }
 };
 
+}
 
 /* MX_XD_DYNAMICS_H */
 #endif
