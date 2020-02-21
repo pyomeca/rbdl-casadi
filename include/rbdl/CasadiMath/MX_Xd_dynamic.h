@@ -166,7 +166,7 @@ public:
     }
 
     MX_Xd_dynamic norm() const {
-        return casadi::MX::norm_1(*this);
+        return casadi::MX::norm_2(*this);
     }
 
     void normalize() {
@@ -174,7 +174,7 @@ public:
     }
 
     MX_Xd_dynamic squaredNorm() const {
-        return casadi::MX::norm_2(*this);
+        return norm() * norm();
     }
 
 

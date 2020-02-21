@@ -360,11 +360,11 @@ public:
     }
 
     MX_Xd_scalar norm() const{
-        return casadi::MX::norm_1(*this);
+        return casadi::MX::norm_2(*this);
     }
 
     MX_Xd_scalar squaredNorm() const{
-        return casadi::MX::norm_2(*this);
+        return norm() * norm();
     }
 
     void normalize() {
