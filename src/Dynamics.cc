@@ -397,7 +397,7 @@ RBDL_DLLAPI void ForwardDynamics (
           + Ia * model.c[i]
           + model.U[i] * model.u[i] / model.d[i];
 
-#ifdef EIGEN_CORE_H
+#ifdef RBDL_USE_EIGEN3_MATH
         model.IA[lambda].noalias()
           += model.X_lambda[i].toMatrixTranspose()
           * Ia * model.X_lambda[i].toMatrix();
@@ -416,7 +416,7 @@ RBDL_DLLAPI void ForwardDynamics (
     } else if (model.mJoints[i].mDoFCount == 3
         && model.mJoints[i].mJointType != JointTypeCustom) {
       model.multdof3_U[i] = model.IA[i] * model.multdof3_S[i];
-#ifdef EIGEN_CORE_H
+#ifdef RBDL_USE_EIGEN3_MATH
       model.multdof3_Dinv[i] = (model.multdof3_S[i].transpose()
           * model.multdof3_U[i]).inverse().eval();
 #else
@@ -441,7 +441,7 @@ RBDL_DLLAPI void ForwardDynamics (
           + model.multdof3_U[i]
           * model.multdof3_Dinv[i]
           * model.multdof3_u[i];
-#ifdef EIGEN_CORE_H
+#ifdef RBDL_USE_EIGEN3_MATH
         model.IA[lambda].noalias()
           += model.X_lambda[i].toMatrixTranspose()
           * Ia
@@ -467,7 +467,7 @@ RBDL_DLLAPI void ForwardDynamics (
       model.mCustomJoints[kI]->U =
         model.IA[i] * model.mCustomJoints[kI]->S;
 
-#ifdef EIGEN_CORE_H
+#ifdef RBDL_USE_EIGEN3_MATH
       model.mCustomJoints[kI]->Dinv
         = (model.mCustomJoints[kI]->S.transpose()
             * model.mCustomJoints[kI]->U).inverse().eval();
@@ -494,7 +494,7 @@ RBDL_DLLAPI void ForwardDynamics (
               * model.mCustomJoints[kI]->Dinv
               * model.mCustomJoints[kI]->u);
 
-#ifdef EIGEN_CORE_H
+#ifdef RBDL_USE_EIGEN3_MATH
         model.IA[lambda].noalias() += model.X_lambda[i].toMatrixTranspose()
           * Ia
           * model.X_lambda[i].toMatrix();
@@ -677,7 +677,7 @@ RBDL_DLLAPI void CalcMInvTimesTau ( Model &model,
         if (lambda != 0) {
           SpatialMatrix Ia = model.IA[i] - 
             model.U[i] * (model.U[i] / model.d[i]).transpose();
-#ifdef EIGEN_CORE_H
+#ifdef RBDL_USE_EIGEN3_MATH
           model.IA[lambda].noalias() += model.X_lambda[i].toMatrixTranspose()
             * Ia
             * model.X_lambda[i].toMatrix();
@@ -692,7 +692,7 @@ RBDL_DLLAPI void CalcMInvTimesTau ( Model &model,
 
         model.multdof3_U[i] = model.IA[i] * model.multdof3_S[i];
 
-#ifdef EIGEN_CORE_H
+#ifdef RBDL_USE_EIGEN3_MATH
         model.multdof3_Dinv[i] = 
           (model.multdof3_S[i].transpose()*model.multdof3_U[i]).inverse().eval();
 #else
@@ -709,7 +709,7 @@ RBDL_DLLAPI void CalcMInvTimesTau ( Model &model,
             - ( model.multdof3_U[i]
                 * model.multdof3_Dinv[i]
                 * model.multdof3_U[i].transpose());
-#ifdef EIGEN_CORE_H
+#ifdef RBDL_USE_EIGEN3_MATH
           model.IA[lambda].noalias() +=
             model.X_lambda[i].toMatrixTranspose()
             * Ia
@@ -725,7 +725,7 @@ RBDL_DLLAPI void CalcMInvTimesTau ( Model &model,
         unsigned int dofI   = model.mCustomJoints[kI]->mDoFCount;
         model.mCustomJoints[kI]->U = model.IA[i] * model.mCustomJoints[kI]->S;
 
-#ifdef EIGEN_CORE_H
+#ifdef RBDL_USE_EIGEN3_MATH
         model.mCustomJoints[kI]->Dinv = (model.mCustomJoints[kI]->S.transpose()
             * model.mCustomJoints[kI]->U
             ).inverse().eval();
@@ -743,7 +743,7 @@ RBDL_DLLAPI void CalcMInvTimesTau ( Model &model,
             - ( model.mCustomJoints[kI]->U
                 * model.mCustomJoints[kI]->Dinv
                 * model.mCustomJoints[kI]->U.transpose());
-#ifdef EIGEN_CORE_H
+#ifdef RBDL_USE_EIGEN3_MATH
           model.IA[lambda].noalias() += model.X_lambda[i].toMatrixTranspose()
             * Ia
             * model.X_lambda[i].toMatrix();
@@ -769,7 +769,7 @@ RBDL_DLLAPI void CalcMInvTimesTau ( Model &model,
       if (lambda != 0) {
         SpatialVector pa = model.pA[i] + model.U[i] * model.u[i] / model.d[i];
 
-#ifdef EIGEN_CORE_H
+#ifdef RBDL_USE_EIGEN3_MATH
         model.pA[lambda].noalias() += model.X_lambda[i].applyTranspose(pa);
 #else
         model.pA[lambda] += model.X_lambda[i].applyTranspose(pa);
@@ -795,7 +795,7 @@ RBDL_DLLAPI void CalcMInvTimesTau ( Model &model,
           * model.multdof3_Dinv[i]
           * model.multdof3_u[i];
 
-#ifdef EIGEN_CORE_H
+#ifdef RBDL_USE_EIGEN3_MATH
         model.pA[lambda].noalias() +=
           model.X_lambda[i].applyTranspose(pa);
 #else
@@ -821,7 +821,7 @@ RBDL_DLLAPI void CalcMInvTimesTau ( Model &model,
               * model.mCustomJoints[kI]->Dinv
               * model.mCustomJoints[kI]->u);
 
-#ifdef EIGEN_CORE_H
+#ifdef RBDL_USE_EIGEN3_MATH
         model.pA[lambda].noalias() +=
           model.X_lambda[i].applyTranspose(pa);
 #else

@@ -14,6 +14,8 @@
 
 #include <casadi.hpp>
 
+namespace RBDLCasadiMath {
+
 class MX_Xd_SubMatrix : public casadi::SubMatrix<casadi::MX, casadi::Slice, casadi::Slice>{
 public:
     MX_Xd_SubMatrix(casadi::MX& mat, const casadi::Slice& i, const casadi::Slice& j) :
@@ -32,6 +34,10 @@ public:
 
     }
 
+    virtual ~MX_Xd_SubMatrix(){
+
+    }
+
     void operator=(const casadi::SubMatrix<casadi::MX, casadi::Slice, casadi::Slice>& submat){
         this->casadi::SubMatrix<casadi::MX, casadi::Slice, casadi::Slice>::operator=(submat);
     }
@@ -45,6 +51,8 @@ public:
         this->casadi::SubMatrix<casadi::MX, casadi::Slice, casadi::Slice>::operator =(mat);
     }
 };
+
+}
 
 /* MX_XD_SUBMATRIX_H */
 #endif

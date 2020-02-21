@@ -16,10 +16,14 @@
 #include "MX_Xd_scalar.h"
 #include "MX_Xd_dynamic.h"
 
+
+namespace RBDLCasadiMath {
+
 template <unsigned int nrows, unsigned int ncols>
 class MX_Xd_static : public casadi::MX{
 public:
     MX_Xd_static() : casadi::MX(nrows, ncols){
+
     }
 
     virtual ~MX_Xd_static(){
@@ -356,11 +360,11 @@ public:
     }
 
     MX_Xd_scalar norm() const{
-        return casadi::MX::norm_1(*this);
+        return casadi::MX::norm_2(*this);
     }
 
     MX_Xd_scalar squaredNorm() const{
-        return casadi::MX::norm_2(*this);
+        return norm() * norm();
     }
 
     void normalize() {
@@ -422,6 +426,8 @@ public:
         return result;
     }
 };
+
+}
 
 /* MX_XD_STATIC_H */
 #endif

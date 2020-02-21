@@ -147,7 +147,7 @@ RBDL_DLLAPI std::string GetNamedBodyOriginsOverview (Model &model) {
   for (unsigned int body_id = 0; body_id < model.mBodies.size(); body_id++) {
     std::string body_name = model.GetBodyName (body_id);
 
-    if (body_name.size() == 0) 
+    if (body_name.size() == 0)
       continue;
 
     Vector3d position = CalcBodyToBaseCoordinates (model, Q, body_id, Vector3d (0., 0., 0.), false);
@@ -172,7 +172,7 @@ RBDL_DLLAPI void CalcCenterOfMass (
   bool update_kinematics) {
   // If we want to compute com_acceleration or change of angular momentum
   // we must have qddot provided.
-  assert( (com_acceleration == NULL && change_of_angular_momentum == NULL) 
+  assert( (com_acceleration == NULL && change_of_angular_momentum == NULL)
       || (qddot != NULL) );
 
   if (update_kinematics)
