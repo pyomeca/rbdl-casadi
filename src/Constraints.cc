@@ -1220,7 +1220,7 @@ void ForwardDynamicsApplyConstraintForces (
         SpatialVector pa = model.pA[i] + Ia * model.c[i]
           + model.multdof3_U[i] * model.multdof3_Dinv[i] * model.multdof3_u[i];
 
-#ifdef EIGEN_CORE_H
+#ifdef RBDL_USE_EIGEN3_MATH
         model.IA[lambda].noalias() += (model.X_lambda[i].toMatrixTranspose()
             * Ia * model.X_lambda[i].toMatrix());
         model.pA[lambda].noalias() += model.X_lambda[i].applyTranspose(pa);
@@ -1242,7 +1242,7 @@ void ForwardDynamicsApplyConstraintForces (
           - model.U[i] * (model.U[i] / model.d[i]).transpose();
         SpatialVector pa =  model.pA[i] + Ia * model.c[i]
           + model.U[i] * model.u[i] / model.d[i];
-#ifdef EIGEN_CORE_H
+#ifdef RBDL_USE_EIGEN3_MATH
         model.IA[lambda].noalias() += (model.X_lambda[i].toMatrixTranspose()
             * Ia * model.X_lambda[i].toMatrix());
         model.pA[lambda].noalias() += model.X_lambda[i].applyTranspose(pa);
@@ -1279,7 +1279,7 @@ void ForwardDynamicsApplyConstraintForces (
           + (   model.mCustomJoints[kI]->U
               * model.mCustomJoints[kI]->Dinv
               * model.mCustomJoints[kI]->u);
-#ifdef EIGEN_CORE_H
+#ifdef RBDL_USE_EIGEN3_MATH
         model.IA[lambda].noalias() += model.X_lambda[i].toMatrixTranspose()
           * Ia * model.X_lambda[i].toMatrix();
 

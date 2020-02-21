@@ -42,7 +42,7 @@ namespace Math {
 RBDL_DLLAPI inline VectorNdRef VectorFromPtr (double *ptr, unsigned int n) {
 #ifdef RBDL_USE_SIMPLE_MATH
 	return SimpleMath::Map<VectorNd> (ptr, n, 1);
-#elif defined EIGEN_CORE_H
+#elif defined RBDL_USE_EIGEN3_MATH
 	return Eigen::Map<VectorNd> (ptr, n, 1);
 #else
 	std::cerr << __func__ << " not defined for used math library!" << std::endl;
@@ -54,7 +54,7 @@ RBDL_DLLAPI inline VectorNdRef VectorFromPtr (double *ptr, unsigned int n) {
 RBDL_DLLAPI inline MatrixNdRef MatrixFromPtr (double *ptr, unsigned int rows, unsigned int cols, bool row_major = true) {
 #ifdef RBDL_USE_SIMPLE_MATH
 	return SimpleMath::Map<MatrixNd> (ptr, rows, cols);
-#elif defined EIGEN_CORE_H
+#elif defined RBDL_USE_EIGEN3_MATH
 #ifdef PTR_DATA_ROW_MAJOR
 	return Eigen::Map<MatrixNdRowMaj> (ptr, rows, cols);
 #else
@@ -562,7 +562,7 @@ void ForwardDynamicsPtr (
 
 		if (model.mJoints[i].mDoFCount == 3) {
 			model.multdof3_U[i] = model.IA[i] * model.multdof3_S[i];
-#ifdef EIGEN_CORE_H
+#ifdef RBDL_USE_EIGEN3_MATH
 			model.multdof3_Dinv[i] = (model.multdof3_S[i].transpose() * model.multdof3_U[i]).inverse().eval();
 #else
 			model.multdof3_Dinv[i] = (model.multdof3_S[i].transpose() * model.multdof3_U[i]).inverse();
@@ -576,7 +576,7 @@ void ForwardDynamicsPtr (
 			if (lambda != 0) {
 				SpatialMatrix Ia = model.IA[i] - model.multdof3_U[i] * model.multdof3_Dinv[i] * model.multdof3_U[i].transpose();
 				SpatialVector pa = model.pA[i] + Ia * model.c[i] + model.multdof3_U[i] * model.multdof3_Dinv[i] * model.multdof3_u[i];
-#ifdef EIGEN_CORE_H
+#ifdef RBDL_USE_EIGEN3_MATH
 				model.IA[lambda].noalias() += model.X_lambda[i].toMatrixTranspose() * Ia * model.X_lambda[i].toMatrix();
 				model.pA[lambda].noalias() += model.X_lambda[i].applyTranspose(pa);
 #else
@@ -595,7 +595,7 @@ void ForwardDynamicsPtr (
 			if (lambda != 0) {
 				SpatialMatrix Ia = model.IA[i] - model.U[i] * (model.U[i] / model.d[i]).transpose();
 				SpatialVector pa = model.pA[i] + Ia * model.c[i] + model.U[i] * model.u[i] / model.d[i];
-#ifdef EIGEN_CORE_H
+#ifdef RBDL_USE_EIGEN3_MATH
 				model.IA[lambda].noalias() += model.X_lambda[i].toMatrixTranspose() * Ia * model.X_lambda[i].toMatrix();
 				model.pA[lambda].noalias() += model.X_lambda[i].applyTranspose(pa);
 #else

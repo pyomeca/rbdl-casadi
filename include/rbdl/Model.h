@@ -24,7 +24,7 @@
 // as members need to have a special allocater. This can be achieved with
 // the following macro.
 
-#ifdef EIGEN_CORE_H
+#ifdef RBDL_USE_EIGEN3_MATH
 EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(RigidBodyDynamics::Joint)
 EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(RigidBodyDynamics::Body)
 EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(RigidBodyDynamics::FixedBody)
