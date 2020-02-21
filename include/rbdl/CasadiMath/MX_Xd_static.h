@@ -20,6 +20,7 @@ template <unsigned int nrows, unsigned int ncols>
 class MX_Xd_static : public casadi::MX{
 public:
     MX_Xd_static() : casadi::MX(nrows, ncols){
+
     }
 
     virtual ~MX_Xd_static(){

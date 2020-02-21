@@ -32,6 +32,10 @@ public:
 
     }
 
+    virtual ~MX_Xd_SubMatrix(){
+
+    }
+
     void operator=(const casadi::SubMatrix<casadi::MX, casadi::Slice, casadi::Slice>& submat){
         this->casadi::SubMatrix<casadi::MX, casadi::Slice, casadi::Slice>::operator=(submat);
     }
