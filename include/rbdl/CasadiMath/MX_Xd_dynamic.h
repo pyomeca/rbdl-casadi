@@ -220,15 +220,21 @@ public:
     }
     MX_Xd_dynamic operator/(const MX_Xd_scalar &scalar) const {
         MX_Xd_dynamic result (*this);
-        for (unsigned int i = 0; i < rows() * cols(); i++)
-            result[i] /= scalar;
+        for (unsigned int i = 0; i < rows(); ++i){
+            for (unsigned int j = 0; j < cols(); ++j){
+                result(i, j) /= scalar;
+            }
+        }
         return result;
     }
     MX_Xd_dynamic operator/(
             const MX_Xd_SubMatrix& scalar) const {
         MX_Xd_dynamic result (*this);
-        for (unsigned int i = 0; i < rows() * cols(); i++)
-            result[i] /= scalar;
+        for (unsigned int i = 0; i < rows(); ++i){
+            for (unsigned int j = 0; j < cols(); ++j){
+                result(i, j) /= scalar;
+            }
+        }
         return result;
     }
 };

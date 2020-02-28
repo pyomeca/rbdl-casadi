@@ -409,8 +409,7 @@ public:
     }
 
     void operator/=(const MX_Xd_scalar &scalar) {
-        for (unsigned int i = 0; i < nrows * ncols; i++)
-            this->casadi::MX::operator/=(scalar(0, 0));
+        this->casadi::MX::operator/=(scalar(0, 0));
     }
     MX_Xd_static<nrows, ncols> operator/(const MX_Xd_scalar &scalar) const {
         MX_Xd_static<nrows, ncols> result (*this);
