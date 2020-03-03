@@ -177,8 +177,6 @@ public:
         return norm() * norm();
     }
 
-
-
     void operator+=(
             const MX_Xd_dynamic& other) {
         this->casadi::MX::operator+=(other);
