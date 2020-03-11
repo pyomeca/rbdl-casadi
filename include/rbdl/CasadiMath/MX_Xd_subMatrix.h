@@ -38,6 +38,14 @@ public:
 
     }
 
+    MX_Xd_scalar norm() const {
+        return casadi::SubMatrix<casadi::MX, casadi::Slice, casadi::Slice>::norm_2(*this);
+    }
+
+    void normalize() {
+        *this /= norm();
+    }
+
     void operator=(const casadi::SubMatrix<casadi::MX, casadi::Slice, casadi::Slice>& submat){
         this->casadi::SubMatrix<casadi::MX, casadi::Slice, casadi::Slice>::operator=(submat);
     }
