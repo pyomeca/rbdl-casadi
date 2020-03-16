@@ -35,13 +35,28 @@ IF(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   SET_PROPERTY(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 ENDIF()
 
+# Choose the math's library backend to use
+set(MATH_LIBRARY_BACKEND Eigen3 CACHE STRING "Choose the backend library for the linear algebra.")
+# Set the possible values of build type for cmake-gui
+set_property(CACHE MATH_LIBRARY_BACKEND PROPERTY STRINGS "Eigen3" "Simple" "Casadi")
 
 OPTION (RBDL_BUILD_STATIC "Build statically linked library (otherwise dynamiclly linked)" ${RBDL_BUILD_STATIC_DEFAULT})
 OPTION (RBDL_BUILD_TESTS "Build the test executables" OFF)
 OPTION (RBDL_ENABLE_LOGGING "Enable logging (warning: major impact on performance!)" OFF)
 OPTION (RBDL_USE_SIMPLE_MATH "Use slow math instead of the fast Eigen3 library (faster compilation)" OFF)
-OPTION (RBDL_USE_CASADI_MATH "Use automatic differentiation Casadi library" OFF)
-option (RBDL_USE_EIGEN3_MATH "Use Eigen library" ON)
+if(${MATH_LIBRARY_BACKEND} STREQUAL "Eigen3")
+    set (RBDL_USE_EIGEN3_MATH ON)
+    set (RBDL_USE_SIMPLE_MATH OFF)
+    set (RBDL_USE_CASADI_MATH OFF)
+elseif(${MATH_LIBRARY_BACKEND} STREQUAL "Casadi")
+    set (RBDL_USE_EIGEN3_MATH OFF)
+    set (RBDL_USE_SIMPLE_MATH OFF)
+    set (RBDL_USE_CASADI_MATH ON)
+elseif(${MATH_LIBRARY_BACKEND} STREQUAL "Simple")
+    set (RBDL_USE_EIGEN3_MATH OFF)
+    set (RBDL_USE_SIMPLE_MATH ON)
+    set (RBDL_USE_CASADI_MATH OFF)
+endif()
 OPTION (RBDL_STORE_VERSION "Enable storing of version information in the library (requires build from valid repository)" OFF)
 OPTION (RBDL_BUILD_ADDON_URDFREADER "Build the (experimental) urdf reader" OFF)
 OPTION (RBDL_BUILD_ADDON_BENCHMARK "Build the benchmarking tool" OFF)
@@ -231,6 +246,19 @@ INSTALL (
   FILES  ${CMAKE_CURRENT_BINARY_DIR}/rbdl.pc
   DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
   )
+
+# Prepare share
+message(${CMAKE_INSTALL_INCLUDEDIR})
+include(CMakePackageConfigHelpers)
+configure_package_config_file(
+  share/RBDLConfig.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/RBDLConfig.cmake
+  INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/rbdl/cmake
+)
+install(FILES
+  ${CMAKE_CURRENT_BINARY_DIR}/RBDLConfig.cmake
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/rbdl/cmake
+)
 
 # Packaging
 SET(CPACK_GENERATOR "DEB")
