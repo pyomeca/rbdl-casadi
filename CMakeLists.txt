@@ -248,7 +248,6 @@ INSTALL (
   )
 
 # Prepare share
-message(${CMAKE_INSTALL_INCLUDEDIR})
 include(CMakePackageConfigHelpers)
 configure_package_config_file(
   share/RBDLConfig.cmake.in
