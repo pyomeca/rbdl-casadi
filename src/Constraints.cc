@@ -43,6 +43,7 @@ unsigned int ConstraintSet::AddContactConstraint (
   assert (bound == false);
 
   unsigned int n_constr = size() + 1;
+  has_constraints = true;
 
   std::string name_str;
   if (constraint_name != NULL) {
@@ -51,7 +52,7 @@ unsigned int ConstraintSet::AddContactConstraint (
 
   constraintType.push_back (ContactConstraint);
   name.push_back (name_str);
-  mContactConstraintIndices.push_back(size());
+  mContactConstraintIndices.push_back(n_constr-1);
 
   // These variables will be used for this type of constraint.
   body.push_back (body_id);
@@ -100,6 +101,7 @@ unsigned int ConstraintSet::AddLoopConstraint (
   assert (bound == false);
 
   unsigned int n_constr = size() + 1;
+  has_constraints = true;
 
   std::string name_str;
   if (constraint_name != NULL) {
@@ -108,7 +110,7 @@ unsigned int ConstraintSet::AddLoopConstraint (
 
   constraintType.push_back(LoopConstraint);
   name.push_back (name_str);
-  mLoopConstraintIndices.push_back(size());
+  mLoopConstraintIndices.push_back(n_constr-1);
 
   // These variables will be used for this kind of constraint.
   body_p.push_back (id_predecessor);
@@ -170,6 +172,7 @@ unsigned int ConstraintSet::AddCustomConstraint(
 
   unsigned int n_constr_start_idx = size();
   unsigned int n_constr_size      = size() + customConstraint->mConstraintCount;
+  has_constraints = true;
 
   std::string name_str;
   if (constraint_name != NULL) {

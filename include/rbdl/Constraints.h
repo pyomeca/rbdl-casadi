@@ -266,7 +266,8 @@ struct RBDL_DLLAPI CustomConstraint;
 struct RBDL_DLLAPI ConstraintSet {
   ConstraintSet() :
     linear_solver (Math::LinearSolverColPivHouseholderQR),
-    bound (false) {}
+    bound (false),
+    has_constraints (false){}
 
   // Enum to describe the type of a constraint.
   enum ConstraintType {
@@ -397,7 +398,10 @@ struct RBDL_DLLAPI ConstraintSet {
 
   /** \brief Returns the number of constraints. */
   size_t size() const {
-    return acceleration.size();
+    if (has_constraints)
+        return acceleration.size();
+    else
+        return 0;
   }
 
   /** \brief Clears all variables in the constraint set. */
@@ -450,6 +454,8 @@ struct RBDL_DLLAPI ConstraintSet {
   Math::MatrixNd H;
   /// Workspace for the coriolis forces.
   Math::VectorNd C;
+  /// If the ConstraintSet has at least one constraint
+  bool has_constraints;
   /// Workspace of the lower part of b.
   Math::VectorNd gamma;
   Math::MatrixNd G;
