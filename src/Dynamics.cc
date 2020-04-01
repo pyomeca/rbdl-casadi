@@ -612,7 +612,6 @@ RBDL_DLLAPI void ForwardDynamicsLagrangian (
   }
 #else
 #ifdef RBDL_USE_CASADI_MATH
-  std::cout << "BETTER SOLVER HERE" << std::endl;
     QDDot = H->inverse() * (*C * -1. + Tau);
 #else
   bool solve_successful = LinSolveGaussElimPivot (*H, *C * -1. + Tau, QDDot);
