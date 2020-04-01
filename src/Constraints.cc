@@ -378,7 +378,8 @@ void SolveConstrainedSystemDirect (
   LOG << "b = " << std::endl << b << std::endl;
 
 #ifdef RBDL_USE_CASADI_MATH
-  x = A.inverse() * b;
+  auto linsol = casadi::Linsol("linear_solver", "symbolicqr", A.sparsity());
+  x = linsol.solve(A, b);
 #else
   switch (linear_solver) {
     case (LinearSolverPartialPivLU) :
