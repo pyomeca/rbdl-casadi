@@ -521,7 +521,14 @@ void CalcConstraintsPositionError (
   Math::VectorNd& err,
   bool update_kinematics
   ) {
-  assert(err.size() == CS.size());
+  if (!CS.has_constraints)
+#ifdef RBDL_USE_CASADI_MATH
+    assert(err.size() == CS.size()+1);
+#else
+      assert(err.size() == CS.size());
+#endif
+  else
+    assert(err.size() == CS.size());
 
   if(update_kinematics) {
     UpdateKinematicsCustom (model, &Q, NULL, NULL);
