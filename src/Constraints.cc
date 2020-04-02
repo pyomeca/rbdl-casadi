@@ -437,7 +437,8 @@ void SolveConstrainedSystemRangeSpaceSparse (
   a = gamma - Y.transpose() * z;
 
 #ifdef RBDL_USE_CASADI_MATH
-  lambda = K.inverse() * a;
+  auto linsol = casadi::Linsol("linear_solver", "symbolicqr", K.sparsity());
+  lambda = linsol.solve(K, a);
 #else
   lambda = K.llt().solve(a);
 #endif
@@ -521,7 +522,14 @@ void CalcConstraintsPositionError (
   Math::VectorNd& err,
   bool update_kinematics
   ) {
-  assert(err.size() == CS.size());
+  if (!CS.has_constraints)
+#ifdef RBDL_USE_CASADI_MATH
+    assert(err.size() == CS.size()+1);
+#else
+      assert(err.size() == CS.size());
+#endif
+  else
+    assert(err.size() == CS.size());
 
   if(update_kinematics) {
     UpdateKinematicsCustom (model, &Q, NULL, NULL);
@@ -1653,7 +1661,8 @@ void ForwardDynamicsContactsKokkevis (
   }
 #else
 #ifdef RBDL_USE_CASADI_MATH
-    CS.force = CS.K.inverse() * CS.a;
+    auto linsol = casadi::Linsol("linear_solver", "symbolicqr", CS.K.sparsity());
+    CS.force = linsol.solve(CS.K, CS.a);
 #else
   bool solve_successful = LinSolveGaussElimPivot (CS.K, CS.a, CS.force);
   assert (solve_successful);
@@ -1697,7 +1706,8 @@ void SolveLinearSystem (
 
   // Solve the sistem A*x = b.
 #ifdef RBDL_USE_CASADI_MATH
-  x = A.inverse() * b;
+  auto linsol = casadi::Linsol("linear_solver", "symbolicqr", A.sparsity());
+  x = linsol.solve(A, b);
 #else
   switch (ls) {
   case (LinearSolverPartialPivLU) :
