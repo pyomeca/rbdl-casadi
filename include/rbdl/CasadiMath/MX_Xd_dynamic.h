@@ -52,22 +52,25 @@ public:
     static MX_Xd_dynamic Zero(unsigned int nrows, unsigned int ncols = 1){
         return casadi::MX::zeros(nrows, ncols);
     }
-    void setZero(){
+    MX_Xd_dynamic& setZero(){
         *this = casadi::MX::zeros(this->rows(), this->cols());
+        return *this;
     }
 
     static MX_Xd_dynamic One(unsigned int nrows, unsigned int ncols = 1){
         return casadi::MX::ones(nrows, ncols);
     }
-    void setOnes(){
+    MX_Xd_dynamic& setOnes(){
         *this = casadi::MX::ones(this->rows(), this->cols());
+        return *this;
     }
 
     static MX_Xd_dynamic Identity(unsigned int size, unsigned int ignoredSize = 0){
         return casadi::MX::eye(size);
     }
-    void setIdentity(){
+    MX_Xd_dynamic& setIdentity(){
         *this = casadi::MX::eye(cols());
+        return *this;
     }
 
     MX_Xd_SubMatrix operator[](unsigned int i) {
