@@ -65,31 +65,6 @@ OPTION (RBDL_BUILD_PYTHON_WRAPPER "Build experimental python wrapper" OFF)
 OPTION (RBDL_BUILD_ADDON_GEOMETRY "Build the geometry library" OFF)
 OPTION (RBDL_BUILD_ADDON_MUSCLE "Build the muscle library" OFF)
 
-# Make sure only one math library is selected priorizing the following order: Casadi, Eigen, Simple
-IF (RBDL_USE_CASADI_MATH)
-    IF(RBDL_USE_SIMPLE_MATH)
-        MESSAGE (WARNING "You can not use both Casadi and Simple math. Automatically choosing RBDL_USE_CASADI_MATH.")
-        SET (RBDL_USE_SIMPLE_MATH OFF)
-    ENDIF(RBDL_USE_SIMPLE_MATH)
-
-    IF (RBDL_USE_EIGEN3_MATH)
-        MESSAGE (WARNING "You can not use both Casadi and Eigen3 math. Automatically choosing RBDL_USE_CASADI_MATH.")
-        SET (RBDL_USE_EIGEN3_MATH OFF)
-    ENDIF(RBDL_USE_EIGEN3_MATH)
-ENDIF(RBDL_USE_CASADI_MATH)
-
-IF (RBDL_USE_EIGEN3_MATH)
-    IF(RBDL_USE_SIMPLE_MATH)
-        MESSAGE (WARNING "You can not use both Eigen and Simple math. Automatically choosing RBDL_USE_EIGEN3_MATH.")
-        SET (RBDL_USE_SIMPLE_MATH OFF)
-    ENDIF(RBDL_USE_SIMPLE_MATH)
-ENDIF (RBDL_USE_EIGEN3_MATH)
-
-IF (NOT RBDL_USE_CASADI_MATH AND NOT RBDL_USE_EIGEN3_MATH AND NOT RBDL_USE_SIMPLE_MATH)
-    MESSAGE (WARNING "You have to choose exactly one library. Automatically choosing RBDL_USE_EIGEN3_MATH.")
-    SET(RBDL_USE_EIGEN3_MATH ON)
-ENDIF (NOT RBDL_USE_CASADI_MATH AND NOT RBDL_USE_EIGEN3_MATH AND NOT RBDL_USE_SIMPLE_MATH)
-
 # Loading the appropriate packages
 IF (RBDL_USE_CASADI_MATH)
     FIND_PACKAGE (Casadi REQUIRED)
