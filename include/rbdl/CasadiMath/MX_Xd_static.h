@@ -253,22 +253,25 @@ public:
     static MX_Xd_static Identity(){
         return casadi::MX::eye(ncols);
     }
-    void setIdentity(){
+    MX_Xd_static& setIdentity(){
         *this = casadi::MX::eye(ncols);
+        return *this;
     }
 
     static MX_Xd_static Zero(){
         return MX_Xd_static<nrows, ncols>::zeros(nrows, ncols);
     }
-    void setZero(){
+    MX_Xd_static& setZero(){
         *this = casadi::MX::zeros(this->rows(), this->cols());
+        return *this;
     }
 
     static MX_Xd_static One(){
         return MX_Xd_static<nrows, ncols>::ones(nrows, ncols);
     }
-    void setOnes(){
+    MX_Xd_static& setOnes(){
         *this = casadi::MX::ones(this->rows(), this->cols());
+        return *this;
     }
 
 
