@@ -363,7 +363,7 @@ RBDL_DLLAPI void ForwardDynamics (
     model.pA[i] = crossf(model.v[i],model.I[i] * model.v[i]);
 
 #ifdef RBDL_USE_CASADI_MATH
-    if (f_ext != NULL && (*f_ext)[i].is_zero()) {
+    if (f_ext != NULL) {
 #else
     if (f_ext != NULL && (*f_ext)[i] != SpatialVector::Zero()) {
 #endif
