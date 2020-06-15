@@ -58,7 +58,7 @@ struct RBDL_DLLAPI Body {
    * \param com  the position of the center of mass in the bodies coordinates
    * \param gyration_radii the radii of gyration at the center of mass of the body
    */
-  Body(const double &mass,
+  Body(const Math::Scalar &mass,
       const Math::Vector3d &com,
       const Math::Vector3d &gyration_radii) :
     mMass (mass),
@@ -82,7 +82,7 @@ struct RBDL_DLLAPI Body {
    * \param com  the position of the center of mass in the bodies coordinates
    * \param inertia_C the inertia at the center of mass
    */
-  Body(const double &mass,
+  Body(const Math::Scalar &mass,
       const Math::Vector3d &com,
       const Math::Matrix3d &inertia_C) :
     mMass (mass),
@@ -107,7 +107,7 @@ struct RBDL_DLLAPI Body {
   void Join (const Math::SpatialTransform &transform, const Body &other_body) {
     // nothing to do if we join a massles body to the current.
 #ifdef RBDL_USE_CASADI_MATH
-    if (other_body.mMass == 0. && other_body.mInertia.is_zero()) {
+    if (other_body.mMass.is_zero() && other_body.mInertia.is_zero()) {
       return;
     }
 #else
@@ -116,14 +116,20 @@ struct RBDL_DLLAPI Body {
     }
 #endif
 
-    double other_mass = other_body.mMass;
-    double new_mass = mMass + other_mass;
+    Math::Scalar other_mass = other_body.mMass;
+    Math::Scalar new_mass = mMass + other_mass;
 
+#ifdef RBDL_USE_CASADI_MATH
+    if (new_mass.is_zero()) {
+#else
     if (new_mass == 0.) {
+#endif
+
       std::cerr << "Error: cannot join bodies as both have zero mass!" << std::endl;
       assert (false);
       abort();
     }
+
 
     Math::Vector3d other_com = transform.E.transpose() * other_body.mCenterOfMass + transform.r;
     Math::Vector3d new_com = (1 / new_mass ) * (mMass * mCenterOfMass + other_mass * other_com);
@@ -177,7 +183,7 @@ struct RBDL_DLLAPI Body {
   ~Body() {};
 
   /// \brief The mass of the body
-  double mMass;
+  Math::Scalar mMass;
   /// \brief The position of the center of mass in body coordinates
   Math::Vector3d mCenterOfMass;
   /// \brief Inertia matrix at the center of mass
@@ -194,7 +200,7 @@ struct RBDL_DLLAPI Body {
  */
 struct RBDL_DLLAPI FixedBody {
   /// \brief The mass of the body
-  double mMass;
+  Math::Scalar mMass;
   /// \brief The position of the center of mass in body coordinates
   Math::Vector3d mCenterOfMass;
   /// \brief The spatial inertia that contains both mass and inertia information
