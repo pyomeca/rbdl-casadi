@@ -121,17 +121,15 @@ struct RBDL_DLLAPI Body {
 
 #ifdef RBDL_USE_CASADI_MATH
     if (new_mass.is_zero()) {
-      std::cerr << "Error: cannot join bodies as both have zero mass!" << std::endl;
-      assert (false);
-      abort();
-    }
 #else
     if (new_mass == 0.) {
+#endif
+
       std::cerr << "Error: cannot join bodies as both have zero mass!" << std::endl;
       assert (false);
       abort();
     }
-#endif
+
 
     Math::Vector3d other_com = transform.E.transpose() * other_body.mCenterOfMass + transform.r;
     Math::Vector3d new_com = (1 / new_mass ) * (mMass * mCenterOfMass + other_mass * other_com);
