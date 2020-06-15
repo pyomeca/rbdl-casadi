@@ -111,7 +111,7 @@ struct RBDL_DLLAPI Body {
       return;
     }
 #else
-    if (other_body.mMass.is_zero() && other_body.mInertia == Math::Matrix3d::Zero()) {
+    if (other_body.mMass == 0. && other_body.mInertia == Math::Matrix3d::Zero()) {
       return;
     }
 #endif
@@ -119,11 +119,19 @@ struct RBDL_DLLAPI Body {
     Math::Scalar other_mass = other_body.mMass;
     Math::Scalar new_mass = mMass + other_mass;
 
+#ifdef RBDL_USE_CASADI_MATH
     if (new_mass.is_zero()) {
       std::cerr << "Error: cannot join bodies as both have zero mass!" << std::endl;
       assert (false);
       abort();
     }
+#else
+    if (new_mass == 0.) {
+      std::cerr << "Error: cannot join bodies as both have zero mass!" << std::endl;
+      assert (false);
+      abort();
+    }
+#endif
 
     Math::Vector3d other_com = transform.E.transpose() * other_body.mCenterOfMass + transform.r;
     Math::Vector3d new_com = (1 / new_mass ) * (mMass * mCenterOfMass + other_mass * other_com);
