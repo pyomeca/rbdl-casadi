@@ -107,11 +107,11 @@ struct RBDL_DLLAPI Body {
   void Join (const Math::SpatialTransform &transform, const Body &other_body) {
     // nothing to do if we join a massles body to the current.
 #ifdef RBDL_USE_CASADI_MATH
-    if (other_body.mMass == 0. && other_body.mInertia.is_zero()) {
+    if (other_body.mMass.is_zero() && other_body.mInertia.is_zero()) {
       return;
     }
 #else
-    if (other_body.mMass == 0. && other_body.mInertia == Math::Matrix3d::Zero()) {
+    if (other_body.mMass.is_zero() && other_body.mInertia == Math::Matrix3d::Zero()) {
       return;
     }
 #endif
@@ -119,7 +119,7 @@ struct RBDL_DLLAPI Body {
     Math::Scalar other_mass = other_body.mMass;
     Math::Scalar new_mass = mMass + other_mass;
 
-    if (new_mass == 0.) {
+    if (new_mass.is_zero()) {
       std::cerr << "Error: cannot join bodies as both have zero mass!" << std::endl;
       assert (false);
       abort();
