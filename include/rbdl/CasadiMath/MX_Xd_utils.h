@@ -326,6 +326,10 @@ inline MX_Xd_scalar operator-(
 }
 
 
+inline RBDLCasadiMath::MX_Xd_scalar exp(const RBDLCasadiMath::MX_Xd_scalar& x){
+    return casadi::MX::exp(x);
+}
+
 namespace std {
 using namespace RBDLCasadiMath;
 
