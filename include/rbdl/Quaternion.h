@@ -79,11 +79,7 @@ class Quaternion : public Vector4d {
 #endif
 
       Scalar angle = acos (dot(quat) / s);
-#ifdef RBDL_USE_CASADI_MATH
-      if (angle.is_zero() || std::isnan(angle)) {
-        return *this;
-      }
-#else
+#ifndef RBDL_USE_CASADI_MATH
       if (angle == 0. || std::isnan(angle)) {
         return *this;
       }
