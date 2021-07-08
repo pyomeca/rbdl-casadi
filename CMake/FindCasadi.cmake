@@ -11,19 +11,16 @@ if (Casadi_INCLUDE_DIR)
 endif (Casadi_INCLUDE_DIR)
 
 find_path (Casadi_INCLUDE_DIR "casadi.hpp" 
-    PATHS ${CMAKE_INSTALL_PREFIX}/include/casadi ${CMAKE_INSTALL_PREFIX}/Library/include/casadi
+  PATHS ${CMAKE_INSTALL_PREFIX}/include/casadi ${CMAKE_INSTALL_PREFIX}/Library/include/casadi
 )
 find_library (Casadi_LIBRARY NAMES casadi 
-    PATHS ${CMAKE_INSTALL_PREFIX}/lib ${CMAKE_INSTALL_PREFIX}/Library/lib
+  PATHS ${CMAKE_INSTALL_PREFIX}/lib ${CMAKE_INSTALL_PREFIX}/Library/lib
 )
 
-# handle the QUIETLY and REQUIRED arguments and set Casadi_FOUND to TRUE if
+# handle the QUIETLY and REQUIRED arguments and set Casadi_FOUND to TRUE if 
 # all listed variables are TRUE
 include (FindPackageHandleStandardArgs)
 find_package_handle_standard_args (Casadi DEFAULT_MSG 
-    Casadi_LIBRARY
-    Casadi_INCLUDE_DIR
+  Casadi_LIBRARY
+  Casadi_INCLUDE_DIR
 )
-
-
-
