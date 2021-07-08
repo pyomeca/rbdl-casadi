@@ -137,7 +137,7 @@ RBDL_DLLAPI Math::Matrix3d CalcBodyWorldOrientation (
  * Before calling this function one has to ensure that all other values
  * have been set to zero, e.g. by calling G.setZero().
  *
- */
+ */ 
 RBDL_DLLAPI void CalcPointJacobian (Model &model,
     const Math::VectorNd &Q,
     unsigned int body_id,
@@ -165,7 +165,7 @@ RBDL_DLLAPI void CalcPointJacobian (Model &model,
  * Before calling this function one has to ensure that all other values
  * have been set to zero, e.g. by calling G.setZero().
  *
- */
+ */ 
 RBDL_DLLAPI void CalcPointJacobian6D (Model &model,
     const Math::VectorNd &Q,
     unsigned int body_id,
@@ -353,8 +353,70 @@ RBDL_DLLAPI
       Math::VectorNd &Qres,
       double step_tol = 1.0e-12,
       double lambda = 0.01,
-      unsigned int max_iter = 50
+      unsigned int max_iter = 55
       );
+
+RBDL_DLLAPI Math::Vector3d CalcAngularVelocityfromMatrix (
+    const Math::Matrix3d &RotMat);
+
+struct RBDL_DLLAPI InverseKinematicsConstraintSet {
+  enum ConstraintType {
+    ConstraintTypePosition = 0,
+    ConstraintTypeOrientation,
+    ConstraintTypeFull,
+    ConstraintTypePositionXY,
+    ConstraintTypePositionZ,
+    ConstraintTypePositionCoMXY
+  };
+
+  InverseKinematicsConstraintSet();
+
+  Math::MatrixNd J; /// the Jacobian of all constraints
+  Math::MatrixNd G; /// temporary storage of a single body Jacobian
+  Math::VectorNd e; /// Vector with all the constraint residuals.
+
+  unsigned int num_constraints; //size of all constraints
+  double lambda; /// Damping factor, the default value of 1.0e-6 is reasonable for most problems
+  unsigned int num_steps; // The number of iterations performed
+  unsigned int max_steps; // Maximum number of steps (default 300), abort if more steps are performed.
+  double step_tol; // Step tolerance (default = 1.0e-12). If the computed step length is smaller than this value the algorithm terminates successfully (i.e. returns true). If error_norm is still larger than constraint_tol then this usually means that the target is unreachable.
+  double constraint_tol; // Constraint tolerance (default = 1.0e-12). If error_norm is smaller than this value the algorithm terminates successfully, i.e. all constraints are satisfied.
+  double error_norm; // Norm of the constraint residual vector.
+  double delta_q_norm; //Norm of the change in generalized coordinates
+
+  // everything to define a IKin constraint
+  std::vector<ConstraintType> constraint_type;
+  std::vector<unsigned int> body_ids;
+  std::vector<Math::Vector3d> body_points;
+  std::vector<Math::Vector3d> target_positions;
+  std::vector<Math::Matrix3d> target_orientations;
+  std::vector<unsigned int> constraint_row_index;
+  std::vector<float> constraint_weight;
+
+  // Adds a point constraint that tries to get a body point close to a 
+  // point described in base coordinates.
+  unsigned int AddPointConstraint (unsigned int body_id, const Math::Vector3d &body_point, const Math::Vector3d &target_pos, float weight = 1.);
+  // Adds an orientation constraint that tries to align a body to the
+  // orientation specified as a rotation matrix expressed in base
+  // coordinates.
+  unsigned int AddOrientationConstraint (unsigned int body_id, const Math::Matrix3d &target_orientation, float weight = 1.);
+  // Adds a constraint on both location and orientation of a body.
+  unsigned int AddFullConstraint (unsigned int body_id, const Math::Vector3d &body_point, const Math::Vector3d &target_pos, const Math::Matrix3d &target_orientation, float weight = 1.);
+  // Clears all entries of the constraint setting
+  unsigned int ClearConstraints(); 
+  
+  unsigned int AddPointConstraintXY (unsigned int body_id, const Math::Vector3d &body_point, const Math::Vector3d &target_pos, float weight = 1.);
+  unsigned int AddPointConstraintZ  (unsigned int body_id, const Math::Vector3d &body_point, const Math::Vector3d &target_pos, float weight = 1.);
+  unsigned int AddPointConstraintCoMXY (unsigned int body_id, const Math::Vector3d &target_pos, float weight = 1.);
+
+};
+
+RBDL_DLLAPI bool InverseKinematics (
+    Model &model,
+    const Math::VectorNd &Qinit,
+    InverseKinematicsConstraintSet &CS,
+    Math::VectorNd &Qres
+    );
 #endif
 
 /** @} */

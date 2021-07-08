@@ -71,18 +71,17 @@ class Quaternion : public Vector4d {
       // check whether one of the two has 0 length
       Scalar s = std::sqrt (squaredNorm() * quat.squaredNorm());
 
-      // division by 0.f is unhealthy!
-#ifdef RBDL_USE_CASADI_MATH
-      assert (!s.is_zero());
-#else
-      assert (s != 0.);
-#endif
+      // division by 0.f is unhealthy
+      #ifndef RBDL_USE_CASADI_MATH
+        assert (s != 0.);
+      #endif
 
       Scalar angle = acos (dot(quat) / s);
 #ifndef RBDL_USE_CASADI_MATH
       if (angle == 0. || std::isnan(angle)) {
         return *this;
       }
+      assert(!std::isnan(angle));
 #endif
 
       Scalar d = 1. / std::sin (angle);
