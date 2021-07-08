@@ -20,7 +20,8 @@
 using namespace RigidBodyDynamics;
 using namespace RigidBodyDynamics::Math;
 
-Model::Model() {
+Model::Model()
+{
   Body root_body;
   Joint root_joint;
 
@@ -69,8 +70,8 @@ Model::Model() {
 
   f.push_back (zero_spatial);
   SpatialRigidBodyInertia rbi(0.,
-      Vector3d (0., 0., 0.),
-      Matrix3d::Zero());
+                              Vector3d (0., 0., 0.),
+                              Matrix3d::Zero());
   Ic.push_back (rbi);
   I.push_back(rbi);
   hc.push_back (zero_spatial);
@@ -87,12 +88,13 @@ Model::Model() {
 }
 
 unsigned int AddBodyFixedJoint (
-    Model &model,
-    const unsigned int parent_id,
-    const SpatialTransform &joint_frame,
-    const Joint &joint,
-    const Body &body,
-    std::string body_name) {
+  Model &model,
+  const unsigned int parent_id,
+  const SpatialTransform &joint_frame,
+  const Joint &joint,
+  const Body &body,
+  std::string body_name)
+{
   FixedBody fbody = FixedBody::CreateFromBody (body);
   fbody.mMovableParent = parent_id;
   fbody.mParentTransform = joint_frame;
@@ -111,72 +113,72 @@ unsigned int AddBodyFixedJoint (
   model.mBodies[fbody.mMovableParent] = parent_body;
   model.I[fbody.mMovableParent] =
     SpatialRigidBodyInertia::createFromMassComInertiaC (
-        parent_body.mMass,
-        parent_body.mCenterOfMass,
-        parent_body.mInertia);
+      parent_body.mMass,
+      parent_body.mCenterOfMass,
+      parent_body.mInertia);
 
   model.mFixedBodies.push_back (fbody);
 
-  if (model.mFixedBodies.size() >
-      std::numeric_limits<unsigned int>::max() - model.fixed_body_discriminator) {
-    std::cerr << "Error: cannot add more than "
-      << std::numeric_limits<unsigned int>::max()
-      - model.mFixedBodies.size()
-      << " fixed bodies. You need to modify "
-      << "Model::fixed_body_discriminator for this."
-      << std::endl;
-    assert (0);
-    abort();
+  if (model.mFixedBodies.size() > std::numeric_limits<unsigned int>::max() -
+      model.fixed_body_discriminator) {
+    std::ostringstream errormsg;
+    errormsg  << "Error: cannot add more than "
+              << std::numeric_limits<unsigned int>::max() - model.mFixedBodies.size()
+              << " fixed bodies. You need to modify "
+              << "Model::fixed_body_discriminator for this."
+              << std::endl;
+    throw Errors::RBDLError(errormsg.str());
   }
 
   if (body_name.size() != 0) {
     if (model.mBodyNameMap.find(body_name) != model.mBodyNameMap.end()) {
-      std::cerr << "Error: Body with name '"
-        << body_name
-        << "' already exists!"
-        << std::endl;
-      assert (0);
-      abort();
+      std::ostringstream errormsg;
+      errormsg << "Error: Body with name '"
+               << body_name
+               << "' already exists!"
+               << std::endl;
+      throw Errors::RBDLError(errormsg.str());
     }
     model.mBodyNameMap[body_name] = model.mFixedBodies.size()
-      + model.fixed_body_discriminator - 1;
+                                    + model.fixed_body_discriminator - 1;
   }
 
   return model.mFixedBodies.size() + model.fixed_body_discriminator - 1;
 }
 
 unsigned int AddBodyMultiDofJoint (
-    Model &model,
-    const unsigned int parent_id,
-    const SpatialTransform &joint_frame,
-    const Joint &joint,
-    const Body &body,
-    std::string body_name) {
+  Model &model,
+  const unsigned int parent_id,
+  const SpatialTransform &joint_frame,
+  const Joint &joint,
+  const Body &body,
+  std::string body_name)
+{
   // Here we emulate multi DoF joints by simply adding nullbodies. This
   // allows us to use fixed size elements for S,v,a, etc. which is very
   // fast in Eigen.
   unsigned int joint_count = 0;
-  if (joint.mJointType == JointType1DoF)
+  if (joint.mJointType == JointType1DoF) {
     joint_count = 1;
-  else if (joint.mJointType == JointType2DoF)
+  } else if (joint.mJointType == JointType2DoF) {
     joint_count = 2;
-  else if (joint.mJointType == JointType3DoF)
+  } else if (joint.mJointType == JointType3DoF) {
     joint_count = 3;
-  else if (joint.mJointType == JointType4DoF)
+  } else if (joint.mJointType == JointType4DoF) {
     joint_count = 4;
-  else if (joint.mJointType == JointType5DoF)
+  } else if (joint.mJointType == JointType5DoF) {
     joint_count = 5;
-  else if (joint.mJointType == JointType6DoF)
+  } else if (joint.mJointType == JointType6DoF) {
     joint_count = 6;
-  else if (joint.mJointType == JointTypeFloatingBase)
+  } else if (joint.mJointType == JointTypeFloatingBase)
     // no action required
   {}
   else {
-    std::cerr << "Error: Invalid joint type: "
-      << joint.mJointType
-      << std::endl;
-
-    assert (0 && !"Invalid joint type!");
+    std::ostringstream errormsg;
+    errormsg << "Error: Invalid joint type: "
+             << joint.mJointType
+             << std::endl;
+    throw Errors::RBDLError(errormsg.str());
   }
 
   Body null_body (0., Vector3d (0., 0., 0.), Vector3d (0., 0., 0.));
@@ -187,15 +189,15 @@ unsigned int AddBodyMultiDofJoint (
 
   if (joint.mJointType == JointTypeFloatingBase) {
     null_parent = model.AddBody (parent_id,
-        joint_frame,
-        JointTypeTranslationXYZ,
-        null_body);
+                                 joint_frame,
+                                 JointTypeTranslationXYZ,
+                                 null_body);
 
     return model.AddBody (null_parent,
-        SpatialTransform(),
-        JointTypeSpherical,
-        body,
-        body_name);
+                          SpatialTransform(),
+                          JointTypeSpherical,
+                          body,
+                          body_name);
   }
 
   Joint single_dof_joint;
@@ -209,13 +211,13 @@ unsigned int AddBodyMultiDofJoint (
 
     if (single_dof_joint.mJointType == JointType1DoF) {
       Vector3d rotation (
-          joint.mJointAxes[j][0],
-          joint.mJointAxes[j][1],
-          joint.mJointAxes[j][2]);
+        joint.mJointAxes[j][0],
+        joint.mJointAxes[j][1],
+        joint.mJointAxes[j][2]);
       Vector3d translation (
-          joint.mJointAxes[j][3],
-          joint.mJointAxes[j][4],
-          joint.mJointAxes[j][5]);
+        joint.mJointAxes[j][3],
+        joint.mJointAxes[j][4],
+        joint.mJointAxes[j][5]);
 
 #ifdef RBDL_USE_CASADI_MATH
       if (rotation.is_zero()) {
@@ -225,7 +227,7 @@ unsigned int AddBodyMultiDofJoint (
         single_dof_joint = Joint (JointTypePrismatic, translation);
       }
 #ifdef RBDL_USE_CASADI_MATH
-      else if (translation.is_zero()) {
+      if (translation.is_zero()) {
 #else
       else if (translation == Vector3d (0., 0., 0.)) {
 #endif
@@ -235,69 +237,72 @@ unsigned int AddBodyMultiDofJoint (
 
     // the first joint has to be transformed by joint_frame, all the
     // others must have a null transformation
-    if (j == 0)
+    if (j == 0) {
       joint_frame_transform = joint_frame;
-    else
+    } else {
       joint_frame_transform = SpatialTransform();
+    }
 
     if (j == joint_count - 1)
       // if we are at the last we must add the real body
+    {
       break;
-    else {
+    } else {
       // otherwise we just add an intermediate body
       null_parent = model.AddBody (null_parent,
-          joint_frame_transform,
-          single_dof_joint,
-          null_body);
+                                   joint_frame_transform,
+                                   single_dof_joint,
+                                   null_body);
     }
   }
 
   return model.AddBody (null_parent,
-      joint_frame_transform,
-      single_dof_joint,
-      body,
-      body_name);
+                        joint_frame_transform,
+                        single_dof_joint,
+                        body,
+                        body_name);
 }
 
 unsigned int Model::AddBody(
-    const unsigned int parent_id,
-    const SpatialTransform &joint_frame,
-    const Joint &joint,
-    const Body &body,
-    std::string body_name) {
+  const unsigned int parent_id,
+  const SpatialTransform &joint_frame,
+  const Joint &joint,
+  const Body &body,
+  std::string body_name)
+{
   assert (lambda.size() > 0);
   assert (joint.mJointType != JointTypeUndefined);
 
   if (joint.mJointType == JointTypeFixed) {
     previously_added_body_id = AddBodyFixedJoint (*this,
-        parent_id,
-        joint_frame,
-        joint,
-        body,
-        body_name);
+                               parent_id,
+                               joint_frame,
+                               joint,
+                               body,
+                               body_name);
 
     return previously_added_body_id;
   } else if ( (joint.mJointType == JointTypeSpherical)
-      || (joint.mJointType == JointTypeEulerZYX)
-      || (joint.mJointType == JointTypeEulerXYZ)
-      || (joint.mJointType == JointTypeEulerYXZ)
-      || (joint.mJointType == JointTypeTranslationXYZ)
-      || (joint.mJointType == JointTypeCustom)
-      ) {
+              || (joint.mJointType == JointTypeEulerZYX)
+              || (joint.mJointType == JointTypeEulerXYZ)
+              || (joint.mJointType == JointTypeEulerYXZ)
+              || (joint.mJointType == JointTypeTranslationXYZ)
+              || (joint.mJointType == JointTypeCustom)
+            ) {
     // no action required
   } else if (joint.mJointType != JointTypePrismatic
-      && joint.mJointType != JointTypeRevolute
-      && joint.mJointType != JointTypeRevoluteX
-      && joint.mJointType != JointTypeRevoluteY
-      && joint.mJointType != JointTypeRevoluteZ
-      && joint.mJointType != JointTypeHelical
-      ) {
+             && joint.mJointType != JointTypeRevolute
+             && joint.mJointType != JointTypeRevoluteX
+             && joint.mJointType != JointTypeRevoluteY
+             && joint.mJointType != JointTypeRevoluteZ
+             && joint.mJointType != JointTypeHelical
+            ) {
     previously_added_body_id = AddBodyMultiDofJoint (*this,
-        parent_id,
-        joint_frame,
-        joint,
-        body,
-        body_name);
+                               parent_id,
+                               joint_frame,
+                               joint,
+                               body,
+                               body_name);
     return previously_added_body_id;
   }
 
@@ -322,7 +327,7 @@ unsigned int Model::AddBody(
   } else if (mJoints[mJoints.size() - 1].mJointType == JointTypeCustom) {
     unsigned int custom_index = mJoints[mJoints.size() - 1].custom_joint_index;
     lambda_q_last = lambda_q_last
-      + mCustomJoints[mCustomJoints.size() - 1]->mDoFCount;
+                    + mCustomJoints[mCustomJoints.size() - 1]->mDoFCount;
   }
 
   for (unsigned int i = 0; i < joint.mDoFCount; i++) {
@@ -338,12 +343,12 @@ unsigned int Model::AddBody(
 
   if (body_name.size() != 0) {
     if (mBodyNameMap.find(body_name) != mBodyNameMap.end()) {
-      std::cerr << "Error: Body with name '"
-        << body_name
-        << "' already exists!"
-        << std::endl;
-      assert (0);
-      abort();
+      std::ostringstream errormsg;
+      errormsg << "Error: Body with name '"
+               << body_name
+               << "' already exists!"
+               << std::endl;
+      throw Errors::RBDLError(errormsg.str());
     }
     mBodyNameMap[body_name] = mBodies.size() - 1;
   }
@@ -392,7 +397,7 @@ unsigned int Model::AddBody(
   }
 
   q_size = dof_count
-    + multdof3_joint_counter;
+           + multdof3_joint_counter;
 
   qdot_size = qdot_size + joint.mDoFCount;
 
@@ -422,13 +427,12 @@ unsigned int Model::AddBody(
   hdotc.push_back (SpatialVector(0., 0., 0., 0., 0., 0.));
 
   if (mBodies.size() == fixed_body_discriminator) {
-    std::cerr << "Error: cannot add more than "
-      << fixed_body_discriminator
-      <<  " movable bodies. You need to modify "
-      "Model::fixed_body_discriminator for this."
-      << std::endl;
-    assert (0);
-    abort();
+    std::ostringstream errormsg;
+    errormsg << "Error: cannot add more than "
+             << fixed_body_discriminator
+             <<  " movable bodies. You need to modify Model::fixed_body_discriminator for this."
+             << std::endl;
+    throw Errors::RBDLError(errormsg.str());
   }
 
   previously_added_body_id = mBodies.size() - 1;
@@ -439,7 +443,7 @@ unsigned int Model::AddBody(
   std::vector<std::pair<JointType, unsigned int> > joint_types;
   for (unsigned int i = 0; i < mJoints.size(); i++) {
     joint_types.push_back(
-        std::pair<JointType, unsigned int> (mJoints[i].mJointType,i));
+      std::pair<JointType, unsigned int> (mJoints[i].mJointType,i));
     mJointUpdateOrder.push_back (mJoints[i].mJointType);
   }
 
@@ -470,23 +474,25 @@ unsigned int Model::AddBody(
 }
 
 unsigned int Model::AppendBody (
-    const Math::SpatialTransform &joint_frame,
-    const Joint &joint,
-    const Body &body,
-    std::string body_name) {
+  const Math::SpatialTransform &joint_frame,
+  const Joint &joint,
+  const Body &body,
+  std::string body_name)
+{
   return Model::AddBody (previously_added_body_id,
-      joint_frame,
-      joint,
-      body,
-      body_name);
+                         joint_frame,
+                         joint,
+                         body,
+                         body_name);
 }
 
 unsigned int Model::AddBodyCustomJoint (
-    const unsigned int parent_id,
-    const Math::SpatialTransform &joint_frame,
-    CustomJoint *custom_joint,
-    const Body &body,
-    std::string body_name) {
+  const unsigned int parent_id,
+  const Math::SpatialTransform &joint_frame,
+  CustomJoint *custom_joint,
+  const Body &body,
+  std::string body_name)
+{
   Joint proxy_joint (JointTypeCustom, custom_joint->mDoFCount);
   proxy_joint.custom_joint_index = mCustomJoints.size();
   //proxy_joint.mDoFCount = custom_joint->mDoFCount; //MM added. Otherwise
@@ -495,10 +501,10 @@ unsigned int Model::AddBodyCustomJoint (
   mCustomJoints.push_back (custom_joint);
 
   unsigned int body_id = AddBody (parent_id,
-      joint_frame,
-      proxy_joint,
-      body,
-      body_name);
+                                  joint_frame,
+                                  proxy_joint,
+                                  body,
+                                  body_name);
 
   return body_id;
 }

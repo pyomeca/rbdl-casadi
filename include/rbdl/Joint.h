@@ -12,8 +12,10 @@
 #include <assert.h>
 #include <iostream>
 #include "rbdl/Logging.h"
+#include "rbdl/rbdl_errors.h"
 
-namespace RigidBodyDynamics {
+namespace RigidBodyDynamics
+{
 
 struct Model;
 
@@ -122,7 +124,7 @@ struct Model;
  * Singularities in the models arise when a joint has three rotational
  * degrees of freedom and the rotations are described by Euler- or
  * Cardan-angles. The singularities present in these rotation
- * parametrizations (e.g. for ZYX Euler-angles for rotations where a 
+ * parametrizations (e.g. for ZYX Euler-angles for rotations where a
  * +/- 90 degrees rotation around the Y-axis) may cause problems in
  * dynamics calculations, such as a rank-deficit joint-space inertia matrix
  * or exploding accelerations in the forward dynamics calculations.
@@ -153,12 +155,12 @@ struct Model;
  * the joint is appended to \f$\mathbf{q}\f$. E.g. for a model with the joints:
  * TX, Spherical, TY, Spherical, the values of \f$\mathbf{q},\mathbf{\bar{q}},\mathbf{\bar{\bar{q}}},\mathbf{\tau}\f$ are:
  *
- 
+
  \f{eqnarray*}
         \mathbf{q} &=& ( q_{tx}, q_{q1,x}, q_{q1,y}, q_{q1,z}, q_{ty}, q_{q2,x}, q_{q2,y}, q_{q2,z}, q_{q1,w}, q_{q2,w})^T \\
   \mathbf{\bar{q}} &=& ( \dot{q}_{tx}, \omega_{1,x}, \omega_{1,y}, \omega_{1,z}, \dot{q}_{ty}, \omega_{2,x}, \omega_{2,y}, \omega_{2,z} )^T \\
   \mathbf{\bar{\bar{q}}} &=& ( \ddot{q}_{tx}, \dot{\omega}_{1,x}, \dot{\omega}_{1,y}, \dot{\omega}_{1,z}, \ddot{q}_{ty}, \dot{\omega}_{2,x}, \dot{\omega}_{2,y}, \dot{\omega}_{2,z} )^T \\
-  \mathbf{\tau} &=& ( \tau_{tx}, \tau_{1,x}, \tau_{1,y}, \tau_{1,z}, \tau_{ty}, \tau_{2,x}, \tau_{2,y}, \tau_{2,z} )^T 
+  \mathbf{\tau} &=& ( \tau_{tx}, \tau_{1,x}, \tau_{1,y}, \tau_{1,z}, \tau_{ty}, \tau_{2,x}, \tau_{2,y}, \tau_{2,z} )^T
   \f}
 
   * \subsection spherical_integration Numerical Integration of Quaternions
@@ -174,31 +176,76 @@ struct Model;
   *
   */
 
-  /** \brief General types of joints
-  */
-  enum JointType {
-    JointTypeUndefined = 0,
-    JointTypeRevolute,
-    JointTypePrismatic,
-    JointTypeRevoluteX,
-    JointTypeRevoluteY,
-    JointTypeRevoluteZ,
-    JointTypeSpherical, ///< 3 DoF joint using Quaternions for joint positional variables and angular velocity for joint velocity variables.
-    JointTypeEulerZYX, ///< 3 DoF joint that uses Euler ZYX convention (faster than emulated multi DoF joints).
-    JointTypeEulerXYZ, ///< 3 DoF joint that uses Euler XYZ convention (faster than emulated multi DoF joints).
-    JointTypeEulerYXZ, ///< 3 DoF joint that uses Euler YXZ convention (faster than emulated multi DoF joints).
-    JointTypeTranslationXYZ,
-    JointTypeFloatingBase, ///< A 6-DoF joint for floating-base (or freeflyer) systems.
-    JointTypeFixed, ///< Fixed joint which causes the inertial properties to be merged with the parent body.
-    JointTypeHelical, //1 DoF joint with both rotational and translational motion
-    JointType1DoF,
-    JointType2DoF, ///< Emulated 2 DoF joint.
-    JointType3DoF, ///< Emulated 3 DoF joint.
-    JointType4DoF, ///< Emulated 4 DoF joint.
-    JointType5DoF, ///< Emulated 5 DoF joint.
-    JointType6DoF, ///< Emulated 6 DoF joint.
-    JointTypeCustom, ///< User defined joints of varying size
-  };
+/** \brief General types of joints
+*/
+enum JointType {
+  JointTypeUndefined = 0,
+  JointTypeRevolute,
+  JointTypePrismatic,
+  JointTypeRevoluteX,
+  JointTypeRevoluteY,
+  JointTypeRevoluteZ,
+  JointTypeSpherical, ///< 3 DoF joint using Quaternions for joint positional variables and angular velocity for joint velocity variables.
+  JointTypeEulerZYX, ///< 3 DoF joint that uses Euler ZYX convention (faster than emulated multi DoF joints).
+  JointTypeEulerXYZ, ///< 3 DoF joint that uses Euler XYZ convention (faster than emulated multi DoF joints).
+  JointTypeEulerYXZ, ///< 3 DoF joint that uses Euler YXZ convention (faster than emulated multi DoF joints).
+  JointTypeTranslationXYZ,
+  JointTypeFloatingBase, ///< A 6-DoF joint for floating-base (or freeflyer) systems.
+  JointTypeFixed, ///< Fixed joint which causes the inertial properties to be merged with the parent body.
+  JointTypeHelical, //1 DoF joint with both rotational and translational motion
+  JointType1DoF,
+  JointType2DoF, ///< Emulated 2 DoF joint.
+  JointType3DoF, ///< Emulated 3 DoF joint.
+  JointType4DoF, ///< Emulated 4 DoF joint.
+  JointType5DoF, ///< Emulated 5 DoF joint.
+  JointType6DoF, ///< Emulated 6 DoF joint.
+  JointTypeCustom, ///< User defined joints of varying size
+};
+
+struct JointMapEntry{
+  JointType id;
+  const char* name;
+  const char* abbr;
+};
+
+static const JointMapEntry JointMap[] = {
+  { JointTypeUndefined        , "Undefined"        , "UNDEFINED"},
+  { JointTypeRevolute         , "Revolute"         , ""        },
+  { JointTypePrismatic        , "Prismatic"        , ""        },
+  { JointTypeRevoluteX        , "RevoluteX"        , ""        },
+  { JointTypeRevoluteY        , "RevoluteY"        , ""        },
+  { JointTypeRevoluteZ        , "RevoluteZ"        , ""        },
+  { JointTypeSpherical        , "Spherical"        , "Sphere"  },
+  { JointTypeEulerZYX         , "EulerZYX"         , "EaZYX"   },
+  { JointTypeEulerXYZ         , "EulerXYZ"         , "EaXYZ"   },
+  { JointTypeEulerYXZ         , "EulerYXZ"         , "EaYXZ"   },
+  { JointTypeTranslationXYZ   , "TranslationXYZ"   , "TrXYZ"   },
+  { JointTypeFloatingBase     , "FloatingBase"     , "FloBas"  },
+  { JointTypeFixed            , "Fixed"            , "Fixed"   },
+  { JointTypeHelical          , "Helical"          , "Helic"   },
+  { JointType1DoF             , "1DoF"             , ""        },
+  { JointType2DoF             , "2DoF"             , ""        },
+  { JointType3DoF             , "3DoF"             , ""        },
+  { JointType4DoF             , "4DoF"             , ""        },
+  { JointType5DoF             , "5DoF"             , ""        },
+  { JointType6DoF             , "6DoF"             , ""        },
+  { JointTypeCustom           , "Custom"           , "Cus"     }
+};
+
+struct AxisMapEntry{
+  unsigned int id;
+  const char* name;
+};
+
+static const AxisMapEntry AxisMap[]={
+  {0, "Rx"},
+  {1, "Ry"},
+  {2, "Rz"},
+  {3, "Tx"},
+  {4, "Ty"},
+  {5, "Tz"}
+};
+
 
 /** \brief Describes a joint relative to the predecessor body.
  *
@@ -211,117 +258,125 @@ struct RBDL_DLLAPI Joint {
     mJointAxes (NULL),
     mJointType (JointTypeUndefined),
     mDoFCount (0),
-    q_index (0) {};
+    q_index (0),
+    custom_joint_index(-1) {};
   Joint (JointType type) :
     mJointAxes (NULL),
     mJointType (type),
     mDoFCount (0),
     q_index (0),
-    custom_joint_index(-1) {
-      if (type == JointTypeRevoluteX) {
-        mDoFCount = 1;
-        mJointAxes = new Math::SpatialVector[mDoFCount];
-        mJointAxes[0] = Math::SpatialVector (1., 0., 0., 0., 0., 0.);
-      } else if (type == JointTypeRevoluteY) {
-        mDoFCount = 1;
-        mJointAxes = new Math::SpatialVector[mDoFCount];
-        mJointAxes[0] = Math::SpatialVector (0., 1., 0., 0., 0., 0.);
-      } else if (type == JointTypeRevoluteZ) {
-        mDoFCount = 1;
-        mJointAxes = new Math::SpatialVector[mDoFCount];
-        mJointAxes[0] = Math::SpatialVector (0., 0., 1., 0., 0., 0.);
-      } else if (type == JointTypeSpherical) {
-        mDoFCount = 3;
+    custom_joint_index(-1)
+  {
+    if (type == JointTypeRevoluteX) {
+      mDoFCount = 1;
+      mJointAxes = new Math::SpatialVector[mDoFCount];
+      mJointAxes[0] = Math::SpatialVector (1., 0., 0., 0., 0., 0.);
+    } else if (type == JointTypeRevoluteY) {
+      mDoFCount = 1;
+      mJointAxes = new Math::SpatialVector[mDoFCount];
+      mJointAxes[0] = Math::SpatialVector (0., 1., 0., 0., 0., 0.);
+    } else if (type == JointTypeRevoluteZ) {
+      mDoFCount = 1;
+      mJointAxes = new Math::SpatialVector[mDoFCount];
+      mJointAxes[0] = Math::SpatialVector (0., 0., 1., 0., 0., 0.);
+    } else if (type == JointTypeSpherical) {
+      mDoFCount = 3;
 
-        mJointAxes = new Math::SpatialVector[mDoFCount];
+      mJointAxes = new Math::SpatialVector[mDoFCount];
 
-        mJointAxes[0] = Math::SpatialVector (0., 0., 1., 0., 0., 0.);
-        mJointAxes[1] = Math::SpatialVector (0., 1., 0., 0., 0., 0.);
-        mJointAxes[2] = Math::SpatialVector (1., 0., 0., 0., 0., 0.);
-      } else if (type == JointTypeEulerZYX) {
-        mDoFCount = 3;
+      mJointAxes[0] = Math::SpatialVector (0., 0., 1., 0., 0., 0.);
+      mJointAxes[1] = Math::SpatialVector (0., 1., 0., 0., 0., 0.);
+      mJointAxes[2] = Math::SpatialVector (1., 0., 0., 0., 0., 0.);
+    } else if (type == JointTypeEulerZYX) {
+      mDoFCount = 3;
 
-        mJointAxes = new Math::SpatialVector[mDoFCount];
+      mJointAxes = new Math::SpatialVector[mDoFCount];
 
-        mJointAxes[0] = Math::SpatialVector (0., 0., 1., 0., 0., 0.);
-        mJointAxes[1] = Math::SpatialVector (0., 1., 0., 0., 0., 0.);
-        mJointAxes[2] = Math::SpatialVector (1., 0., 0., 0., 0., 0.);
-      } else if (type == JointTypeEulerXYZ) {
-        mDoFCount = 3;
+      mJointAxes[0] = Math::SpatialVector (0., 0., 1., 0., 0., 0.);
+      mJointAxes[1] = Math::SpatialVector (0., 1., 0., 0., 0., 0.);
+      mJointAxes[2] = Math::SpatialVector (1., 0., 0., 0., 0., 0.);
+    } else if (type == JointTypeEulerXYZ) {
+      mDoFCount = 3;
 
-        mJointAxes = new Math::SpatialVector[mDoFCount];
+      mJointAxes = new Math::SpatialVector[mDoFCount];
 
-        mJointAxes[0] = Math::SpatialVector (1., 0., 0., 0., 0., 0.);
-        mJointAxes[1] = Math::SpatialVector (0., 1., 0., 0., 0., 0.);
-        mJointAxes[2] = Math::SpatialVector (0., 0., 1., 0., 0., 0.);
-      } else if (type == JointTypeEulerYXZ) {
-        mDoFCount = 3;
+      mJointAxes[0] = Math::SpatialVector (1., 0., 0., 0., 0., 0.);
+      mJointAxes[1] = Math::SpatialVector (0., 1., 0., 0., 0., 0.);
+      mJointAxes[2] = Math::SpatialVector (0., 0., 1., 0., 0., 0.);
+    } else if (type == JointTypeEulerYXZ) {
+      mDoFCount = 3;
 
-        mJointAxes = new Math::SpatialVector[mDoFCount];
+      mJointAxes = new Math::SpatialVector[mDoFCount];
 
-        mJointAxes[0] = Math::SpatialVector (0., 1., 0., 0., 0., 0.);
-        mJointAxes[1] = Math::SpatialVector (1., 0., 0., 0., 0., 0.);
-        mJointAxes[2] = Math::SpatialVector (0., 0., 1., 0., 0., 0.);
-      } else if (type == JointTypeTranslationXYZ) {
-        mDoFCount = 3;
+      mJointAxes[0] = Math::SpatialVector (0., 1., 0., 0., 0., 0.);
+      mJointAxes[1] = Math::SpatialVector (1., 0., 0., 0., 0., 0.);
+      mJointAxes[2] = Math::SpatialVector (0., 0., 1., 0., 0., 0.);
+    } else if (type == JointTypeTranslationXYZ) {
+      mDoFCount = 3;
 
-        mJointAxes = new Math::SpatialVector[mDoFCount];
+      mJointAxes = new Math::SpatialVector[mDoFCount];
 
-        mJointAxes[0] = Math::SpatialVector (0., 0., 0., 1., 0., 0.);
-        mJointAxes[1] = Math::SpatialVector (0., 0., 0., 0., 1., 0.);
-        mJointAxes[2] = Math::SpatialVector (0., 0., 0., 0., 0., 1.);
-      } else if (type >= JointType1DoF && type <= JointType6DoF) {
-        // create a joint and allocate memory for it.
-        // Warning: the memory does not get initialized by this function!
-        mDoFCount = type - JointType1DoF + 1;
-        mJointAxes = new Math::SpatialVector[mDoFCount];
-  std::cerr << "Warning: uninitalized vector" << std::endl;
-      } else if (type == JointTypeCustom) {
-        //This constructor cannot be used for a JointTypeCustom because
-        //we have no idea what mDoFCount is.
-        std::cerr << "Error: Invalid use of Joint constructor Joint(JointType"
-                  << " type). Only allowed when type != JointTypeCustom" 
-                  << std::endl;
-        assert(0);
-        abort();                  
-      } else if (type != JointTypeFixed && type != JointTypeFloatingBase) {
-        std::cerr << "Error: Invalid use of Joint constructor Joint(JointType type). Only allowed when type == JointTypeFixed or JointTypeSpherical." << std::endl;
-        assert (0);
-        abort();
-      }
+      mJointAxes[0] = Math::SpatialVector (0., 0., 0., 1., 0., 0.);
+      mJointAxes[1] = Math::SpatialVector (0., 0., 0., 0., 1., 0.);
+      mJointAxes[2] = Math::SpatialVector (0., 0., 0., 0., 0., 1.);
+    } else if (type >= JointType1DoF && type <= JointType6DoF) {
+      // create a joint and allocate memory for it.
+      // Warning: the memory does not get initialized by this function!
+      mDoFCount = type - JointType1DoF + 1;
+      mJointAxes = new Math::SpatialVector[mDoFCount];
+      std::cerr << "Warning: uninitalized vector" << std::endl;
+    } else if (type == JointTypeCustom) {
+      //This constructor cannot be used for a JointTypeCustom because
+      //we have no idea what mDoFCount is.
+      std::ostringstream errormsg;
+      errormsg  << "Error: Invalid use of Joint constructor Joint(JointType"
+                << " type). Only allowed when type != JointTypeCustom"
+                << std::endl;
+      throw Errors::RBDLError(errormsg.str());
+    } else if (type != JointTypeFixed && type != JointTypeFloatingBase) {
+      std::ostringstream errormsg;
+      errormsg <<
+               "Error: Invalid use of Joint constructor Joint(JointType type). Only allowed when type == JointTypeFixed or JointTypeSpherical."
+               << std::endl;
+      throw Errors::RBDLError(errormsg.str());
     }
-    Joint (JointType type, int degreesOfFreedom) :
-      mJointAxes (NULL),
-      mJointType (type),
-      mDoFCount (0),
-      q_index (0),
-      custom_joint_index(-1) {
-     if (type == JointTypeCustom) {        
-        mDoFCount   = degreesOfFreedom;
-        mJointAxes  = new Math::SpatialVector[mDoFCount];
-        for(unsigned int i=0; i<mDoFCount;++i){
-          mJointAxes[i] = Math::SpatialVector (0., 0., 0., 0., 0., 0.);
-        }        
-      } else {
-        std::cerr << "Error: Invalid use of Joint constructor Joint(JointType"
-                  << " type, int degreesOfFreedom). Only allowed when "
-                  << "type  == JointTypeCustom." 
-                  << std::endl;
-        assert (0);
-        abort();
+  }
+  Joint (JointType type, int degreesOfFreedom) :
+    mJointAxes (NULL),
+    mJointType (type),
+    mDoFCount (0),
+    q_index (0),
+    custom_joint_index(-1)
+  {
+    if (type == JointTypeCustom) {
+      mDoFCount   = degreesOfFreedom;
+      mJointAxes  = new Math::SpatialVector[mDoFCount];
+      for(unsigned int i=0; i<mDoFCount; ++i) {
+        mJointAxes[i] = Math::SpatialVector (0., 0., 0., 0., 0., 0.);
       }
-    }  
+    } else {
+      std::ostringstream errormsg;
+      errormsg  << "Error: Invalid use of Joint constructor Joint(JointType"
+                << " type, int degreesOfFreedom). Only allowed when "
+                << "type  == JointTypeCustom."
+                << std::endl;
+      throw Errors::RBDLError(errormsg.str());
+    }
+  }
   Joint (const Joint &joint) :
     mJointType (joint.mJointType),
     mDoFCount (joint.mDoFCount),
     q_index (joint.q_index),
-    custom_joint_index(joint.custom_joint_index) {
-      mJointAxes = new Math::SpatialVector[mDoFCount];
+    custom_joint_index(joint.custom_joint_index)
+  {
+    mJointAxes = new Math::SpatialVector[mDoFCount];
 
-      for (unsigned int i = 0; i < mDoFCount; i++)
-        mJointAxes[i] = joint.mJointAxes[i];
-    };
-  Joint& operator= (const Joint &joint) {
+    for (unsigned int i = 0; i < mDoFCount; i++) {
+      mJointAxes[i] = joint.mJointAxes[i];
+    }
+  };
+  Joint& operator= (const Joint &joint)
+  {
     if (this != &joint) {
       if (mDoFCount > 0) {
         assert (mJointAxes);
@@ -332,14 +387,16 @@ struct RBDL_DLLAPI Joint {
       custom_joint_index = joint.custom_joint_index;
       mJointAxes = new Math::SpatialVector[mDoFCount];
 
-      for (unsigned int i = 0; i < mDoFCount; i++)
+      for (unsigned int i = 0; i < mDoFCount; i++) {
         mJointAxes[i] = joint.mJointAxes[i];
+      }
 
       q_index = joint.q_index;
     }
     return *this;
   }
-  ~Joint() {
+  ~Joint()
+  {
     if (mJointAxes) {
       assert (mJointAxes);
       delete[] mJointAxes;
@@ -358,9 +415,10 @@ struct RBDL_DLLAPI Joint {
    * \param joint_axis the axis of rotation or translation
    */
   Joint (
-      const JointType joint_type,
-      const Math::Vector3d &joint_axis
-      ) {
+    const JointType joint_type,
+    const Math::Vector3d &joint_axis
+  )
+  {
     mDoFCount = 1;
     mJointAxes = new Math::SpatialVector[mDoFCount];
 
@@ -374,11 +432,11 @@ struct RBDL_DLLAPI Joint {
     if (joint_type == JointTypeRevolute) {
       // make sure we have a unit axis
       mJointAxes[0].set (
-          joint_axis[0],
-          joint_axis[1], 
-          joint_axis[2], 
-          0., 0., 0.
-          );
+        joint_axis[0],
+        joint_axis[1],
+        joint_axis[2],
+        0., 0., 0.
+      );
 
     } else if (joint_type == JointTypePrismatic) {
       // make sure we have a unit axis
@@ -387,11 +445,11 @@ struct RBDL_DLLAPI Joint {
 #endif
 
       mJointAxes[0].set (
-          0., 0., 0.,
-          joint_axis[0],
-          joint_axis[1],
-          joint_axis[2]
-          );
+        0., 0., 0.,
+        joint_axis[0],
+        joint_axis[1],
+        joint_axis[2]
+      );
     }
   }
 
@@ -403,11 +461,14 @@ struct RBDL_DLLAPI Joint {
    * \param axis_0 Motion subspace for axis 0
    */
   Joint (
-      const Math::SpatialVector &axis_0
-      ) {
+    const Math::SpatialVector &axis_0
+  )
+  {
     mDoFCount = 1;
     mJointAxes = new Math::SpatialVector[mDoFCount];
     mJointAxes[0] = Math::SpatialVector (axis_0);
+    
+    // TODO this has to be properly determined AND test case. Try Matt's dot product idea
 #ifdef RBDL_USE_CASADI_MATH
     if (!axis_0[0].is_zero()) {
 #else
@@ -449,9 +510,10 @@ struct RBDL_DLLAPI Joint {
    * \param axis_1 Motion subspace for axis 1
    */
   Joint (
-      const Math::SpatialVector &axis_0,
-      const Math::SpatialVector &axis_1
-      ) {
+    const Math::SpatialVector &axis_0,
+    const Math::SpatialVector &axis_1
+  )
+  {
     mJointType = JointType2DoF;
     mDoFCount = 2;
 
@@ -475,10 +537,11 @@ struct RBDL_DLLAPI Joint {
    * \param axis_2 Motion subspace for axis 2
    */
   Joint (
-      const Math::SpatialVector &axis_0,
-      const Math::SpatialVector &axis_1,
-      const Math::SpatialVector &axis_2
-      ) {
+    const Math::SpatialVector &axis_0,
+    const Math::SpatialVector &axis_1,
+    const Math::SpatialVector &axis_2
+  )
+  {
     mJointType = JointType3DoF;
     mDoFCount = 3;
 
@@ -506,11 +569,12 @@ struct RBDL_DLLAPI Joint {
    * \param axis_3 Motion subspace for axis 3
    */
   Joint (
-      const Math::SpatialVector &axis_0,
-      const Math::SpatialVector &axis_1,
-      const Math::SpatialVector &axis_2,
-      const Math::SpatialVector &axis_3
-      ) {
+    const Math::SpatialVector &axis_0,
+    const Math::SpatialVector &axis_1,
+    const Math::SpatialVector &axis_2,
+    const Math::SpatialVector &axis_3
+  )
+  {
     mJointType = JointType4DoF;
     mDoFCount = 4;
 
@@ -541,12 +605,13 @@ struct RBDL_DLLAPI Joint {
    * \param axis_4 Motion subspace for axis 4
    */
   Joint (
-      const Math::SpatialVector &axis_0,
-      const Math::SpatialVector &axis_1,
-      const Math::SpatialVector &axis_2,
-      const Math::SpatialVector &axis_3,
-      const Math::SpatialVector &axis_4
-      ) {
+    const Math::SpatialVector &axis_0,
+    const Math::SpatialVector &axis_1,
+    const Math::SpatialVector &axis_2,
+    const Math::SpatialVector &axis_3,
+    const Math::SpatialVector &axis_4
+  )
+  {
     mJointType = JointType5DoF;
     mDoFCount = 5;
 
@@ -580,13 +645,14 @@ struct RBDL_DLLAPI Joint {
    * \param axis_5 Motion subspace for axis 5
    */
   Joint (
-      const Math::SpatialVector &axis_0,
-      const Math::SpatialVector &axis_1,
-      const Math::SpatialVector &axis_2,
-      const Math::SpatialVector &axis_3,
-      const Math::SpatialVector &axis_4,
-      const Math::SpatialVector &axis_5
-      ) {
+    const Math::SpatialVector &axis_0,
+    const Math::SpatialVector &axis_1,
+    const Math::SpatialVector &axis_2,
+    const Math::SpatialVector &axis_3,
+    const Math::SpatialVector &axis_4,
+    const Math::SpatialVector &axis_5
+  )
+  {
     mJointType = JointType6DoF;
     mDoFCount = 6;
 
@@ -612,7 +678,8 @@ struct RBDL_DLLAPI Joint {
    * This function is mainly used to print out warnings when specifying an
    * axis that might not be intended.
    */
-  bool validate_spatial_axis (Math::SpatialVector &axis) {
+  bool validate_spatial_axis (Math::SpatialVector &axis)
+  {
 #ifdef RBDL_USE_CASADI_MATH
       // If using casadi, the axes won't be validated
       return true;
@@ -623,11 +690,13 @@ struct RBDL_DLLAPI Joint {
     Math::Vector3d rotation (axis[0], axis[1], axis[2]);
     Math::Vector3d translation (axis[3], axis[4], axis[5]);
 
-    if (fabs(rotation.norm()) > 1.0e-8)
+    if (fabs(rotation.norm()) > 1.0e-8) {
       axis_rotational = true;
+    }
 
-    if (fabs(translation.norm()) > 1.0e-8)
+    if (fabs(translation.norm()) > 1.0e-8) {
       axis_translational = true;
+    }
 
     if(axis_rotational && rotation.norm() - 1.0 > 1.0e-8) {
       std::cerr << "Warning: joint rotation axis is not unit!" << std::endl;
@@ -643,14 +712,14 @@ struct RBDL_DLLAPI Joint {
 
   /// \brief The spatial axes of the joint
   Math::SpatialVector* mJointAxes;
-  /// \brief Type of joint 
+  /// \brief Type of joint
   JointType mJointType;
   /// \brief Number of degrees of freedom of the joint. Note: CustomJoints
   // have here a value of 0 and their actual numbers of degrees of freedom
   // can be obtained using the CustomJoint structure.
   unsigned int mDoFCount;
   unsigned int q_index;
-  int custom_joint_index;
+  unsigned int custom_joint_index;
 };
 
 /** \brief Computes all variables for a joint model
@@ -665,39 +734,39 @@ struct RBDL_DLLAPI Joint {
  */
 RBDL_DLLAPI
 void jcalc (
-    Model &model,
-    unsigned int joint_id,
-    const Math::VectorNd &q,
-    const Math::VectorNd &qdot
-    );
+  Model &model,
+  unsigned int joint_id,
+  const Math::VectorNd &q,
+  const Math::VectorNd &qdot
+);
 
 RBDL_DLLAPI
 Math::SpatialTransform jcalc_XJ (
-    Model &model,
-    unsigned int joint_id,
-    const Math::VectorNd &q);
+  Model &model,
+  unsigned int joint_id,
+  const Math::VectorNd &q);
 
 RBDL_DLLAPI
 void jcalc_X_lambda_S (
-    Model &model,
-    unsigned int joint_id,
-    const Math::VectorNd &q
-    );
+  Model &model,
+  unsigned int joint_id,
+  const Math::VectorNd &q
+);
 
 struct RBDL_DLLAPI CustomJoint {
-  CustomJoint() 
+  CustomJoint()
   { }
   virtual ~CustomJoint() {};
 
   virtual void jcalc (Model &model,
-      unsigned int joint_id,
-      const Math::VectorNd &q,
-      const Math::VectorNd &qdot
-      ) = 0;
+                      unsigned int joint_id,
+                      const Math::VectorNd &q,
+                      const Math::VectorNd &qdot
+                     ) = 0;
   virtual void jcalc_X_lambda_S (Model &model,
-      unsigned int joint_id,
-      const Math::VectorNd &q
-      ) = 0;
+                                 unsigned int joint_id,
+                                 const Math::VectorNd &q
+                                ) = 0;
 
   unsigned int mDoFCount;
   Math::SpatialTransform XJ;

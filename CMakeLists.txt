@@ -1,7 +1,7 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
 
-SET ( RBDL_VERSION_MAJOR 2 )
-SET ( RBDL_VERSION_MINOR 6 )
+SET ( RBDL_VERSION_MAJOR 3 )
+SET ( RBDL_VERSION_MINOR 0 )
 SET ( RBDL_VERSION_PATCH 0 )
 SET ( RBDL_VERSION 
 	${RBDL_VERSION_MAJOR}.${RBDL_VERSION_MINOR}.${RBDL_VERSION_PATCH}
@@ -35,28 +35,33 @@ IF(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   SET_PROPERTY(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 ENDIF()
 
-# Choose the math's library backend to use
-set(MATH_LIBRARY_BACKEND Eigen3 CACHE STRING "Choose the backend library for the linear algebra.")
-# Set the possible values of build type for cmake-gui
-set_property(CACHE MATH_LIBRARY_BACKEND PROPERTY STRINGS "Eigen3" "Simple" "Casadi")
+OPTION (RBDL_USE_CASADI_MATH "Use the CasADi backend" OFF)
+IF (RBDL_USE_CASADI_MATH)
+    FIND_PACKAGE (Casadi REQUIRED)
+    INCLUDE_DIRECTORIES (
+        ${Casadi_INCLUDE_DIR}
+        ${Casadi_INCLUDE_DIR}/..
+    )
+ELSE (RBDL_USE_CASADI_MATH)
+    # Find and use the system's Eigen3 library
+    FIND_PACKAGE (Eigen3 3.0.0)
+
+    IF (NOT EIGEN3_FOUND)
+        MESSAGE (WARNING "Could not find Eigen3 on your system. Please install it!")
+    ENDIF (NOT EIGEN3_FOUND)
+
+    INCLUDE_DIRECTORIES (${EIGEN3_INCLUDE_DIR})
+ENDIF (RBDL_USE_CASADI_MATH)
+
+# Options
+SET (RBDL_BUILD_STATIC_DEFAULT OFF)
+IF (MSVC)
+  SET (RBDL_BUILD_STATIC_DEFAULT ON)
+ENDIF (MSVC)
 
 OPTION (RBDL_BUILD_STATIC "Build statically linked library (otherwise dynamiclly linked)" ${RBDL_BUILD_STATIC_DEFAULT})
 OPTION (RBDL_BUILD_TESTS "Build the test executables" OFF)
 OPTION (RBDL_ENABLE_LOGGING "Enable logging (warning: major impact on performance!)" OFF)
-OPTION (RBDL_USE_SIMPLE_MATH "Use slow math instead of the fast Eigen3 library (faster compilation)" OFF)
-if(${MATH_LIBRARY_BACKEND} STREQUAL "Eigen3")
-    set (RBDL_USE_EIGEN3_MATH ON)
-    set (RBDL_USE_SIMPLE_MATH OFF)
-    set (RBDL_USE_CASADI_MATH OFF)
-elseif(${MATH_LIBRARY_BACKEND} STREQUAL "Casadi")
-    set (RBDL_USE_EIGEN3_MATH OFF)
-    set (RBDL_USE_SIMPLE_MATH OFF)
-    set (RBDL_USE_CASADI_MATH ON)
-elseif(${MATH_LIBRARY_BACKEND} STREQUAL "Simple")
-    set (RBDL_USE_EIGEN3_MATH OFF)
-    set (RBDL_USE_SIMPLE_MATH ON)
-    set (RBDL_USE_CASADI_MATH OFF)
-endif()
 OPTION (RBDL_STORE_VERSION "Enable storing of version information in the library (requires build from valid repository)" OFF)
 OPTION (RBDL_BUILD_ADDON_URDFREADER "Build the (experimental) urdf reader" OFF)
 OPTION (RBDL_BUILD_ADDON_BENCHMARK "Build the benchmarking tool" OFF)
@@ -64,26 +69,12 @@ OPTION (RBDL_BUILD_ADDON_LUAMODEL "Build the lua model reader" OFF)
 OPTION (RBDL_BUILD_PYTHON_WRAPPER "Build experimental python wrapper" OFF)
 OPTION (RBDL_BUILD_ADDON_GEOMETRY "Build the geometry library" OFF)
 OPTION (RBDL_BUILD_ADDON_MUSCLE "Build the muscle library" OFF)
+OPTION (RBDL_BUILD_ADDON_MUSCLE_FITTING "Build muscle library fitting functions (requires Ipopt)" OFF)
+OPTION (RBDL_USE_PYTHON_2 "Use python 2 instead of python 3" OFF)
 
-# Loading the appropriate packages
-IF (RBDL_USE_CASADI_MATH)
-    FIND_PACKAGE (Casadi REQUIRED)
-    INCLUDE_DIRECTORIES (
-        ${Casadi_INCLUDE_DIR}
-        ${Casadi_INCLUDE_DIR}/..)
-ENDIF (RBDL_USE_CASADI_MATH)
+SET (RBDL_BUILD_COMPILER_ID ${CMAKE_CXX_COMPILER_ID})
+SET (RBDL_BUILD_COMPILER_VERSION ${CMAKE_CXX_COMPILER_VERSION})
 
-IF (RBDL_USE_EIGEN3_MATH)
-    # Find and use the system's Eigen3 library
-    FIND_PACKAGE (Eigen3 3.0.0 REQUIRED)
-    INCLUDE_DIRECTORIES (${EIGEN3_INCLUDE_DIR})
-ENDIF (RBDL_USE_EIGEN3_MATH)
-
-# Options
-SET (RBDL_BUILD_STATIC_DEFAULT OFF)
-IF (MSVC)
-  SET (RBDL_BUILD_STATIC_DEFAULT ON)
-ENDIF (MSVC)
 
 # Addons
 IF (RBDL_BUILD_ADDON_URDFREADER)
@@ -94,12 +85,13 @@ IF (RBDL_BUILD_ADDON_BENCHMARK)
   ADD_SUBDIRECTORY ( addons/benchmark )
 ENDIF (RBDL_BUILD_ADDON_BENCHMARK)
 
-IF (RBDL_BUILD_ADDON_LUAMODEL)
-  ADD_SUBDIRECTORY ( addons/luamodel )
-ENDIF (RBDL_BUILD_ADDON_LUAMODEL)
+
 
 IF(RBDL_BUILD_ADDON_MUSCLE)
   SET(RBDL_BUILD_ADDON_GEOMETRY ON CACHE BOOL "Build the geometry library" FORCE)
+  IF (RBDL_BUILD_ADDON_MUSCLE_FITTING)
+    SET(CUSTOM_IPOPT_PATH "" CACHE PATH "Path to specific IPOPT Installation")
+  ENDIF (RBDL_BUILD_ADDON_MUSCLE_FITTING)
   ADD_SUBDIRECTORY ( addons/muscle )
   IF(RBDL_BUILD_TESTS)
   	ADD_SUBDIRECTORY ( addons/muscle/tests ) 
@@ -114,7 +106,12 @@ IF(RBDL_BUILD_ADDON_GEOMETRY)
   ENDIF(RBDL_BUILD_TESTS)
 ENDIF(RBDL_BUILD_ADDON_GEOMETRY)
 
-
+IF (RBDL_BUILD_ADDON_LUAMODEL)
+  ADD_SUBDIRECTORY ( addons/luamodel )
+  IF(RBDL_BUILD_TESTS)
+    ADD_SUBDIRECTORY ( addons/luamodel/tests )
+  ENDIF(RBDL_BUILD_TESTS)
+ENDIF (RBDL_BUILD_ADDON_LUAMODEL)
 
 IF (RBDL_BUILD_TESTS)
  ADD_SUBDIRECTORY ( tests )
@@ -125,12 +122,15 @@ SET ( RBDL_SOURCES
 	src/rbdl_version.cc
 	src/rbdl_mathutils.cc
 	src/rbdl_utils.cc
-        src/Constraints.cc
-        src/Dynamics.cc
+	src/rbdl_errors.cc
+	src/Constraints.cc
+  src/Constraint_Contact.cc
+  src/Constraint_Loop.cc  
+	src/Dynamics.cc
 	src/Logging.cc
 	src/Joint.cc
 	src/Model.cc
-        src/Kinematics.cc
+	src/Kinematics.cc
 	)
 
 IF (MSVC AND NOT RBDL_BUILD_STATIC)	
@@ -150,11 +150,16 @@ IF (RBDL_BUILD_STATIC)
 			rbdl_luamodel-static
 			)
 	ENDIF (RBDL_BUILD_ADDON_LUAMODEL)
-    IF (RBDL_USE_CASADI_MATH)
-        TARGET_LINK_LIBRARIES ( rbdl-static
-			    ${Casadi_LIBRARY}
-			    )
-    ENDIF (RBDL_USE_CASADI_MATH)
+  IF (RBDL_BUILD_ADDON_URDFREADER)
+		TARGET_LINK_LIBRARIES ( rbdl-static
+			rbdl_urdfreader-static
+			)
+  ENDIF (RBDL_BUILD_ADDON_URDFREADER)
+  IF (RBDL_USE_CASADI_MATH)
+      TARGET_LINK_LIBRARIES ( rbdl-static
+                          ${Casadi_LIBRARY}
+                          )
+  ENDIF (RBDL_USE_CASADI_MATH)
 
 	INSTALL (TARGETS rbdl-static
 	  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -167,26 +172,31 @@ ELSE (RBDL_BUILD_STATIC)
 		SOVERSION ${RBDL_SO_VERSION}
 		)
 
+        IF (RBDL_USE_CASADI_MATH)
+            TARGET_LINK_LIBRARIES ( rbdl
+                ${Casadi_LIBRARY}
+                )
+        ENDIF (RBDL_USE_CASADI_MATH)
+
 	INSTALL (TARGETS rbdl
 		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 		)
-    IF (RBDL_USE_CASADI_MATH)
-        TARGET_LINK_LIBRARIES ( rbdl
-            ${Casadi_LIBRARY}
-            )
-    ENDIF (RBDL_USE_CASADI_MATH)
 ENDIF (RBDL_BUILD_STATIC)
 
 IF (RBDL_STORE_VERSION)
 	# Set versioning information that can be queried during runtime
-	EXEC_PROGRAM("hg" ${CMAKE_CURRENT_SOURCE_DIR} ARGS "id -i"
-		OUTPUT_VARIABLE RBDL_BUILD_REVISION)
-	EXEC_PROGRAM("hg" ${CMAKE_CURRENT_SOURCE_DIR} ARGS "branch"
-		OUTPUT_VARIABLE RBDL_BUILD_BRANCH)
+	EXECUTE_PROCESS(COMMAND "git" "rev-parse" "HEAD"
+			WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+			OUTPUT_VARIABLE RBDL_BUILD_COMMIT)
+	STRING(REGEX REPLACE "\n$" "" RBDL_BUILD_COMMIT "${RBDL_BUILD_COMMIT}")
+	EXECUTE_PROCESS(COMMAND "git" "describe" "--all" "--dirty" "--long"
+			WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+			OUTPUT_VARIABLE RBDL_BUILD_BRANCH)
+	STRING(REGEX REPLACE "\n$" "" RBDL_BUILD_BRANCH "${RBDL_BUILD_BRANCH}")
 	SET (RBDL_BUILD_TYPE ${CMAKE_BUILD_TYPE})
 ELSE (RBDL_STORE_VERSION)
-	SET (RBDL_BUILD_REVISION "unknown")
+	SET (RBDL_BUILD_COMMIT "unknown")
 	SET (RBDL_BUILD_BRANCH "unknown")
 	SET (RBDL_BUILD_TYPE "unknown")
 ENDIF (RBDL_STORE_VERSION)
@@ -199,7 +209,6 @@ CONFIGURE_FILE (
 # Python wrapper
 IF (RBDL_BUILD_PYTHON_WRAPPER)
 	add_subdirectory ( python )
-
 ENDIF (RBDL_BUILD_PYTHON_WRAPPER)
 
 # Installation
@@ -210,17 +219,12 @@ FILE ( GLOB headers
 
 INSTALL ( FILES ${headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/rbdl )
 
-# Setup of SimpleMath install settings
+# Setup of CasADi install settings
 IF (RBDL_USE_CASADI_MATH)
         INSTALL ( DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/rbdl/CasadiMath"
                 DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/rbdl
         )
 ENDIF (RBDL_USE_CASADI_MATH)
-IF (RBDL_USE_SIMPLE_MATH)
-        INSTALL ( DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/rbdl/SimpleMath"
-		DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/rbdl
-	)
-ENDIF (RBDL_USE_SIMPLE_MATH)
 
 # pkg-config
 CONFIGURE_FILE (

@@ -10,37 +10,8 @@
 
 #include "rbdl/rbdl_config.h"
 
-#ifdef RBDL_USE_SIMPLE_MATH
-#include "rbdl/SimpleMath/SimpleMathFixed.h"
-#include "rbdl/SimpleMath/SimpleMathDynamic.h"
-#include "rbdl/SimpleMath/SimpleMathMixed.h"
-#include "rbdl/SimpleMath/SimpleMathQR.h"
-#include "rbdl/SimpleMath/SimpleMathCholesky.h"
-#include "rbdl/SimpleMath/SimpleMathCommaInitializer.h"
-#include "rbdl/SimpleMath/SimpleMathMap.h"
-#include <vector>
-
-typedef double Vector1_t;
-typedef SimpleMath::Fixed::Matrix<double, 2,1> Vector2_t;
-typedef SimpleMath::Fixed::Matrix<double, 3,1> Vector3_t;
-typedef SimpleMath::Fixed::Matrix<double, 2,2> Matrix2_t;
-typedef SimpleMath::Fixed::Matrix<double, 3,3> Matrix3_t;
-typedef SimpleMath::Fixed::Matrix<double, 4,1> Vector4_t;
-
-typedef SimpleMath::Fixed::Matrix<double, 6,1> SpatialVector_t;
-typedef SimpleMath::Fixed::Matrix<double, 6,6> SpatialMatrix_t;
-
-typedef SimpleMath::Fixed::Matrix<double, 6,3> Matrix63_t;
-typedef SimpleMath::Fixed::Matrix<double, 4,3> Matrix43_t;
-typedef SimpleMath::Fixed::Matrix<double, 4,4> Matrix4_t;
-
-typedef SimpleMath::Dynamic::Matrix<double> MatrixN_t;
-typedef SimpleMath::Dynamic::Matrix<double> VectorN_t;
-
-
-#else
 #ifdef RBDL_USE_CASADI_MATH
-#include "rbdl/CasadiMath/MX_Xd_utils.h"
+#include "CasadiMath/MX_Xd_utils.h"
 
 typedef RBDLCasadiMath::MX_Xd_scalar Vector1_t;
 typedef RBDLCasadiMath::MX_Xd_static<2,1> Vector2_t;
@@ -74,10 +45,6 @@ typedef Eigen::Matrix<double, 4, 3> Matrix43_t;
 
 typedef Eigen::VectorXd VectorN_t;
 typedef Eigen::MatrixXd MatrixN_t;
-
-
-
-#endif
 #endif
 
 namespace RigidBodyDynamics {
@@ -107,13 +74,13 @@ typedef MatrixN_t MatrixNd;
 
 // If we use Eigen3 we have to create specializations of the STL
 // std::vector such that the alignment is done properly.
-#ifdef RBDL_USE_EIGEN3_MATH
-  EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(RigidBodyDynamics::Math::SpatialVector)
-  EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(RigidBodyDynamics::Math::SpatialMatrix)
-  EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(RigidBodyDynamics::Math::Matrix63)
-  EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(RigidBodyDynamics::Math::Matrix43)
-  EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(RigidBodyDynamics::Math::SpatialTransform)
-  EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(RigidBodyDynamics::Math::SpatialRigidBodyInertia)
+#ifndef RBDL_USE_CASADI_MATH
+EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(RigidBodyDynamics::Math::SpatialVector)
+EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(RigidBodyDynamics::Math::SpatialMatrix)
+EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(RigidBodyDynamics::Math::Matrix63)
+EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(RigidBodyDynamics::Math::Matrix43)
+EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(RigidBodyDynamics::Math::SpatialTransform)
+EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(RigidBodyDynamics::Math::SpatialRigidBodyInertia)
 #endif
 
   /* RBDL_MATH_H_H */

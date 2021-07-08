@@ -4,10 +4,23 @@
 #include <rbdl/rbdl_config.h>
 #include <string>
 #include <vector>
+#include "luastructs.h"
+
+#ifdef RBDL_BUILD_ADDON_MUSCLE
+namespace RigidBodyDynamics{
+  namespace Addons{
+    namespace Muscle{
+      class Millard2016TorqueMuscle;
+    }
+  }
+}
+#endif
 
 extern "C" {
   struct lua_State;
 };
+
+
 
 namespace RigidBodyDynamics {
 
@@ -249,7 +262,7 @@ namespace Addons {
 /** \brief Reads a model from a Lua file.
  *
  * \param filename the name of the Lua file.
- * \param model a pointer to the output Model structure.
+ * \param upd_model a pointer to the output Model structure.
  * \param verbose specifies wether information on the model should be printed
  * (default: true).
  *
@@ -261,18 +274,85 @@ namespace Addons {
 RBDL_DLLAPI
 bool LuaModelReadFromFile (
   const char* filename,
-  Model* model,
+  Model* upd_model,
   bool verbose = false);
+
+RBDL_DLLAPI
+void LuaModelGetCoordinateNames(
+      const Model* model,
+      std::vector< std::string >& updGeneralizedPositionNames,
+      std::vector< std::string >& updGeneralizedVelocityNames,
+      std::vector< std::string >& updGeneralizedForceNames);
 
 /** \brief Reads a model file and returns the names of all constraint sets.
  */
 RBDL_DLLAPI
 std::vector<std::string> LuaModelGetConstraintSetNames(const char* filename);
 
+RBDL_DLLAPI
+bool LuaModelGetConstraintSetPhases(const char* filename,
+    const std::vector<std::string> &constraint_set_names,
+    std::vector< unsigned int > &constraint_set_phases);
+
+/**
+  This function will load named body-fixed motion capture markers that are
+  attached to each body
+
+  @param filename: name of the lua file
+  @param model: reference to the (loaded) multibody model.
+  @param upd_marker_set: an empty std::vector of Point structure
+  @param verbose: information will be printed to the command window if this
+                  is set to true.
+
+*/
+RBDL_DLLAPI
+bool LuaModelReadMotionCaptureMarkers (
+      const char* filename,
+      const Model* model,
+      std::vector<MotionCaptureMarker> &upd_marker_set,
+      bool verbose=false);
+
+/**
+  This function will load the point information from the lua
+  file into the std::vector of Point structures.
+
+  @param filename: name of the lua file
+  @param model: reference to the (loaded) multibody model.
+  @param upd_point_set: an empty std::vector of Point structurs
+  @param verbose: information will be printed to the command window if this
+                  is set to true.
+
+*/
+RBDL_DLLAPI
+bool LuaModelReadPoints (
+      const char* filename,
+      const Model* model,
+      std::vector<Point> &upd_point_set,
+      bool verbose=false);
+
+/**
+  This function will load the local frames from the lua
+  file into the std::vector of LocalFrame structures.
+
+  @param filename: name of the lua file
+  @param model: reference to the (loaded) multibody model.
+  @param upd_local_frame_set: an empty std::vector of LocalFrame structurs
+  @param verbose: information will be printed to the command window if this
+                  is set to true.
+
+*/
+RBDL_DLLAPI
+bool LuaModelReadLocalFrames (
+      const char* filename,
+      const Model* model,
+      std::vector<LocalFrame> &upd_local_frame_set,
+      bool verbose=false);
+
+
 /** \brief Reads a model and constraint sets from a Lua file.
  *
  * \param filename the name of the Lua file.
- * \param model a pointer to the output Model structure.
+ * \param upd_model a pointer to the output Model structure.
  * \param constraint_sets reference to a std::vector of ConstraintSet structures
  * in which to save the information read from the file.
  * \param constraint_set_names reference to a std::vector of std::string
@@ -289,7 +369,7 @@ std::vector<std::string> LuaModelGetConstraintSetNames(const char* filename);
 RBDL_DLLAPI
 bool LuaModelReadFromFileWithConstraints (
   const char* filename,
-  Model* model,
+  Model* upd_model,
   std::vector<ConstraintSet>& constraint_sets,
   const std::vector<std::string>& constraint_set_names,
   bool verbose = false);
@@ -309,6 +389,191 @@ bool LuaModelReadFromLuaState (
   Model* model,
   bool verbose = false);
 
+/**
+      This function will read in the data contained in the 'HumanMetaData'
+      table in the lua file.
+
+      @param filename: name of the lua file
+      @param human_meta_data: an empty HumanMetaData structure
+      @param verbose: information will be printed to the command window if this
+                      is set to true.
+*/
+RBDL_DLLAPI
+bool LuaModelReadHumanMetaData(
+  const char* filename,
+  HumanMetaData &human_meta_data,
+  bool verbose = false);
+
+
+#ifdef RBDL_BUILD_ADDON_MUSCLE
+
+/**
+  This function will read the information for each millard2016_torque_muscle
+  into the vector of Millard2016TorqueMuscleConfig structs and populate a
+  corresponding vector of Millard2016TorqueMuscle objects. Note that the
+  struct Millard2016TorqueMuscleConfig contains information needed not just
+  to create an Millard2016TorqueMuscle object but also the information needed
+  to retrieve the correct q index, qdot index, and activation index from the
+  state vector to evaluate the joint torque and to update the generalized
+  torque vector. Please see the doxygen on Millard2016TorqueMuscle.h and
+  Millard2016TorqueMuscleConfig for more details.
+
+  \param filename the name of the Lua file.
+  \param model a pointer to the populated Model structure
+  \param human_meta_data: the meta data for this subject.
+  \param updMtgSet: an empty vector of Millard2016TorqueMuscle objects
+  \param updMtgSetInfo: an empty vector of Millard2016TorqueMuscleConfig structs
+  \param verbose specifies wether information on the model should be printed
+  (default: true).
+ 
+  \returns true if the model and constraint sets were read successfully.
+
+*/
+RBDL_DLLAPI
+bool LuaModelReadMillard2016TorqueMuscleSets(
+          const char* filename,
+          const RigidBodyDynamics::Model *model,
+          const HumanMetaData &human_meta_data,
+          std::vector <RigidBodyDynamics::Addons::
+                        Muscle::Millard2016TorqueMuscle> &updMtgSet,
+          std::vector <Millard2016TorqueMuscleConfig> &updMtgSetInfo,
+          bool verbose = false);
+
+#endif
+
+/**
+  Generates a header file with human-readable enums for each of the
+  generalized positions, velocity, accelerations, and forces of the model.
+  In addition, a struct is generated so that the names of these elements can
+  be written to file to make post-processing more systematic. This function
+  is quite comprehensive and will correctly handle the extra degrees of freedom
+  added, for example, to the generalized position vector by a quaternion joint.
+
+  @param header_file_name the name of the header file
+  @param model a reference to the populated model.
+  @param append false: any existing text will be discarded,
+                true: this text will be appended to the file
+*/
+RBDL_DLLAPI
+bool LuaModelWriteModelHeaderEntries(const char* header_file_name,
+                              const RigidBodyDynamics::Model &model,
+                              bool append);
+/**
+  Will prepend and append header guards where the name is given by
+  the capitlized form of the file name.
+
+  @param header_file_name the name of the header file
+*/
+RBDL_DLLAPI
+bool LuaModelAddHeaderGuards(const char* header_file_name);
+
+/**
+  Generates a header file with human-readable enums for the points. In addition
+  a struct is generated so that text of these names can be used to write
+  post-processing scripts/generate sensible messages
+
+  @param header_file_name the name of the header file
+  @param point_set a reference to the populated vector of points
+  @param append false: any existing text will be discarded,
+                true: this text will be appended to the file
+*/
+RBDL_DLLAPI
+bool LuaModelWritePointsHeaderEntries(const char* header_file_name,
+                                      const std::vector<Point> &point_set,
+                                      bool append);
+
+/**
+  Generates a header file with human-readable enums for the markers. In addition
+  a struct is generated so that text of these names can be used to write
+  post-processing scripts/generate sensible messages
+
+  @param header_file_name the name of the header file
+  @param marker_set a reference to the populated vector of
+         motion capture markers
+  @param append false: any existing text will be discarded,
+                true: this text will be appended to the file
+*/
+RBDL_DLLAPI
+bool LuaModelWriteMotionCaptureMarkerHeaderEntries(
+        const char* header_file_name,
+        const std::vector< MotionCaptureMarker > &marker_set,
+        bool append);
+
+/**
+  Generates a header file with human-readable enums for the local frames.
+  In addition a struct is generated so that text of these names can be used to
+  write post-processing scripts/generate sensible messages
+
+  @param header_file_name the name of the header file
+  @param local_frame_set a reference to the populated vector of
+         local frames
+  @param append false: any existing text will be discarded,
+                true: this text will be appended to the file
+*/
+RBDL_DLLAPI
+bool LuaModelWriteLocalFrameHeaderEntries(const char* header_file_name,
+                         const std::vector<LocalFrame> &local_frame_set,
+                         bool append);
+
+/**
+  Generates a number of enums and structures so that each individual
+  constraint row can be selected individually, by user-defined-group id,
+  or constraint set. Note: this header information must be appended prior to
+  the constraint phase data otherwise the header will not compile.
+
+  @param header_file_name the name of the header file
+  @param constraint_set_names the names of the constraint sets returned by
+          the function LuaModelGetConstraintSetNames
+  @param constraint_sets the vector of populated constraint sets
+  @param append false: any existing text will be discarded,
+                true: this text will be appended to the file
+*/
+RBDL_DLLAPI
+bool LuaModelWriteConstraintSetHeaderEntries(const char* header_file_name,
+       const std::vector< std::string > &constraint_set_names,
+       const std::vector<RigidBodyDynamics::ConstraintSet> &constraint_sets,
+       bool append);
+
+/**
+  Generates an enum and a structure so that each constraint set associated
+  with a constraint phase can be easily retreived, and its name can be written
+  to file.
+
+  @param header_file_name the name of the header file
+  @param constraint_set_names the names of the constraint sets returned by
+          the function LuaModelGetConstraintSetNames
+  @param constraint_phases the ordering of the constraint set indices returned
+          by LuaModelGetConstraintSetPhases
+  @param append false: any existing text will be discarded,
+                true: this text will be appended to the file
+*/
+
+RBDL_DLLAPI
+bool LuaModelWriteConstraintSetPhaseHeaderEntries(const char* header_file_name,
+                         const std::vector< std::string > &constraint_set_names,
+                         const std::vector< unsigned int > &constraint_phases,
+                         bool append);
+
+#ifdef RBDL_BUILD_ADDON_MUSCLE
+/**
+  Generates an enum and a structure so that each Millard2016TorqueMuscle can
+  be easily retreived, and its name can be written to file.
+
+  @param header_file_name the name of the header file
+  @param mtg_set the vector of populated Millard2016TorqueMuscle objects
+  @param mtg_set_info the vector of Millard2016TorqueMuscleConfig structures
+  @param append false: any existing text will be discarded,
+                true: this text will be appended to the file
+*/
+RBDL_DLLAPI
+bool LuaModelWriteMillard2016TorqueMuscleHeaderEntries(
+    const char* header_file_name,
+    const std::vector<RigidBodyDynamics::Addons::Muscle
+                      ::Millard2016TorqueMuscle> &mtg_set,
+    const std::vector<Millard2016TorqueMuscleConfig > &mtg_set_info,
+    bool append);
+
+#endif
 /** @} */
 }
 

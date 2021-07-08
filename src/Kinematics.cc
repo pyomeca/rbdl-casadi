@@ -16,6 +16,8 @@
 #include "rbdl/Model.h"
 #include "rbdl/Kinematics.h"
 
+#include "rbdl/rbdl_utils.h"
+
 namespace RigidBodyDynamics {
 
 using namespace Math;
@@ -54,8 +56,8 @@ RBDL_DLLAPI void UpdateKinematics(
       if (model.mJoints[i].mDoFCount == 1) {
         model.a[i] = model.a[i] + model.S[i] * QDDot[q_index];
       } else if (model.mJoints[i].mDoFCount == 3) {
-        Vector3d omegadot_temp (QDDot[q_index],
-            QDDot[q_index + 1],
+        Vector3d omegadot_temp (QDDot[q_index], 
+            QDDot[q_index + 1], 
             QDDot[q_index + 2]);
         model.a[i] = model.a[i] + model.multdof3_S[i] * omegadot_temp;
       }
@@ -65,7 +67,7 @@ RBDL_DLLAPI void UpdateKinematics(
       unsigned int joint_dof_count = custom_joint->mDoFCount;
 
       model.a[i] = model.a[i]
-        + ( model.mCustomJoints[custom_index]->S
+        + ( model.mCustomJoints[custom_index]->S 
             * QDDot.block(q_index, 0, joint_dof_count, 1));
     }
   }
@@ -136,10 +138,10 @@ RBDL_DLLAPI void UpdateKinematicsCustom(
         if (model.mJoints[i].mDoFCount == 1) {
           model.a[i] = model.a[i] + model.S[i] * (*QDDot)[q_index];
         } else if (model.mJoints[i].mDoFCount == 3) {
-          Vector3d omegadot_temp ((*QDDot)[q_index],
-              (*QDDot)[q_index + 1],
+          Vector3d omegadot_temp ((*QDDot)[q_index], 
+              (*QDDot)[q_index + 1], 
               (*QDDot)[q_index + 2]);
-          model.a[i] = model.a[i]
+          model.a[i] = model.a[i] 
             + model.multdof3_S[i] * omegadot_temp;
         }
       } else {
@@ -152,7 +154,7 @@ RBDL_DLLAPI void UpdateKinematicsCustom(
           + (  (model.mCustomJoints[k]->S)
               *(QDDot->block(q_index, 0, joint_dof_count, 1)));
       }
-    }
+    } 
   }
 }
 
@@ -171,15 +173,15 @@ RBDL_DLLAPI Vector3d CalcBodyToBaseCoordinates (
     unsigned int fbody_id = body_id - model.fixed_body_discriminator;
     unsigned int parent_id = model.mFixedBodies[fbody_id].mMovableParent;
 
-    Matrix3d fixed_rotation =
+    Matrix3d fixed_rotation = 
       model.mFixedBodies[fbody_id].mParentTransform.E.transpose();
     Vector3d fixed_position = model.mFixedBodies[fbody_id].mParentTransform.r;
 
     Matrix3d parent_body_rotation = model.X_base[parent_id].E.transpose();
     Vector3d parent_body_position = model.X_base[parent_id].r;
 
-    return (parent_body_position
-        + (parent_body_rotation
+    return (parent_body_position 
+        + (parent_body_rotation 
           * (fixed_position + fixed_rotation * (point_body_coordinates))) );
   }
 
@@ -209,9 +211,9 @@ RBDL_DLLAPI Vector3d CalcBaseToBodyCoordinates (
     Matrix3d parent_body_rotation = model.X_base[parent_id].E;
     Vector3d parent_body_position = model.X_base[parent_id].r;
 
-    return (fixed_rotation
-        * ( - fixed_position
-          - parent_body_rotation
+    return (fixed_rotation 
+        * ( - fixed_position 
+          - parent_body_rotation 
           * (parent_body_position - point_base_coordinates)));
   }
 
@@ -233,8 +235,8 @@ RBDL_DLLAPI Matrix3d CalcBodyWorldOrientation(
 
   if (body_id >= model.fixed_body_discriminator) {
     unsigned int fbody_id = body_id - model.fixed_body_discriminator;
-    model.mFixedBodies[fbody_id].mBaseTransform =
-      model.mFixedBodies[fbody_id].mParentTransform
+    model.mFixedBodies[fbody_id].mBaseTransform = 
+      model.mFixedBodies[fbody_id].mParentTransform 
       * model.X_base[model.mFixedBodies[fbody_id].mMovableParent];
 
     return model.mFixedBodies[fbody_id].mBaseTransform.E;
@@ -257,12 +259,12 @@ RBDL_DLLAPI void CalcPointJacobian (
     UpdateKinematicsCustom (model, &Q, NULL, NULL);
   }
 
-  SpatialTransform point_trans =
-    SpatialTransform (Matrix3d::Identity(),
-        CalcBodyToBaseCoordinates ( model,
-          Q,
+  SpatialTransform point_trans = 
+    SpatialTransform (Matrix3d::Identity(), 
+        CalcBodyToBaseCoordinates ( model, 
+          Q, 
           body_id,
-          point_position,
+          point_position, 
           false));
 
   assert (G.rows() == 3 && G.cols() == model.qdot_size );
@@ -299,7 +301,7 @@ RBDL_DLLAPI void CalcPointJacobian (
       G.block(0, q_index, 3, model.mCustomJoints[k]->mDoFCount) =
         ((point_trans
           * model.X_base[j].inverse()).toMatrix()
-         * model.mCustomJoints[k]->S).block(
+         * model.mCustomJoints[k]->S).block( 
            3,0,3,model.mCustomJoints[k]->mDoFCount);
     }
 
@@ -459,15 +461,15 @@ RBDL_DLLAPI Vector3d CalcPointVelocity (
   if (model.IsFixedBodyId(body_id)) {
     unsigned int fbody_id = body_id - model.fixed_body_discriminator;
     reference_body_id = model.mFixedBodies[fbody_id].mMovableParent;
-    Vector3d base_coords =
+    Vector3d base_coords = 
       CalcBodyToBaseCoordinates(model, Q, body_id, point_position, false);
     reference_point =
       CalcBaseToBodyCoordinates(model, Q, reference_body_id, base_coords,false);
   }
 
-  SpatialVector point_spatial_velocity =
+  SpatialVector point_spatial_velocity = 
     SpatialTransform (
-        CalcBodyWorldOrientation (model, Q, reference_body_id, false).transpose(),
+        CalcBodyWorldOrientation (model, Q, reference_body_id, false).transpose(), 
         reference_point).apply(model.v[reference_body_id]);
 
   return Vector3d (
@@ -503,14 +505,14 @@ RBDL_DLLAPI Math::SpatialVector CalcPointVelocity6D(
   if (model.IsFixedBodyId(body_id)) {
     unsigned int fbody_id = body_id - model.fixed_body_discriminator;
     reference_body_id = model.mFixedBodies[fbody_id].mMovableParent;
-    Vector3d base_coords =
+    Vector3d base_coords = 
       CalcBodyToBaseCoordinates(model, Q, body_id, point_position, false);
-    reference_point =
+    reference_point = 
       CalcBaseToBodyCoordinates(model, Q, reference_body_id, base_coords,false);
   }
 
   return SpatialTransform (
-      CalcBodyWorldOrientation (model, Q, reference_body_id, false).transpose(),
+      CalcBodyWorldOrientation (model, Q, reference_body_id, false).transpose(), 
       reference_point).apply(model.v[reference_body_id]);
 }
 
@@ -539,9 +541,9 @@ RBDL_DLLAPI Vector3d CalcPointAcceleration (
   if (model.IsFixedBodyId(body_id)) {
     unsigned int fbody_id = body_id - model.fixed_body_discriminator;
     reference_body_id = model.mFixedBodies[fbody_id].mMovableParent;
-    Vector3d base_coords =
+    Vector3d base_coords = 
       CalcBodyToBaseCoordinates (model, Q, body_id, point_position, false);
-    reference_point =
+    reference_point = 
       CalcBaseToBodyCoordinates (model, Q, reference_body_id,base_coords,false);
   }
 
@@ -586,9 +588,9 @@ RBDL_DLLAPI SpatialVector CalcPointAcceleration6D(
   if (model.IsFixedBodyId(body_id)) {
     unsigned int fbody_id = body_id - model.fixed_body_discriminator;
     reference_body_id = model.mFixedBodies[fbody_id].mMovableParent;
-    Vector3d base_coords =
+    Vector3d base_coords = 
       CalcBodyToBaseCoordinates (model, Q, body_id, point_position, false);
-    reference_point =
+    reference_point = 
       CalcBaseToBodyCoordinates (model, Q, reference_body_id,base_coords,false);
   }
 
@@ -599,7 +601,7 @@ RBDL_DLLAPI SpatialVector CalcPointAcceleration6D(
   SpatialVector p_v_i = p_X_i.apply(model.v[reference_body_id]);
   Vector3d a_dash = Vector3d (p_v_i[0], p_v_i[1], p_v_i[2]
       ).cross(Vector3d (p_v_i[3], p_v_i[4], p_v_i[5]));
-  return (p_X_i.apply(model.a[reference_body_id])
+  return (p_X_i.apply(model.a[reference_body_id]) 
       + SpatialVector (0, 0, 0, a_dash[0], a_dash[1], a_dash[2]));
 }
 
@@ -629,14 +631,14 @@ RBDL_DLLAPI bool InverseKinematics (
     for (unsigned int k = 0; k < body_id.size(); k++) {
       MatrixNd G (MatrixNd::Zero(3, model.qdot_size));
       CalcPointJacobian (model, Qres, body_id[k], body_point[k], G, false);
-      Vector3d point_base =
+      Vector3d point_base = 
         CalcBodyToBaseCoordinates (model, Qres, body_id[k], body_point[k], false);
       LOG << "current_pos = " << point_base.transpose() << std::endl;
 
       for (unsigned int i = 0; i < 3; i++) {
         for (unsigned int j = 0; j < model.qdot_size; j++) {
           unsigned int row = k * 3 + i;
-          LOG << "i = " << i << " j = " << j << " k = " << k << " row = "
+          LOG << "i = " << i << " j = " << j << " k = " << k << " row = " 
             << row << " col = " << j << std::endl;
           J(row, j) = G (i,j);
         }
@@ -649,22 +651,19 @@ RBDL_DLLAPI bool InverseKinematics (
     LOG << "e = " << e.transpose() << std::endl;
 
     // abort if we are getting "close"
-    if (Scalar(e.norm()) < Scalar(step_tol)) {
+    if (e.norm() < step_tol) {
       LOG << "Reached target close enough after " << ik_iter << " steps" << std::endl;
       return true;
     }
 
-    MatrixNd JJTe_lambda2_I =
-      J * J.transpose()
+    MatrixNd JJTe_lambda2_I = 
+      J * J.transpose() 
       + lambda*lambda * MatrixNd::Identity(e.size(), e.size());
 
     VectorNd z (body_id.size() * 3);
-#ifndef RBDL_USE_SIMPLE_MATH
-    z = JJTe_lambda2_I.colPivHouseholderQr().solve (e);
-#else
+
     bool solve_successful = LinSolveGaussElimPivot (JJTe_lambda2_I, e, z);
     assert (solve_successful);
-#endif
 
     LOG << "z = " << z << std::endl;
 
@@ -674,7 +673,7 @@ RBDL_DLLAPI bool InverseKinematics (
     Qres = Qres + delta_theta;
     LOG << "Qres = " << Qres.transpose() << std::endl;
 
-    if (Scalar(delta_theta.norm()) < Scalar(step_tol)) {
+    if (delta_theta.norm() < step_tol) {
       LOG << "reached convergence after " << ik_iter << " steps" << std::endl;
       return true;
     }
@@ -699,6 +698,309 @@ RBDL_DLLAPI bool InverseKinematics (
 
   return false;
 }
-#endif
 
+RBDL_DLLAPI
+Vector3d CalcAngularVelocityfromMatrix (
+    const Matrix3d &RotMat
+    ) {
+  double tol = 1e-12;
+
+  Vector3d l = Vector3d (RotMat(2,1) - RotMat(1,2), RotMat(0,2) - RotMat(2,0), RotMat(1,0) - RotMat(0,1));
+  if(l.norm() > tol){
+    double preFactor = atan2(l.norm(),(RotMat.trace() - 1.0))/l.norm();
+    return preFactor*l;
+  }
+  else if((RotMat(0,0)>0 && RotMat(1,1)>0 && RotMat(2,2) > 0) || l.norm() < tol){
+    return Vector3dZero;
+  }
+  else{
+    double PI = atan(1)*4.0;
+    return Vector3d (PI/2*(RotMat(0,0) + 1.0),PI/2*(RotMat(1,1) + 1.0),PI/2*(RotMat(2,2) + 1.0));
+  }
+} 
+
+RBDL_DLLAPI
+InverseKinematicsConstraintSet::InverseKinematicsConstraintSet() {
+  lambda = 1e-9;
+  num_steps = 0;
+  max_steps = 300;
+  step_tol = 1e-12;
+  constraint_tol = 1e-12;
+  num_constraints = 0;
+}
+
+RBDL_DLLAPI
+unsigned int InverseKinematicsConstraintSet::AddPointConstraint(
+    unsigned int body_id,
+    const Vector3d& body_point,
+    const Vector3d& target_pos,
+    float weight
+    ) {
+  constraint_type.push_back (ConstraintTypePosition);
+  body_ids.push_back(body_id);
+  body_points.push_back(body_point);
+  target_positions.push_back(target_pos);
+  target_orientations.push_back(Matrix3d::Zero());
+  constraint_weight.push_back(weight);
+  constraint_row_index.push_back(num_constraints);
+  num_constraints = num_constraints + 3;
+  return constraint_type.size() - 1;
+}
+
+
+unsigned int InverseKinematicsConstraintSet::AddPointConstraintXY(
+    unsigned int body_id,
+    const Vector3d& body_point,
+    const Vector3d& target_pos,
+    float weight
+    ) {
+  constraint_type.push_back (ConstraintTypePositionXY);
+  body_ids.push_back(body_id);
+  body_points.push_back(body_point);
+  target_positions.push_back(target_pos);
+  target_orientations.push_back(Matrix3d::Zero());
+  constraint_weight.push_back(weight);
+  constraint_row_index.push_back(num_constraints);
+  num_constraints = num_constraints + 2;
+  return constraint_type.size() - 1;
+}
+
+
+unsigned int InverseKinematicsConstraintSet::AddPointConstraintZ(
+    unsigned int body_id,
+    const Vector3d& body_point,
+    const Vector3d& target_pos,
+    float weight
+    ) {
+  constraint_type.push_back (ConstraintTypePositionZ);
+  body_ids.push_back(body_id);
+  body_points.push_back(body_point);
+  target_positions.push_back(target_pos);
+  target_orientations.push_back(Matrix3d::Zero());
+  constraint_weight.push_back(weight);
+  constraint_row_index.push_back(num_constraints);
+  num_constraints = num_constraints + 1;
+  return constraint_type.size() - 1;
+}
+
+unsigned int InverseKinematicsConstraintSet::AddPointConstraintCoMXY(
+    unsigned int body_id,
+    //const Vector3d& body_point,
+    const Vector3d& target_pos,
+    float weight
+    ) {
+  constraint_type.push_back (ConstraintTypePositionCoMXY);
+  body_ids.push_back(body_id);
+  body_points.push_back(Vector3d::Zero());
+  target_positions.push_back(target_pos);
+  target_orientations.push_back(Matrix3d::Zero());
+  constraint_weight.push_back(weight);
+  constraint_row_index.push_back(num_constraints);
+  num_constraints = num_constraints + 2;
+  return constraint_type.size() - 1;
+}
+
+
+RBDL_DLLAPI
+unsigned int InverseKinematicsConstraintSet::AddOrientationConstraint(
+    unsigned int body_id,
+    const Matrix3d& target_orientation,
+    float weight
+    ) {
+  constraint_type.push_back (ConstraintTypeOrientation);
+  body_ids.push_back(body_id);
+  body_points.push_back(Vector3d::Zero());
+  target_positions.push_back(Vector3d::Zero());
+  target_orientations.push_back(target_orientation);
+  constraint_row_index.push_back(num_constraints);
+  constraint_weight.push_back(weight);
+  num_constraints = num_constraints + 3;
+  return constraint_type.size() - 1;
+}
+
+RBDL_DLLAPI
+unsigned int InverseKinematicsConstraintSet::AddFullConstraint(
+    unsigned int body_id,
+    const Vector3d& body_point,
+    const Vector3d& target_pos,
+    const Matrix3d& target_orientation,
+    float weight
+    ) {
+  constraint_type.push_back (ConstraintTypeFull);
+  body_ids.push_back(body_id);
+  body_points.push_back(body_point);
+  target_positions.push_back(target_pos);
+  target_orientations.push_back(target_orientation);
+  constraint_row_index.push_back(num_constraints);
+  constraint_weight.push_back(weight);
+  num_constraints = num_constraints + 6;
+  return constraint_type.size() - 1;
+}
+
+RBDL_DLLAPI
+unsigned int InverseKinematicsConstraintSet::ClearConstraints()
+{
+  unsigned int size = constraint_type.size();
+  for (unsigned int i = 0; i < size; i++){
+    constraint_type.pop_back();
+    body_ids.pop_back();
+    body_points.pop_back();
+    target_positions.pop_back();
+    target_orientations.pop_back();
+    constraint_row_index.pop_back();
+    constraint_weight.pop_back();    
+  }
+  num_constraints = 0;
+  return constraint_type.size();
+}
+
+
+RBDL_DLLAPI
+bool InverseKinematics (
+    Model &model,
+    const Math::VectorNd &Qinit,
+    InverseKinematicsConstraintSet &CS,
+    Math::VectorNd &Qres
+    ) {
+  assert (Qinit.size() == model.q_size);
+  assert (Qres.size() == Qinit.size());
+
+  CS.J = MatrixNd::Zero(CS.num_constraints, model.qdot_size);
+  CS.e = VectorNd::Zero(CS.num_constraints);
+  double mass;
+
+  Qres = Qinit;
+
+  for (CS.num_steps = 0; CS.num_steps < CS.max_steps; CS.num_steps++) {
+    UpdateKinematicsCustom (model, &Qres, NULL, NULL);
+
+    for (unsigned int k = 0; k < CS.body_ids.size(); k++) {
+      CS.G = MatrixNd::Zero(6, model.qdot_size);
+      CalcPointJacobian6D (model, Qres, CS.body_ids[k], CS.body_points[k], CS.G, false);
+      Vector3d point_base = CalcBodyToBaseCoordinates (model, Qres, CS.body_ids[k], CS.body_points[k], false);
+      Matrix3d R = CalcBodyWorldOrientation(model, Qres, CS.body_ids[k], false);
+      Vector3d angular_velocity = R.transpose()*CalcAngularVelocityfromMatrix(R*CS.target_orientations[k].transpose());
+
+      //assign offsets and Jacobians
+      if (CS.constraint_type[k] == InverseKinematicsConstraintSet::ConstraintTypeFull){
+        for (unsigned int i = 0; i < 3; i++){
+          unsigned int row = CS.constraint_row_index[k] + i;
+          CS.e[row + 3] = CS.constraint_weight.at(k)*(CS.target_positions[k][i] - point_base[i]);
+          CS.e[row] = CS.constraint_weight.at(k)*angular_velocity[i];
+          for (unsigned int j = 0; j < model.qdot_size; j++) {
+            CS.J(row + 3, j) = CS.constraint_weight.at(k)*CS.G (i + 3,j);
+            CS.J(row, j) = CS.constraint_weight.at(k)*CS.G (i,j);
+          }
+        }
+      }
+      else if (CS.constraint_type[k] == InverseKinematicsConstraintSet::ConstraintTypeOrientation){
+        for (unsigned int i = 0; i < 3; i++){
+          unsigned int row = CS.constraint_row_index[k] + i;
+          CS.e[row] = CS.constraint_weight.at(k)*angular_velocity[i];
+          for (unsigned int j = 0; j < model.qdot_size; j++) {
+            CS.J(row, j) = CS.constraint_weight.at(k)*CS.G (i,j);
+          }
+        }
+      }
+      else if (CS.constraint_type[k] == InverseKinematicsConstraintSet::ConstraintTypePosition){
+        for (unsigned int i = 0; i < 3; i++){
+          unsigned int row = CS.constraint_row_index[k] + i;
+          CS.e[row] = CS.constraint_weight.at(k)*(CS.target_positions[k][i] - point_base[i]);
+          for (unsigned int j = 0; j < model.qdot_size; j++) {
+            CS.J(row, j) = CS.constraint_weight.at(k)*CS.G (i + 3,j);
+          }
+        }
+      }
+      else if (CS.constraint_type[k] == InverseKinematicsConstraintSet::ConstraintTypePositionXY){
+        for (unsigned int i = 0; i < 2; i++){
+          unsigned int row = CS.constraint_row_index[k] + i;
+          CS.e[row] = CS.constraint_weight.at(k)*(CS.target_positions[k][i] - point_base[i]);
+          for (unsigned int j = 0; j < model.qdot_size; j++) {
+            CS.J(row, j) = CS.constraint_weight.at(k)*CS.G (i + 3,j);
+          }
+        }
+      }
+      else if (CS.constraint_type[k] == InverseKinematicsConstraintSet::ConstraintTypePositionZ){
+        
+        unsigned int row = CS.constraint_row_index[k];
+        CS.e[row] = CS.constraint_weight.at(k)*(CS.target_positions[k][2] - point_base[2]);
+        for (unsigned int j = 0; j < model.qdot_size; j++) {
+          CS.J(row, j) = CS.constraint_weight.at(k)*CS.G (2 + 3,j);
+        }
+        
+      }
+      else if (CS.constraint_type[k] == InverseKinematicsConstraintSet::ConstraintTypePositionCoMXY){
+        Utils::CalcCenterOfMass (model, Qres, Qres, NULL, mass, point_base, NULL, NULL, NULL, NULL, false);
+		CalcPointJacobian6D (model, Qres, CS.body_ids[k], point_base, CS.G, false);
+      
+        for (unsigned int i = 0; i < 2; i++){
+          unsigned int row = CS.constraint_row_index[k] + i;
+          CS.e[row] = CS.constraint_weight.at(k)*(CS.target_positions[k][i] - point_base[i]);
+          for (unsigned int j = 0; j < model.qdot_size; j++) {
+            CS.J(row, j) = CS.constraint_weight.at(k)*CS.G (i + 3,j);
+          }
+        }
+      }
+      else {
+        assert (false && !"Invalid inverse kinematics constraint");
+      }
+    }
+
+    LOG << "J = " << CS.J << std::endl;
+    LOG << "e = " << CS.e.transpose() << std::endl;
+    CS.error_norm = CS.e.norm();
+
+    // abort if we are getting "close"
+    if (CS.error_norm < CS.step_tol) {
+      LOG << "Reached target close enough after " << CS.num_steps << " steps" << std::endl;
+      return true;
+    }
+
+    //     // "task space" from puppeteer
+    //     MatrixNd Ek = MatrixNd::Zero (CS.e.size(), CS.e.size());
+    // 
+    //     for (size_t ei = 0; ei < CS.e.size(); ei ++) {
+    // //      Ek(ei,ei) = CS.error_norm * CS.error_norm * 0.5 + CS.lambda;
+    //       Ek(ei,ei) = CS.e[ei]*CS.e[ei] * 0.5 + CS.lambda;
+    //     }
+    // 
+    //     MatrixNd JJT_Ek_wnI = CS.J * CS.J.transpose() + Ek;
+    // 
+    //     VectorNd delta_theta = CS.J.transpose() * JJT_Ek_wnI.colPivHouseholderQr().solve (CS.e);
+    // 
+    //     LOG << "change = " << delta_theta << std::endl;
+
+
+    // "joint space" from puppeteer
+
+    double Ek = 0.;
+
+    for (size_t ei = 0; ei < CS.e.size(); ei ++) {
+      Ek += CS.e[ei] * CS.e[ei] * 0.5;
+    }
+
+    VectorNd ek = CS.J.transpose() * CS.e;
+    MatrixNd Wn = MatrixNd::Zero (Qres.size(), Qres.size());
+
+    assert (ek.size() == Qres.size());
+
+    for (size_t wi = 0; wi < Qres.size(); wi++) {
+      Wn(wi, wi) = ek[wi] * ek[wi] * 0.5 + CS.lambda;
+      //      Wn(wi, wi) = Ek + 1.0e-3;
+    }
+
+    MatrixNd A = CS.J.transpose() * CS.J + Wn;
+    VectorNd delta_theta = A.colPivHouseholderQr().solve(CS.J.transpose() * CS.e);
+
+    Qres = Qres + delta_theta;
+    CS.delta_q_norm = delta_theta.norm();
+    if (CS.delta_q_norm < CS.step_tol) {
+      LOG << "reached convergence after " << CS.num_steps << " steps" << std::endl;
+      return true;
+    }
+  }
+
+  return false;
+}
+#endif
 }
