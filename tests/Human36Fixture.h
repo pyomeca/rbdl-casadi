@@ -18,6 +18,7 @@ struct Human36 {
 
   RigidBodyDynamics::ConstraintSet constraints_1B1C_emulated;
   RigidBodyDynamics::ConstraintSet constraints_1B4C_emulated;
+  //RigidBodyDynamics::ConstraintSet constraints_1B4C_emulated_b2g;
   RigidBodyDynamics::ConstraintSet constraints_4B4C_emulated;
 
   RigidBodyDynamics::ConstraintSet constraints_1B1C_3dof;
@@ -244,7 +245,7 @@ struct Human36 {
     Body hand_body = create_body (SegmentHand);
     Body head_body = create_body (SegmentHead);
 
-    Matrix3d zero_matrix (Matrix3d::Zero(3,3));
+    Matrix3d zero_matrix (Matrix3d::Zero());
     Body null_body (0., Vector3d (0., 0., 0.), zero_matrix);
 
     Joint free_flyer (
@@ -362,6 +363,15 @@ struct Human36 {
     constraints_1B4C_emulated.AddContactConstraint (foot_r_emulated, Vector3d (0.1, 0., -0.05), Vector3d (0., 0., 1.));
     constraints_1B4C_emulated.AddContactConstraint (foot_r_emulated, Vector3d (-0.1, 0., -0.05), Vector3d (1., 0., 0.));
     constraints_1B4C_emulated.Bind (*model_emulated); 
+
+    std::vector< Vector3d > normals;
+    normals.push_back(Vector3d(1.,0.,0.));
+    normals.push_back(Vector3d(0.,1.,0.));
+    normals.push_back(Vector3d(0.,0.,1.));
+
+    //constraints_1B4C_emulated_b2g.AddContactConstraint (foot_r_emulated, Vector3d (0.1, 0., -0.05), normals);
+    //constraints_1B4C_emulated_b2g.AddContactConstraint (foot_r_emulated, Vector3d (-0.1, 0., -0.05), Vector3d (1., 0., 0.));
+    //constraints_1B4C_emulated_b2g.Bind (*model_emulated);
 
     constraints_4B4C_emulated.AddContactConstraint (foot_r_emulated, Vector3d (0.1, 0., -0.05), Vector3d (1., 0., 0.));
     constraints_4B4C_emulated.AddContactConstraint (foot_r_emulated, Vector3d (0.1, 0., -0.05), Vector3d (0., 1., 0.));

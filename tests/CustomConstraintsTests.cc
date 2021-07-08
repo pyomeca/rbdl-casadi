@@ -1,7 +1,9 @@
-#include <UnitTest++.h>
 #include "rbdl/rbdl.h"
+#include "rbdl/Constraint.h"
 #include "rbdl/Constraints.h"
 #include <cassert>
+
+#include "rbdl_tests.h"
 
 #include "PendulumModels.h"
 
@@ -12,16 +14,43 @@ using namespace RigidBodyDynamics::Math;
 const double TEST_PREC = 1.0e-11;
 
 
-struct PinJointCustomConstraint : public RigidBodyDynamics::CustomConstraint
+class PinJointCustomConstraint : public RigidBodyDynamics::Constraint
 {
 
-  PinJointCustomConstraint():RigidBodyDynamics::CustomConstraint(5){
+public:
+
+  PinJointCustomConstraint()
+    :Constraint(NULL,ConstraintTypeCustom,5,
+                std::numeric_limits<unsigned int>::max())
+  {
   }
 
-  PinJointCustomConstraint(unsigned int x0y1z2):RigidBodyDynamics::CustomConstraint(5){    
-    TuP.resize(mConstraintCount);
-    for(unsigned int i=0; i<TuP.size(); ++i){
-      TuP[i].setZero();
+  PinJointCustomConstraint(//const unsigned int rowInSystem,
+      const unsigned int bodyIdPredecessor,
+      const unsigned int bodyIdSuccessor,
+      const Math::SpatialTransform &bodyFramePredecessor,
+      const Math::SpatialTransform &bodyFrameSuccessor,
+      unsigned int x0y1z2,
+      const char *name = NULL,
+      unsigned int userDefinedId=std::numeric_limits<unsigned int>::max(),
+      bool enableBaumgarteStabilization=false,
+      double baumgarteTStab = 0.1):
+        Constraint(name,ConstraintTypeCustom,5,userDefinedId)
+  {
+    //Configure the parent member variables
+    bodyIds.push_back(bodyIdPredecessor);
+    bodyIds.push_back(bodyIdSuccessor);
+    bodyFrames.push_back(bodyFramePredecessor);
+    bodyFrames.push_back(bodyFrameSuccessor);
+
+    enableConstraintErrorFromPositionLevel();
+    setBaumgarteTimeConstant(baumgarteTStab);
+    setEnableBaumgarteStabilization(enableBaumgarteStabilization);
+
+    //Configure the local variables
+    T.resize(sizeOfConstraint);
+    for(unsigned int i=0; i<T.size(); ++i){
+      T[i].setZero();
     }
 
     /*A pin joint has constraints about these axis when expressed
@@ -37,71 +66,71 @@ struct PinJointCustomConstraint : public RigidBodyDynamics::CustomConstraint
     switch(x0y1z2){
       case 0:
       {
-        TuP[3][1] = 1;
-        TuP[4][2] = 1;
+        T[3][1] = 1;
+        T[4][2] = 1;
       }break;
       case 1:{
-        TuP[3][0] = 1;
-        TuP[4][2] = 1;
+        T[3][0] = 1;
+        T[4][2] = 1;
       }break;
       case 2:{
-        TuP[3][0] = 1;
-        TuP[4][1] = 1;
+        T[3][0] = 1;
+        T[4][1] = 1;
       }break;
       default: {
         cerr << "Invalid AxisOfRotation argument" << endl;
       }
     };
 
-    TuP[0][3] = 1;
-    TuP[1][4] = 1;
-    TuP[2][5] = 1;
+    T[0][3] = 1;
+    T[1][4] = 1;
+    T[2][5] = 1;
 
   }
 
-
-  virtual void CalcConstraintsJacobianAndConstraintAxis(
-                  Model &model,
-                  unsigned int ccid,
-                  const Math::VectorNd &Q,
-                  ConstraintSet &CS,
-                  Math::MatrixNd &G,
-                  unsigned int GrowStart,
-                  unsigned int GcolStart)
+  void bind(const Model &model) override
   {
-
-
-      //Set the working matrices for the previous/successor point Jacobians
-      //to zero
-      CS.GSpi.setZero();
-      CS.GSsi.setZero();
-
-      CalcPointJacobian6D(model,Q,CS.body_p[ccid],CS.X_p[ccid].r,CS.GSpi,false);
-      CalcPointJacobian6D(model,Q,CS.body_s[ccid],CS.X_s[ccid].r,CS.GSsi,false);
-      CS.GSJ = CS.GSsi-CS.GSpi;
-
-      r0P0 = CalcBodyToBaseCoordinates (model, Q, CS.body_p[ccid],
-                                                  CS.X_p[ccid].r, false);
-      rmP0 = CalcBodyWorldOrientation (model, Q, CS.body_p[ccid], false
-                                       ).transpose()* CS.X_p[ccid].E;
-      xP0  = SpatialTransform (rmP0, r0P0);
-
-      for(unsigned int i=0; i<TuP.size(); ++i){
-        eT0 = xP0.apply(TuP[i]);
-        CS.constraintAxis[ccid+i] = TuP[i]; //To keep it up to date.
-        G.block(GrowStart+i,GcolStart,1,model.dof_count)
-            = eT0.transpose()*CS.GSJ;
-      }
+    //This function does not need to resize any of its own local
+    //memory (it makes use of the memory in cache) so this function is blank.
   }
 
-  virtual void CalcGamma( Model &model,
-                          unsigned int ccid,
-                          const Math::VectorNd &Q,
-                          const Math::VectorNd &QDot,
-                          ConstraintSet &CS,
-                          const MatrixNd &Gblock,
-                          Math::VectorNd &gamma,
-                          unsigned int gammaStartIndex)
+  void calcConstraintJacobian(  Model &model,
+                              const double time,
+                              const Math::VectorNd &Q,
+                              const Math::VectorNd &QDot,
+                              Math::MatrixNd &GSysUpd,
+                              ConstraintCache &cache,
+                              bool updKin) override
+  {
+    //Set the working matrices for the previous/successor point Jacobians
+    //to zero
+    cache.mat6NA.setZero(); //predecessor
+    cache.mat6NB.setZero(); //successor
+
+    CalcPointJacobian6D(model,Q,bodyIds[0],bodyFrames[0].r,cache.mat6NA,updKin);
+    CalcPointJacobian6D(model,Q,bodyIds[1],bodyFrames[1].r,cache.mat6NB,updKin);
+    cache.mat6NA = cache.mat6NB-cache.mat6NA;
+
+    cache.stA.r = CalcBodyToBaseCoordinates (model, Q, bodyIds[0],
+                                                bodyFrames[0].r, false);
+    cache.stA.E = CalcBodyWorldOrientation (model, Q, bodyIds[0], false
+                                                ).transpose()* bodyFrames[0].E;
+
+    for(unsigned int i=0; i<T.size(); ++i){
+      cache.svecA = cache.stA.apply(T[i]);
+      GSysUpd.block(rowInSystem+i,0,1,GSysUpd.cols())
+          = cache.svecA.transpose()*cache.mat6NA;
+    }
+  }
+
+  void calcGamma( Model &model,
+                  const double time,
+                  const Math::VectorNd &Q,
+                  const Math::VectorNd &QDot,
+                  const Math::MatrixNd &GSys,
+                  Math::VectorNd &gammaSysUpd,
+                  ConstraintCache &cache,
+                  bool updKin) override
   {
   /*
     Position-level
@@ -145,100 +174,214 @@ struct PinJointCustomConstraint : public RigidBodyDynamics::CustomConstraint
       where aP* and aQ* are the spatial accelerations of points P and Q
       evaluated with d^2q/dt^2 = 0.
   */
-    v0P0 = CalcPointVelocity6D(model, Q, QDot,
-                               CS.body_p[ccid],
-                               CS.X_p[ccid].r,false);
+    //v0P0
+    //Velocity of the point on the predecessor body
+    cache.svecA = CalcPointVelocity6D(model, Q, QDot,
+                               bodyIds[0],
+                               bodyFrames[0].r,updKin);
+    //v0S0
+    //Velocity of the point on the successor body
+    cache.svecB = CalcPointVelocity6D(model, Q, QDot,
+                               bodyIds[1],
+                               bodyFrames[1].r,updKin);
+    //GPQ0
+    //Jacobian of r0P0
+    cache.svecC = CalcPointAcceleration6D(model, Q, QDot,
+                                   cache.vecNZeros,
+                                   bodyIds[0],
+                                   bodyFrames[0].r,updKin);
+    //GSQ0
+    //Jacobian of r0S0
+    cache.svecD = CalcPointAcceleration6D(model, Q, QDot,
+                                   cache.vecNZeros,
+                                   bodyIds[1],
+                                   bodyFrames[1].r,updKin);
+    //r0P0
+    cache.stA.r = CalcBodyToBaseCoordinates (model, Q, bodyIds[0],
+                                            bodyFrames[0].r, updKin);
 
-    v0S0 = CalcPointVelocity6D(model, Q, QDot,
-                               CS.body_s[ccid],
-                               CS.X_s[ccid].r,false);
+    //E0P - rotation matrix from the 0th frame to the P frame
+    cache.stA.E = CalcBodyWorldOrientation (model, Q, bodyIds[0], updKin
+                                              ).transpose() * bodyFrames[0].E;
 
-    dv0P0nl = CalcPointAcceleration6D(model, Q, QDot,
-                                   VectorNd::Zero(model.dof_count),
-                                   CS.body_p[ccid],
-                                   CS.X_p[ccid].r,false);
 
-    dv0S0nl = CalcPointAcceleration6D(model, Q, QDot,
-                                   VectorNd::Zero(model.dof_count),
-                                   CS.body_s[ccid],
-                                   CS.X_s[ccid].r,false);
-    r0P0 = CalcBodyToBaseCoordinates (model, Q, CS.body_p[ccid], CS.X_p[ccid].r,
-                                      false);
-    rmP0 = CalcBodyWorldOrientation (model, Q, CS.body_p[ccid], false
-                                     ).transpose() * CS.X_p[ccid].E;
-
-    xP0 = SpatialTransform (rmP0, r0P0);
-
-    for(unsigned int i=0; i<TuP.size(); ++i){
-      eT0    = xP0.apply(TuP[i]);
-      eT0Dot = crossm(v0P0,eT0);
-      gamma[i+gammaStartIndex] = -eT0.dot(dv0S0nl-dv0P0nl)
-                                 -eT0Dot.dot(v0S0-v0P0);
+    for(unsigned int i=0; i<T.size(); ++i){
+      cache.svecE = cache.stA.apply(T[i]); //constraint axis
+      cache.svecF = crossm(cache.svecA,cache.svecE);//constraint axis derivative
+      gammaSysUpd[rowInSystem+i] =  -cache.svecE.dot(cache.svecD-cache.svecC)
+                                    -cache.svecF.dot(cache.svecB-cache.svecA);
     }
 
   }
 
-  virtual void CalcPositionError( Model &model,
-                                  unsigned int ccid,
-                                  const Math::VectorNd &Q,
-                                  ConstraintSet &CS,
-                                  Math::VectorNd &errPos,
-                                  unsigned int errStartIndex)
+  void calcPositionError( Model &model,
+                          const double time,
+                          const Math::VectorNd &Q,
+                          Math::VectorNd &errSysUpd,
+                          ConstraintCache &cache,
+                          bool updKin) override
   {
-    r0P0 = CalcBodyToBaseCoordinates (model, Q, CS.body_p[ccid],
-                                                CS.X_p[ccid].r, false);
-    r0S0 = CalcBodyToBaseCoordinates (model, Q, CS.body_s[ccid],
-                                                CS.X_s[ccid].r, false);
-    rmP0 = CalcBodyWorldOrientation (model, Q, CS.body_p[ccid], false
-                                     ).transpose()* CS.X_p[ccid].E;
-    rmS0 = CalcBodyWorldOrientation (model, Q, CS.body_s[ccid], false
-                                     ).transpose()* CS.X_s[ccid].E;
-    rmPS = rmP0.transpose()*rmS0;
+    //r0P0
+    cache.vec3A = CalcBodyToBaseCoordinates (model, Q, bodyIds[0],
+                                                bodyFrames[0].r, false);
 
-    //From Davide Corradi's nice expressions for the relative
-    //orientation error. To do: CHECK THIS!
-    err[0] = -0.5 * (rmPS(1,2) - rmPS(2,1));
-    err[1] = -0.5 * (rmPS(2,0) - rmPS(0,2));
-    err[2] = -0.5 * (rmPS(0,1) - rmPS(1,0));
-    err.block<3,1>(3,0) = rmP0.transpose() * (r0S0 - r0P0);
+    //r0S0
+    cache.vec3B = CalcBodyToBaseCoordinates (model, Q, bodyIds[1],
+                                                bodyFrames[1].r, false);
 
-    for(unsigned int i=0; i < TuP.size(); ++i){
-      errPos[i+errStartIndex] = TuP[i].transpose()*err;
+    //EP0 : rotation matrix from the predecessor frame to the root frame
+    cache.mat3A = CalcBodyWorldOrientation (model, Q, bodyIds[0], false
+                                     ).transpose()* bodyFrames[0].E;
+
+    //ES0 : rotation matrix from the successor frame to the root frame
+    cache.mat3B = CalcBodyWorldOrientation (model, Q, bodyIds[1], false
+                                     ).transpose()* bodyFrames[1].E;
+
+    cache.mat3C = cache.mat3A.transpose()*cache.mat3B;
+
+    cache.svecA[0] = -0.5 * (cache.mat3C(1,2) - cache.mat3C(2,1));
+    cache.svecA[1] = -0.5 * (cache.mat3C(2,0) - cache.mat3C(0,2));
+    cache.svecA[2] = -0.5 * (cache.mat3C(0,1) - cache.mat3C(1,0));
+    cache.svecA.block(3,0,3,1) =
+        cache.mat3A.transpose()*(cache.vec3B - cache.vec3A);
+
+    for(unsigned int i=0; i < T.size(); ++i){
+      errSysUpd[rowInSystem+i] = T[i].transpose()*cache.svecA;
     }
 
   }
 
-  virtual void CalcVelocityError( Model &model,
-                                  unsigned int custom_constraint_id,
-                                  const Math::VectorNd &Q,
-                                  const Math::VectorNd &QDot,
-                                  ConstraintSet &CS,
-                                  const Math::MatrixNd &Gblock,
-                                  Math::VectorNd &errVel,
-                                  unsigned int errStartIndex)
+  void calcVelocityError( Model &model,
+                                      const double time,
+                                      const Math::VectorNd &Q,
+                                      const Math::VectorNd &QDot,
+                                      const Math::MatrixNd &GSys,
+                                      Math::VectorNd &derrSysUpd,
+                                      ConstraintCache &cache,
+                                      bool updKin) override
   {
     //Since this is a time-invariant constraint the expression for
     //the velocity error is quite straight forward:
-    errVelBlock = Gblock*QDot;
-    for(unsigned int i=0; i < errVelBlock.rows();++i){
-      errVel[errStartIndex+i] = errVelBlock[i];
+    for(unsigned int i=0; i < sizeOfConstraint;++i){
+      derrSysUpd[rowInSystem+i] = 0.;
+      for(unsigned int j=0; j<GSys.cols();++j){
+        derrSysUpd[rowInSystem+i] += GSys(rowInSystem+i,j)*QDot[j];
+      }
     }
   }
 
-  std::vector < SpatialVector > TuP; //Constraint direction vectors resolved in
-                                     //the frame that P is on.
-  SpatialVector err, eT0, eT0Dot, v0P0,  v0S0, dv0P0nl ,dv0S0nl;
-  Vector3d r0P0, r0S0;
-  Matrix3d rmP0, rmS0, rmPS;
-  SpatialTransform xP0;
+  void calcConstraintForces(
+         Model &model,
+         const double time,
+         const Math::VectorNd &Q,
+         const Math::VectorNd &QDot,
+         const Math::MatrixNd &GSys,
+         const Math::VectorNd &LagrangeMultipliersSys,
+         std::vector< unsigned int > &constraintBodiesUpd,
+         std::vector< Math::SpatialTransform > &constraintBodyFramesUpd,
+         std::vector< Math::SpatialVector > &constraintForcesUpd,
+         ConstraintCache &cache,
+         bool resolveAllInRootFrame,
+         bool updKin) override
+  {
 
-  VectorNd errVelBlock;
+    constraintBodiesUpd.resize(2);
+    constraintBodyFramesUpd.resize(2);
+
+    cache.stA.r = CalcBodyToBaseCoordinates(model,Q,bodyIds[0],bodyFrames[0].r,
+                                            updKin);
+    //The rotation matrix from the predecessor frame to the base frame
+    // 0_E_P
+    cache.stA.E = CalcBodyWorldOrientation(model,Q,bodyIds[0],updKin
+                                           ).transpose()*bodyFrames[0].E;
+
+
+    cache.stB.r = CalcBodyToBaseCoordinates(model,Q,bodyIds[1],bodyFrames[1].r,
+                                            updKin);
+    //The rotation matrix from the successor frame to the base frame
+    // 0_E_S
+    cache.stB.E = CalcBodyWorldOrientation(model,Q,bodyIds[1],updKin
+                                           ).transpose()*bodyFrames[1].E;
+
+    constraintForcesUpd.resize(2);
+    constraintForcesUpd[0].setZero();
+    constraintForcesUpd[1].setZero();
+
+    //Using Eqn. 8.30 of Featherstone. Note that this force is resolved in the
+    //predecessor frame.
+    cache.svecB.setZero();
+    for(unsigned int i=0; i<sizeOfConstraint;++i){
+      cache.svecA =  cache.stA.apply(T[i]);
+      cache.svecB += cache.svecA*LagrangeMultipliersSys[rowInSystem+i];
+    }
+
+    //cache.vec3A[0] = cache.svecB[3];
+    //cache.vec3A[1] = cache.svecB[4];
+    //cache.vec3A[2] = cache.svecB[5];
+    //double mag = cache.vec3A.norm();
+
+
+    constraintBodiesUpd.resize(2);
+    constraintBodyFramesUpd.resize(2);
+
+    if(resolveAllInRootFrame){
+      constraintBodiesUpd[0] = 0;
+      constraintBodiesUpd[1] = 0;
+
+      //These forces are returned in the coordinates of the
+      //root frame but w.r.t. the respective points of the constaint
+      constraintBodyFramesUpd[0].r = cache.stA.r;
+      constraintBodyFramesUpd[0].E.Identity();
+
+      constraintBodyFramesUpd[1].r = cache.stB.r;
+      constraintBodyFramesUpd[1].E.Identity();
+
+
+      //The forces applied to the successor body are equal and opposite
+      constraintForcesUpd[0] = -cache.svecB;
+      constraintForcesUpd[1] = cache.svecB;
+
+    }else{
+
+      constraintBodiesUpd     = bodyIds;
+      constraintBodyFramesUpd = bodyFrames;
+
+      constraintForcesUpd[0].block(0,0,3,1) = -cache.stA.E.transpose()
+                                                *cache.svecB.block(0,0,3,1);
+      constraintForcesUpd[0].block(3,0,3,1) = -cache.stA.E.transpose()
+                                                *cache.svecB.block(3,0,3,1);
+
+
+      constraintForcesUpd[1].block(0,0,3,1) = cache.stB.E.transpose()
+                                                *cache.svecB.block(0,0,3,1);
+      constraintForcesUpd[1].block(3,0,3,1) = cache.stB.E.transpose()
+                                                *cache.svecB.block(3,0,3,1);
+
+
+
+    }
+
+
+  }
+
+private:
+  std::vector < SpatialVector > T; //Constraint direction vectors resolved in
+                                     //the frame that P is on.
+  //SpatialVector err, eT0, eT0Dot, v0P0,  v0S0, dv0P0nl ,dv0S0nl;
+  //Vector3d r0P0, r0S0;
+  //Matrix3d rmP0, rmS0, rmPS;
+  //SpatialTransform xP0;
+
+
+  //VectorNd errVelBlock;
 
 };
 
 
 
-struct DoublePerpendicularPendulumCustomConstraint {
+class DoublePerpendicularPendulumCustomConstraint {
+
+public:
   DoublePerpendicularPendulumCustomConstraint()
     : model()
     , cs()
@@ -290,13 +433,14 @@ struct DoublePerpendicularPendulumCustomConstraint {
     //Make the revolute joints about the y axis using 5 constraints
     //between the end points
 
-    ccPJZaxis = PinJointCustomConstraint(2);
-    ccPJYaxis = PinJointCustomConstraint(1);
+    PinJointCustomConstraint zJoint(0,idB1,X_p1,X_s1,2,"Rz",7);
+    PinJointCustomConstraint yJoint(idB1,idB2,X_p2,X_s2,1,"Ry",11);
 
-    cs.AddCustomConstraint(&ccPJZaxis,   0,idB1, X_p1, X_s1, false, 0.1);
-    cs.AddCustomConstraint(&ccPJYaxis,idB1,idB2, X_p2, X_s2, false, 0.1);
+    ccPJZaxis = std::make_shared<PinJointCustomConstraint>(zJoint);
+    ccPJYaxis = std::make_shared<PinJointCustomConstraint>(yJoint);
 
-
+    assignedIdRz = cs.AddCustomConstraint(ccPJZaxis);
+    assignedIdRy = cs.AddCustomConstraint(ccPJYaxis);
     cs.Bind(model);
 
     q   = VectorNd::Zero(model.dof_count);
@@ -308,6 +452,7 @@ struct DoublePerpendicularPendulumCustomConstraint {
 
     Model model;
     ConstraintSet cs;
+    unsigned int assignedIdRz, assignedIdRy;
 
     VectorNd q;
     VectorNd qd;
@@ -329,13 +474,14 @@ struct DoublePerpendicularPendulumCustomConstraint {
     SpatialTransform X_p2;
     SpatialTransform X_s2;
 
-    PinJointCustomConstraint ccPJZaxis;
-    PinJointCustomConstraint ccPJYaxis;
+    std::shared_ptr<PinJointCustomConstraint> ccPJZaxis;
+    std::shared_ptr<PinJointCustomConstraint> ccPJYaxis;
+
 };
 
 
 
-TEST(CustomConstraintCorrectnessTest) {
+TEST_CASE(__FILE__"_CustomConstraintCorrectnessTest", "") {
 
   //Test to add:
   //  Jacobian vs. num Jacobian
@@ -354,6 +500,14 @@ TEST(CustomConstraintCorrectnessTest) {
   dbj.qd[1] = M_PI/2.0;       //About y1
   dbj.tau[0]= 0.;
   dbj.tau[1]= 0.;
+
+  unsigned int groupIndex = dbcc.cs.getGroupIndexByName("Rz");
+  assert(groupIndex==0);
+  groupIndex = dbcc.cs.getGroupIndexById(7);
+  assert(groupIndex==0);
+  groupIndex = dbcc.cs.getGroupIndexByAssignedId(dbcc.assignedIdRy);
+  assert(groupIndex==1);
+
 
   ForwardDynamics(dbj.model,dbj.q,dbj.qd,dbj.tau,dbj.qdd);
 
@@ -461,10 +615,10 @@ TEST(CustomConstraintCorrectnessTest) {
   //The constraint errors at the position and velocity level
   //must be zero before the accelerations can be tested.
   for(unsigned int i=0; i<err.rows();++i){
-    CHECK_CLOSE(0,err[i],TEST_PREC);
+    CHECK_THAT(0,IsClose(err[i],TEST_PREC, TEST_PREC));
   }
   for(unsigned int i=0; i<errd.rows();++i){
-    CHECK_CLOSE(0,errd[i],TEST_PREC);
+    CHECK_THAT(0,IsClose(errd[i],TEST_PREC, TEST_PREC));
   }
 
 
@@ -485,21 +639,71 @@ TEST(CustomConstraintCorrectnessTest) {
 
   for(unsigned int i = 0; i < dba.cs.G.rows(); ++i){
     for(unsigned int j=0; j< dba.cs.G.cols();++j){
-      CHECK_CLOSE(dba.cs.G(i,j),dbcc.cs.G(i,j),TEST_PREC);
+      CHECK_THAT(dba.cs.G(i,j),IsClose(dbcc.cs.G(i,j),TEST_PREC, TEST_PREC));
     }
   }
 
   for(unsigned int i = 0; i < dba.cs.gamma.rows(); ++i){
-    CHECK_CLOSE(dba.cs.gamma[i],dbcc.cs.gamma[i],TEST_PREC);
+    CHECK_THAT(dba.cs.gamma[i],IsClose(dbcc.cs.gamma[i],TEST_PREC, TEST_PREC));
   }
 
-  for(unsigned int i =0; i < dba.cs.constraintAxis.size(); ++i){
-    for(unsigned int j=0; j< dba.cs.constraintAxis[0].rows();++j){
-      CHECK_CLOSE(dba.cs.constraintAxis[i][j],
-                  dbcc.cs.constraintAxis[i][j],TEST_PREC);
+  //This test cannot be performed with the updated Constraint interface
+  //because the constraintAxis field is obsolete. Instead we can test
+  //the constraint forces
+  //unsigned int idx=0;
+  //for(unsigned int i=0; i < dba.cs.loopConstraints.size();++i){
+  //  for(unsigned int j=0;
+  //      j < dba.cs.loopConstraints[i]->getConstraintSize();++j){
+  //    for(unsigned int k=0; k<6; ++k){
+  //      CHECK_CLOSE(dba.cs.loopConstraints[i]->getConstraintAxes()[j][k],
+  //                  dbcc.cs.constraintAxis[idx][k],TEST_PREC);
+  //    }
+  //    ++idx;
+  //  }
+  //}
+
+  std::vector< unsigned int >     bodyIdDba,      bodyIdDbcc;
+  std::vector< SpatialTransform > bodyFramesDba,  bodyFramesDbcc;
+  std::vector < SpatialVector >   forcesDba,      forcesDbcc;
+
+  bool updKin       = false;
+  bool inBaseFrame  = false;
+
+  for(unsigned int i=0; i<dba.cs.constraints.size();++i){
+    for(unsigned int j=0; j<2; ++j){
+      if(j == 0){
+        inBaseFrame = false;
+      }else{
+        inBaseFrame = true;
+      }
+      dba.cs.constraints[i]->calcConstraintForces(dba.model, 0., dba.q, dba.qd,
+                                          dba.cs.G, dba.cs.force,
+                                          bodyIdDba, bodyFramesDba, forcesDba,
+                                          dba.cs.cache,inBaseFrame,updKin);
+
+      dbcc.cs.constraints[i]->calcConstraintForces(dbcc.model,0.,dbcc.q,dbcc.qd,
+                                          dbcc.cs.G, dbcc.cs.force,
+                                          bodyIdDbcc, bodyFramesDbcc,forcesDbcc,
+                                          dbcc.cs.cache,inBaseFrame,updKin);
+
+      CHECK( (bodyIdDba.size()    - bodyIdDbcc.size()    ) == 0);
+      CHECK( (bodyFramesDba.size()- bodyFramesDbcc.size()) == 0);
+      CHECK( (forcesDba.size()    - forcesDbcc.size()    ) == 0);
+
+      for(unsigned int k=0; k < bodyIdDba.size();++k){
+        CHECK_THAT( bodyFramesDba[k].r,
+                    AllCloseVector(bodyFramesDbcc[k].r, TEST_PREC, TEST_PREC)
+        );
+        CHECK_THAT(bodyFramesDba[k].E,
+                   AllCloseMatrix(bodyFramesDbcc[k].E, TEST_PREC, TEST_PREC)
+        );
+        CHECK_THAT( forcesDba[k],
+                    AllCloseVector(forcesDbcc[k], TEST_PREC, TEST_PREC)
+        );
+      }
     }
   }
-  
+
 
   SpatialVector a010c =
       CalcPointAcceleration6D(dbcc.model,dbcc.q,dbcc.qd,dbcc.qdd,
@@ -512,9 +716,8 @@ TEST(CustomConstraintCorrectnessTest) {
                           dbcc.idB2,Vector3d(dbcc.l2,0.,0.),true);
 
   for(unsigned int i=0; i<6;++i){
-    CHECK_CLOSE(a010[i],a010c[i],TEST_PREC);
-    CHECK_CLOSE(a020[i],a020c[i],TEST_PREC);
-    CHECK_CLOSE(a030[i],a030c[i],TEST_PREC);
+    CHECK_THAT(a010[i],IsClose(a010c[i],TEST_PREC, TEST_PREC));
+    CHECK_THAT(a020[i],IsClose(a020c[i],TEST_PREC, TEST_PREC));
+    CHECK_THAT(a030[i],IsClose(a030c[i],TEST_PREC, TEST_PREC));
   }
-
 }
