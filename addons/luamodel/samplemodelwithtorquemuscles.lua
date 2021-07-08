@@ -59,6 +59,31 @@ local_frames = {
   {name = "Pocket_L",   body="thigh_left",   r={0.,  0.2, 0.}, E=eye33, },
   {name = "Pocket_R",   body="thigh_right",  r={0., -0.2, 0.}, E=eye33, },
 },
+--subject data
+human_meta_data = {
+  {age_group = "Young18To25",   
+   age = 35.0,
+   height = 1.73,
+   weight = 81.68,
+   gender = "male"},
+},
+--torque muscle models
+--The name must contain a name of one of the MTGs  listed in JointTorqueSet : line 60 of addons/muscle/Millard2016TorqueMuscle.cc
+millard2016_torque_muscles = {
+  { name = "HipExtension_R",   								angle_sign = -1, torque_sign =  1, body ="thigh_right",  joint_index=1, act_time = 0.05, deact_time = 0.05,},
+  { name = "HipFlexion_R",     								angle_sign = -1, torque_sign = -1, body ="thigh_right",  joint_index=1, act_time = 0.05, deact_time = 0.05,},
+  { name = "KneeExtension_R",  								angle_sign =  1, torque_sign = -1, body ="shank_right",                 act_time = 0.05, deact_time = 0.05,},
+  { name = "KneeFlexion_R",    								angle_sign =  1, torque_sign =  1, body ="shank_right",                 act_time = 0.05, deact_time = 0.05,},
+  { name = "AnkleExtension_R", 								angle_sign = -1, torque_sign =  1, body ="foot_right" ,                 act_time = 0.05, deact_time = 0.05,},
+  { name = "AnkleFlexion_R",   								angle_sign = -1, torque_sign = -1, body ="foot_right" ,                 act_time = 0.05, deact_time = 0.05,},
+  { name = "AnkleFlexion_R_FpeHalfScale",     angle_sign = -1, torque_sign = -1, body ="foot_right" ,       act_time = 0.05, deact_time = 0.05, passive_element_torque_scale = 0.5,},
+  { name = "AnkleFlexion_R_FisoHalfScale",    angle_sign = -1, torque_sign = -1, body ="foot_right" ,       act_time = 0.05, deact_time = 0.05, max_isometric_torque_scale = 0.5,},
+  { name = "AnkleFlexion_R_OmegaHalfScale",   angle_sign = -1, torque_sign = -1, body ="foot_right" ,       act_time = 0.05, deact_time = 0.05, max_angular_velocity_scale = 0.5,},
+  { name = "UnitExtensor_R",   								angle_sign = -1, torque_sign =  1, body ="thigh_right",  joint_index=2 },
+  { name = "UnitFlexor_R",     								angle_sign = -1, torque_sign = -1, body ="thigh_right",  joint_index=2 },
+  { name = "KneeExtension_R_Anderson2007",   angle_sign = -1, torque_sign = -1, body ="foot_right" ,       act_time = 0.05, deact_time = 0.05, max_angular_velocity_scale = 0.5,
+    	data_set = "Anderson2007", age_group = "SeniorOver65", gender="female", active_torque_angle_scale = 2.0},  
+},
 frames = {
 	{
 		name = "pelvis",
@@ -90,7 +115,7 @@ frames = {
 		name = "foot_right",
 		parent = "shank_right",
 		body = bodies.foot_right,
-		joint = joints.fixed,	
+		joint = joints.rotational_y,	
 	},
 	{
 		name = "thigh_left",
@@ -108,7 +133,7 @@ frames = {
 		name = "foot_left",
 		parent = "shank_left",
 		body = bodies.foot_left,
-		joint = joints.fixed,
+		joint = joints.rotational_y,
 	},
 },
 }
