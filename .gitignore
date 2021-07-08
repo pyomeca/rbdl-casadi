@@ -130,3 +130,6 @@ S2MSource
 pyomeca
 release*
 *.DS_Store
+
+doc/html
+**/build
