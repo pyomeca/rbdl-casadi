@@ -1,3 +1,9 @@
+------  IMPORTANT NOTICE -----
+==============================
+
+This repository is deprecated and should therefore not be used. The project had beed fully merge with the main project (github.com/rbdl/rbdl). It is preserved solely for backward compatibility reasons.
+*********************************
+
 RBDL - Rigid Body Dynamics Library
 Copyright (c) 2011-2020 Martin Felis <martin@fysx.org>
 
